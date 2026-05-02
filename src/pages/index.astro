@@ -1,18 +1,14 @@
 ---
-// Custom landing page — bypasses Starlight entirely
+// Custom landing page - bypasses Starlight entirely
+import BaseHead from '../components/BaseHead.astro';
 ---
 
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ilo | AI Agent Language</title>
-  <meta name="description" content="0.33x the tokens, 0.22x the characters of Python. Type-verified before execution. The first language designed for AI agents." />
-  <meta name="theme-color" content="#f59e0b" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <BaseHead
+    title="ilo | AI Agent Language"
+    description="0.33x the tokens, 0.22x the characters of Python. Type-verified before execution. The first language designed for AI agents."
+  />
 </head>
 <body>
 

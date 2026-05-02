@@ -7,6 +7,7 @@ import { readFileSync } from 'fs';
 const iloGrammar = JSON.parse(readFileSync(new URL('./ilo.tmLanguage.json', import.meta.url), 'utf-8'));
 
 export default defineConfig({
+  site: 'https://ilo-lang.ai',
   integrations: [
     starlight({
       expressiveCode: {
@@ -105,6 +106,14 @@ export default defineConfig({
         {
           tag: 'meta',
           attrs: { name: 'theme-color', content: '#f59e0b' },
+        },
+        {
+          tag: 'script',
+          attrs: {
+            defer: true,
+            src: 'https://cloud.umami.is/script.js',
+            'data-website-id': '39ac022b-8282-43ec-8e1a-7fd9dc222f39',
+          },
         },
       ],
     }),
