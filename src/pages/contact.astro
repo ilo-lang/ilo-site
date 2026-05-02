@@ -1,6 +1,13 @@
 ---
 // Contact page - same visual style as landing page
 import BaseHead from '../components/BaseHead.astro';
+import JsonLd from '../components/JsonLd.astro';
+import {
+  SITE_URL,
+  softwareApplicationSchema,
+  websiteSchema,
+  contactPageSchema,
+} from '../lib/schema';
 ---
 
 <html lang="en">
@@ -10,6 +17,17 @@ import BaseHead from '../components/BaseHead.astro';
     description="Get in touch with the ilo team."
     fonts="Bricolage+Grotesque:opsz,wght@12..96,200..800&family=JetBrains+Mono:wght@400;500"
   />
+  <link rel="canonical" href={`${SITE_URL}/contact/`} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={`${SITE_URL}/contact/`} />
+  <meta property="og:title" content="Contact - ilo" />
+  <meta property="og:description" content="Get in touch with the ilo team." />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Contact - ilo" />
+  <meta name="twitter:description" content="Get in touch with the ilo team." />
+  <JsonLd data={contactPageSchema} />
+  <JsonLd data={softwareApplicationSchema} />
+  <JsonLd data={websiteSchema} />
 </head>
 <body>
 
