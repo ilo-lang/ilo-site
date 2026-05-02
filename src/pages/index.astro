@@ -1,6 +1,49 @@
 ---
 // Custom landing page - bypasses Starlight entirely
 import BaseHead from '../components/BaseHead.astro';
+
+const SITE_URL = 'https://ilo-lang.ai';
+
+const softwareSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'ilo',
+  alternateName: 'ilo-lang',
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'macOS, Linux, Windows',
+  description:
+    'Token-optimised programming language for AI agents. Prefix notation, strongly typed, verified before execution.',
+  url: SITE_URL,
+  downloadUrl: 'https://github.com/ilo-lang/ilo/releases',
+  codeRepository: 'https://github.com/ilo-lang/ilo',
+  programmingLanguage: 'Rust',
+  license: 'https://github.com/ilo-lang/ilo/blob/main/LICENSE',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  author: {
+    '@type': 'Person',
+    name: 'Daniel John Morris',
+    url: 'https://danieljohnmorris.com',
+    sameAs: [
+      'https://github.com/danieljohnmorris',
+      'https://x.com/danielmorris',
+      'https://linkedin.com/in/danieljohnmorris',
+    ],
+  },
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'ilo',
+  url: SITE_URL,
+  description: 'Token-optimised programming language for AI agents.',
+  inLanguage: 'en',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/?q={search_term_string}` },
+    'query-input': 'required name=search_term_string',
+  },
+};
 ---
 
 <html lang="en">
@@ -9,6 +52,16 @@ import BaseHead from '../components/BaseHead.astro';
     title="ilo | AI Agent Language"
     description="0.33x the tokens, 0.22x the characters of Python. Type-verified before execution. The first language designed for AI agents."
   />
+  <link rel="canonical" href={SITE_URL} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={SITE_URL} />
+  <meta property="og:title" content="ilo | AI Agent Language" />
+  <meta property="og:description" content="Token-optimised programming language for AI agents. 0.33x the tokens of Python, type-verified before execution." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ilo | AI Agent Language" />
+  <meta name="twitter:description" content="Token-optimised programming language for AI agents. 0.33x the tokens of Python, type-verified before execution." />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
 </head>
 <body>
 
