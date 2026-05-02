@@ -1,0 +1,26 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  /** Additional Google Fonts families string (after `family=`) */
+  fonts?: string;
+}
+
+const {
+  title,
+  description,
+  fonts = 'Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500',
+} = Astro.props;
+
+const fontsHref = `https://fonts.googleapis.com/css2?family=${fonts}&display=swap`;
+---
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="theme-color" content="#f59e0b" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href={fontsHref} rel="stylesheet" />
+<script is:inline defer src="https://cloud.umami.is/script.js" data-website-id="39ac022b-8282-43ec-8e1a-7fd9dc222f39"></script>
