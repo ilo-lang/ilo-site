@@ -393,6 +393,7 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
       <div class="footer-left">
         <span class="footer-logo">ilo</span>
         <a href="https://github.com/ilo-lang/ilo/blob/main/LICENSE" target="_blank" rel="noopener" class="footer-copy">MIT License</a>
+        <span class="footer-byline">Built by <a href="https://danieljohnmorris.com" target="_blank" rel="noopener">Daniel John Morris</a></span>
       </div>
       <div class="footer-links">
         <a href="/docs/introduction/">Docs</a>
@@ -1265,6 +1266,25 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
   }
   .footer-copy:hover {
     color: var(--accent);
+  }
+
+  .footer-byline {
+    font-size: 1rem;
+    color: var(--text-dim);
+  }
+  .footer-byline a {
+    color: var(--text-dim);
+    transition: color 0.2s;
+  }
+  .footer-byline a:hover {
+    color: var(--accent);
+  }
+
+  .footer-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
   }
 
   .footer-links {

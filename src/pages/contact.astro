@@ -83,6 +83,7 @@ import {
       <div class="footer-left">
         <span class="footer-logo">ilo</span>
         <span class="footer-copy">MIT License</span>
+        <span class="footer-byline">Built by <a href="https://danieljohnmorris.com" target="_blank" rel="noopener">Daniel John Morris</a></span>
       </div>
       <div class="footer-links">
         <a href="/docs/introduction/">Docs</a>
@@ -280,6 +281,19 @@ import {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-byline {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+  .footer-byline a {
+    color: var(--text-dim);
+    transition: color 0.2s;
+  }
+  .footer-byline a:hover {
+    color: var(--accent);
   }
 
   .footer-logo {
