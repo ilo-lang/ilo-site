@@ -116,6 +116,22 @@ Shorthand for folding with addition:
 sum nums                 -- → 15
 ```
 
+#### Inline lambdas
+
+Instead of declaring a one-off helper, pass a function literal directly to any HOF:
+
+```ilo
+by-dist xs:L n>L n;srt (x:n>n;abs x) xs              -- sort by distance from zero
+nonempty ws:L t>L t;flt (s:t>b;>(len s) 0) ws        -- keep non-empty strings
+sumsq xs:L n>n;fld (a:n x:n>n;+a *x x) xs 0          -- sum of squares
+```
+
+Syntax is the same as a top-level function declaration, wrapped in parens, no name: `(<param>:<type> ...><return-type>;<body>)`. The body can capture variables from the enclosing scope:
+
+```ilo
+above xs:L n thr:n>L n;flt (x:n>b;>x thr) xs         -- captures `thr`
+```
+
 ## Dot-notation indexing
 
 Access elements by index (zero-based) using `.`. Works on lists and maps:
@@ -172,6 +188,18 @@ ilo 'f xs:L n>L n;slc xs 1 3' 10,20,30,40
 # → [20, 30]
 ```
 
+Negative indices count from the end (Python-style); bounds clamp instead of wrapping:
+
+```bash
+ilo 'f xs:L n>L n;slc xs 0 -1' 10,20,30,40   # drop the last
+# → [10, 20, 30]
+
+ilo 'f xs:L n>L n;slc xs -2 (len xs)' 10,20,30,40   # keep last two
+# → [30, 40]
+```
+
+`at xs i`, `take n xs`, and `drop n xs` follow the same rule. `take -1 xs` keeps all but the last element; `drop -1 xs` keeps only the last.
+
 ### `has` - contains check
 
 `has xs v` tests membership. Works on lists (element check) and text (substring check):
@@ -195,7 +223,14 @@ ilo 'f xs:L n>L n;+=xs 99' 1,2,3
 
 ## Maps (`M k v`)
 
-Maps are key-value collections, like dictionaries in Python or objects in JavaScript. Keys are always text. Maps are immutable: `mset` and `mdel` return new maps rather than modifying in place.
+Maps are key-value collections, like dictionaries in Python or objects in JavaScript. Keys are typed: text (`t`) or integer (`n`). `Int(1)` and `Text("1")` are distinct, so a numeric index map and a string-keyed map can't accidentally collide. Maps are immutable: `mset` and `mdel` return new maps rather than modifying in place.
+
+```ilo
+idx=mmap
+idx=mset idx 7 "seven"     -- integer key, no str conversion
+mget idx 7                 -- → "seven"
+mhas idx "7"               -- → false (Int and Text are distinct)
+```
 
 ### Creating maps with `mmap` and `mset`
 
