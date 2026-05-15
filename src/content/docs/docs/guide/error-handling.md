@@ -90,6 +90,24 @@ calc a:n b:n > R n t
 
 `div! a b` = call `div`, if error return it immediately, if ok bind the value. One character (`!`) replaces a whole try/catch block.
 
+## Panic-unwrap with `!!`
+
+`!!` has the same shape as `!`, but on error it aborts the program with a runtime diagnostic and exit 1 instead of propagating. There is no constraint on the enclosing function's return type, so `!!` works from `main>t`, `main>n`, or any non-Result context. Use it for one-shot scripts where there is nowhere sensible to propagate to:
+
+```ilo
+main>t
+  xs=rdl!! "input.txt"   -- read file, abort with diagnostic if missing
+  cat xs "\n"
+```
+
+```ilo
+main>n;num!! "42"        -- parse number, abort on parse error
+```
+
+On `^e` the program writes `panic-unwrap: <Err payload>` to stderr and exits 1. On `O nil` it writes `panic-unwrap: expected value, got nil`. On `~v` or non-nil Optional, the inner value is extracted, identical to `!`.
+
+Use `!` when the caller might want to react to the error (compensate, retry, log). Use `!!` when failure is a programming or environmental error the caller has no way to recover from.
+
 ## Optional type `O`
 
 `O T` means "maybe a value of type `T`, maybe `nil`":
