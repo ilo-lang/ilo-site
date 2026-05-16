@@ -75,6 +75,13 @@ description: Complete reference for ilo's built-in functions
 |----------|-----------|-------------|---------|
 | `sum` | `L n > n` | Sum a list of numbers | `sum [1,2,3]` → `6` |
 | `avg` | `L n > n` | Average of a list of numbers | `avg [2,4,6]` → `4` |
+| `min` | `L n > n` | Minimum element of a numeric list (error if empty) | `min [3,1,4,1,5]` → `1` |
+| `max` | `L n > n` | Maximum element of a numeric list (error if empty) | `max [3,1,4,1,5]` → `5` |
+| `min` | `n n > n` | Minimum of two numbers | `min 3 7` → `3` |
+| `max` | `n n > n` | Maximum of two numbers | `max 3 7` → `7` |
+| `median` | `L n > n` | Median of a numeric list | `median [1,2,3,4,5]` → `3` |
+| `stdev` | `L n > n` | Sample standard deviation (divides by N-1) | `stdev [2,4,4,4,5,5,7,9]` |
+| `variance` | `L n > n` | Sample variance (divides by N-1) | `variance [...]` |
 
 ## Maps
 
