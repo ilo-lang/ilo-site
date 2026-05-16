@@ -158,9 +158,17 @@ Access list elements and record fields with `.`:
 ```ilo
 xs.0          -- first element of list xs
 xs.2          -- third element
+xs.i          -- i-th element when `i` is a bound variable in scope
 user.name     -- field "name" of record/map
 data.users.0  -- chained access
 ```
+
+The variable-index form `xs.i` is sugar for `at xs i`. The parser builds a
+field-access node and a post-parse desugar pass rewrites it whenever the
+field identifier resolves to a binding in the current scope (parameter,
+let, foreach, range, match-arm). If the identifier is also a declared
+field on a record type, the rewrite is skipped and the strict `.field`
+record-access semantics apply.
 
 Safe navigation with `.?` returns `nil` instead of erroring on missing keys:
 
