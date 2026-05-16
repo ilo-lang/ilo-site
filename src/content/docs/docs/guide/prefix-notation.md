@@ -162,6 +162,27 @@ Read left-to-right. Each operator grabs the next two values (which may themselve
 
 This is equivalent to `(((a + b) * c) - d) / e` in infix - note how 4 pairs of parentheses disappear entirely.
 
+### Same-precedence prefix-pair trap
+
+The outer prefix op binds the inner prefix subexpression as its **left** operand, regardless of operator precedence. With two same-precedence ops side by side this disagrees with the natural left-to-right reading:
+
+```ilo
+*/a b c     -- (a/b) * c   ← NOT (a*b)/c
+/*a b c     -- (a*b) / c   ← NOT (a/b)*c
++-a b c     -- (a-b) + c   ← NOT (a+b)-c
+-+a b c     -- (a+b) - c   ← NOT (a-b)+c
+```
+
+The ilo runtime emits a `hint:` diagnostic on these four shapes after a successful run. To force the other grouping, either swap the operator pair or bind the inner result first:
+
+```ilo
+-- Want (a*b)/c with a=6, b=2, c=3:
+r=*a b;/r c    -- bind, then divide → 4
+/*a b c        -- equivalent, swapping the prefix-pair order
+```
+
+Different-precedence pairs like `+*a b c` (= `(a*b)+c`) and same-op repeats like `++a b c` (= `(a+b)+c`) match the left-to-right reading naturally and don't fire the hint.
+
 ### Operand rules
 
 Operator operands must be atoms (literals, variable references, field access) or nested prefix operators. Function calls are not valid operands - bind their results first:
