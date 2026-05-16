@@ -42,7 +42,7 @@ description: Complete reference for ilo's built-in functions
 | `spl` | `t t > L t` | Split string by delimiter | `spl "a,b,c" ","` → `["a","b","c"]` |
 | `has` | `t t > b` | Check if string contains substring | `has "hello" "ell"` → `true` |
 | `rgx` | `t t > L t` | Regex match (returns captures) | `rgx "abc123" "[0-9]+"` → `["123"]` |
-| `fmt` | `t ... > t` | Format string with values | `fmt "{} is {}" "sky" "blue"` |
+| `fmt` | `t ... > t` | Format string with values. **`fmt` is pure-functional sprintf, not print** — a bare `fmt "..." v` statement is silently discarded on every engine. Use `prnt fmt "..." v` to print or `line=fmt "..." v` to capture. The verifier emits **ILO-T032** when `fmt`/`fmt2` is a non-tail statement with no binding (tail position, e.g. `f v:n>t;fmt "x={}" v`, is the documented "return formatted text" idiom and does not warn) | `fmt "{} is {}" "sky" "blue"` |
 
 ## Collections (Lists)
 
