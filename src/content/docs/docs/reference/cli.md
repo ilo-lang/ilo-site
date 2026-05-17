@@ -35,6 +35,24 @@ This matches the default-engine heuristic: if there's only one function, or ther
 ilo file.ilo --run-vm 5          # runs main 5 on the VM
 ```
 
+### Unknown `--flag` guard
+
+Any token in the positional tail matching the clean long-flag shape (`--word` or `--word-with-dashes`) that isn't a recognised flag is rejected upfront with `error: unrecognised flag '<flag>'` and exit code 1. This prevents typos like `--engine tree` from silently consuming the flag as positional data and producing misleading `ILO-R012 no functions defined` or `ILO-R004 main: expected N args, got N+1` errors later on.
+
+```bash
+ilo main.ilo --engine tree
+# error: unrecognised flag '--engine'. Use 'ilo --help' for valid flags.
+# To pass it as a literal arg, separate with '--' first.
+```
+
+To pass a hyphen-prefixed token through as literal data, place the `--` separator first. Anything after the first `--` is data:
+
+```bash
+ilo main.ilo -- --foo            # `--foo` reaches `main` as a literal string arg
+```
+
+Tokens with `=` (`--key=val`), trailing or doubled dashes (`--foo-`, `--foo--bar`), and negative numbers (`-1`) are not clean flag shapes and pass through unchanged.
+
 ## Flags
 
 | Flag | Description |
