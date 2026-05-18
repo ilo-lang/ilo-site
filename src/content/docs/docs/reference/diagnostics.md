@@ -35,6 +35,27 @@ Diagnostics with a structured repair plan attach a JSON block to the JSON-mode (
 
 See `ilo --explain ILO-XNNN` for the per-code repair contract.
 
+## Namespace ranges
+
+Every diagnostic ilo emits has the shape `ILO-<letter><digits>`. The letter is the **namespace** - the phase that raised the diagnostic - so agents and tools can route on prefix without parsing the message. Numeric ranges are reserved per namespace with generous gaps, so future codes slot in cleanly. A cross-engine regression test enforces this contract.
+
+| Range | Letter | Area | Status |
+|-------|--------|------|--------|
+| `ILO-L000-099` | L | Lexer / tokenisation | active |
+| `ILO-P100-199` | P | Parser / syntax | active |
+| `ILO-N200-299` | N | Names / resolution | reserved |
+| `ILO-I300-399` | I | Imports | reserved |
+| `ILO-T400-499` | T | Types | active |
+| `ILO-V500-599` | V | Verifier (post-type checks) | reserved |
+| `ILO-R600-699` | R | Runtime | active |
+| `ILO-D700-799` | D | Deprecation warnings | reserved |
+| `ILO-E800-899` | E | Engine-specific limitations | reserved |
+| `ILO-S900-999` | S | Skill / spec system | reserved |
+
+**Historical codes stay valid.** ilo shipped with flat numbering inside each namespace (`ILO-L001`, `ILO-P001`, `ILO-T001`, `ILO-R001`, `ILO-W001`, all starting at 001). Those codes remain valid forever - agents and pinned tool configs depend on them. The hundreds-block allocation applies to new codes going forward.
+
+**Reserved namespaces.** `N`, `I`, `V`, `D`, `E`, `S` carry no codes today. They are forward declarations so the first code in each category lands in its own range without conflicting with the active namespaces. `D` is earmarked for deprecation warnings: when a feature is scheduled for removal it emits an `ILO-D7xx` warning at compile time without failing the build.
+
 ## Lexer errors (ILO-L)
 
 | Code | Description |
@@ -63,8 +84,9 @@ See `ilo --explain ILO-XNNN` for the per-code repair contract.
 | `ILO-P014` | Expected number literal, got end of file |
 | `ILO-P015` | Expected tool description string |
 | `ILO-P016` | Unexpected token after braceless guard body |
-| `ILO-P017` | Inline lambda captures outer scope |
+| `ILO-P017` | `use`-import failed |
 | `ILO-P018` | Variadic builtin not in trailing position |
+| `ILO-P019` | `use`-import name not found |
 | `ILO-P020` | Incomplete function header |
 | `ILO-P021` | Double-minus prefix-binop trap rejected - `- -<op> a b <op> c d` for `<op> ∈ {+, *, /}` is rejected at parse time because it silently miscompiles into `-(a-b)`. Use `- 0 +*a b *c d` or bind the inner result first. |
 
@@ -101,6 +123,8 @@ See `ilo --explain ILO-XNNN` for the per-code repair contract.
 | `ILO-T027` | Braceless guard body looks like a function name |
 | `ILO-T028` | `brk`/`cnt` used outside a loop |
 | `ILO-T029` | Unreachable code |
+| `ILO-T030` | Circular type alias |
+| `ILO-T031` | Type alias shadows builtin |
 | `ILO-T032` | Bare `fmt` result is discarded |
 | `ILO-T033` | Bare mutation-shaped builtin result is discarded |
 | `ILO-T034` | `!` / `!!` used on a non-callable value |
@@ -130,6 +154,20 @@ See `ilo --explain ILO-XNNN` for the per-code repair contract.
 | `ILO-R011` | Compile error: undefined function |
 | `ILO-R012` | No functions defined |
 | `ILO-R013` | Internal VM error |
+| `ILO-R014` | Auto-unwrap propagated Err / nil |
 | `ILO-R026` | Panic-unwrap on Err / nil |
+| `ILO-R099` | Internal runtime error |
+
+## Deprecation warnings (ILO-D)
+
+Reserved range. When a feature is scheduled for removal, ilo emits an `ILO-D7xx` warning at compile time without failing the build. No codes allocated yet - the first `ILO-D###` ships with the first feature deprecation.
+
+## Engine-specific (ILO-E)
+
+Reserved range for diagnostics that come from a particular execution engine (VM register caps surfaced ahead of time, JIT-unsupported opcode, AOT constraint). No `ILO-E###` codes yet.
+
+## Skill / spec (ILO-S)
+
+Reserved range for skill-bundle loader errors, manifest issues, spec-link breaks. No codes yet.
 
 Compact error codes mean agents spend fewer tokens reading error messages and correct faster.
