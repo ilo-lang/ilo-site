@@ -1,7 +1,9 @@
 ---
 title: Syntax Experiments
-description: Nine syntax variants benchmarked against Claude Haiku. What saved tokens and what didn't.
+description: Use this when researching syntax design decisions; nine variants benchmarked against Claude Haiku.
 ---
+
+Use this when researching syntax design decisions; nine variants benchmarked against Claude Haiku.
 
 Nine syntax variants for the same language, tested against Claude Haiku. Most initial assumptions about what would save tokens were wrong.
 

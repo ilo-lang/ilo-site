@@ -1,7 +1,9 @@
 ---
 title: CLI Reference
-description: Command-line usage for ilo
+description: Use this when looking up an ilo CLI flag, subcommand, or invocation form.
 ---
+
+Use this when looking up an ilo CLI flag, subcommand, or invocation form.
 
 ## Basic usage
 

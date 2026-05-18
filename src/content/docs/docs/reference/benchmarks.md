@@ -1,7 +1,9 @@
 ---
 title: Benchmarks
-description: Runtime performance comparison of ilo against other languages
+description: Use this when comparing ilo runtime performance against other languages or across engines.
 ---
+
+Use this when comparing ilo runtime performance against other languages or across engines.
 
 Micro-benchmarks comparing ilo's execution engines against compiled, JIT, and interpreted languages. Each benchmark runs **10000 iterations** and reports the median per-call time in nanoseconds.
 
