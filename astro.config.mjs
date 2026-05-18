@@ -75,6 +75,7 @@ export default defineConfig({
             { label: 'Loops', slug: 'docs/guide/loops' },
             { label: 'Pipes', slug: 'docs/guide/pipes' },
             { label: 'Error Handling', slug: 'docs/guide/error-handling' },
+            { label: 'Memory Model', slug: 'docs/guide/memory-model' },
             { label: 'Data & I/O', slug: 'docs/guide/data-io' },
             { label: 'Imports', slug: 'docs/guide/imports' },
             { label: 'Real-World Examples', slug: 'docs/guide/examples' },
