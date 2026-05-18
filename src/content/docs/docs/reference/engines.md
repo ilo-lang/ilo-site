@@ -29,7 +29,7 @@ The CLI picks a sensible default per command. To force an engine, see `--engine`
 
 ### Tree-walk
 - Lowest binary size. Used by the WASM/npm distribution.
-- HTTP builtins (`get`, `$`, `post`) are not available in WASM.
+- HTTP and process builtins (`get`, `pst`, `run`, `$`) are not available in WASM.
 
 ### VM
 - Default engine for `ilo run` on a native binary.

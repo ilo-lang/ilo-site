@@ -18,7 +18,7 @@ The agent learns ilo automatically via the bundled Agent Skill.
 
 Browse Plugins → Add marketplace from GitHub → `ilo-lang/ilo` → install.
 
-Binary auto-installs via npm. Note: Cowork uses the WASM build - HTTP builtins (`get`, `$`, `post`) are not yet supported.
+Binary auto-installs via npm. Note: Cowork uses the WASM build - HTTP and process builtins (`get`, `pst`, `run`, `$`) are not yet supported.
 
 ## npm / npx
 
