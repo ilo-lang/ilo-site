@@ -12,11 +12,69 @@ ilo file.ilo funcname args              # from file
 
 First argument is code or a file path (auto-detected). Remaining arguments are passed to the first function.
 
+### Verb-noun subcommands
+
+For consistency with `cargo`, `go`, and similar toolchains, ilo also exposes verb forms:
+
+```bash
+ilo run file.ilo arg1 arg2              # run (alias for the bare positional)
+ilo check file.ilo                      # verify without running (exit 0 if clean)
+ilo build file.ilo -o ./bin             # AOT compile (alias for `ilo compile`)
+```
+
+The bare positional forms (`ilo file.ilo`, `ilo compile ...`) remain fully supported; the verbs are aliases, not replacements. Use whichever shape you prefer.
+
+`ilo check` is the only verb that adds new behaviour: it runs the lexer, parser, import resolver, and verifier on the input and exits 0 if the program is well-typed and verifier-clean, or 1 with diagnostics on stderr otherwise. It does not execute the program. Useful for editor save-hooks, agent inner loops, and CI gates that want fast type-only feedback without running the workload.
+
+```bash
+ilo check file.ilo                # human-readable diagnostics (auto-detects ANSI/text/JSON)
+ilo check file.ilo --json         # NDJSON diagnostics on stderr
+```
+
+On a syntactically-broken input `ilo check` still emits the parse error and exits 1 rather than crashing, so it's safe to point at half-written code.
+
+
+
 Select a named function in a multi-function program:
 
 ```bash
 ilo 'dbl x:n>n;*x 2 tot p:n q:n r:n>n;s=*p q;t=*s r;+s t' tot 10 20 30
 ```
+
+### Subcommand dispatch
+
+The first positional argument after the source is treated as a function name **only if** it is a valid identifier and matches a defined function. The matcher accepts hyphenated identifiers, so `ilo file.ilo foo-bar` dispatches to the `foo-bar` function.
+
+If the first positional is not a valid identifier (e.g. a path, a number, a list literal), it is treated as an argument to `main` when `main` is defined:
+
+```bash
+ilo file.ilo /tmp/data.json      # routes to main, /tmp/data.json is arg 1
+ilo file.ilo 1,2,3               # routes to main, list literal is arg 1
+```
+
+This matches the default-engine heuristic: if there's only one function, or there's a `main`, no explicit dispatch is needed. The same auto-pick-main applies to the engine-selection flags (`--run-tree`, `--run-vm`, `--jit`) - they fall back to `main` (or the sole function) when no subcommand is supplied:
+
+```bash
+ilo file.ilo --run-vm 5          # runs main 5 on the VM
+```
+
+### Unknown `--flag` guard
+
+Any token in the positional tail matching the clean long-flag shape (`--word` or `--word-with-dashes`) that isn't a recognised flag is rejected upfront with `error: unrecognised flag '<flag>'` and exit code 1. This prevents typos like `--engine tree` from silently consuming the flag as positional data and producing misleading `ILO-R012 no functions defined` or `ILO-R004 main: expected N args, got N+1` errors later on.
+
+```bash
+ilo main.ilo --engine tree
+# error: unrecognised flag '--engine'. Use 'ilo --help' for valid flags.
+# To pass it as a literal arg, separate with '--' first.
+```
+
+To pass a hyphen-prefixed token through as literal data, place the `--` separator first. Anything after the first `--` is data:
+
+```bash
+ilo main.ilo -- --foo            # `--foo` reaches `main` as a literal string arg
+```
+
+Tokens with `=` (`--key=val`), trailing or doubled dashes (`--foo-`, `--foo--bar`), and negative numbers (`-1`) are not clean flag shapes and pass through unchanged.
 
 ## Flags
 
@@ -199,20 +257,21 @@ Requires the `cranelift` feature (enabled by default in release builds).
 
 ## Backend selection
 
-ilo supports multiple execution backends. The default is Cranelift JIT with an interpreter fallback:
+ilo supports multiple execution backends. The default is the bytecode register VM. Cranelift JIT is opt-in via `--jit` for hot numeric loops:
 
 | Flag | Backend |
 |------|---------|
-| *(default)* | Cranelift JIT, falls back to interpreter |
-| `--run-tree` | Tree-walking interpreter |
-| `--run-vm` | Register VM (bytecode) |
-| `--run-cranelift` | Cranelift JIT |
-| `--run-jit` | Custom ARM64 JIT (macOS Apple Silicon only) |
+| *(default)* | Register VM (closure-aware, all opcodes supported) |
+| `--jit` | Cranelift JIT (hot numeric loops; falls back to VM on bailout) |
+| `--run-vm` | Register VM (explicit form of the default) |
+| `--run-tree` | Tree-walking interpreter (reference semantics) |
 | `--run-llvm` | LLVM JIT (requires `--features llvm` build) |
 
 ```bash
-ilo 'fac n:n>n;<=n 1 1;r=fac -n 1;*n r' --run-vm fac 10
+ilo 'fac n:n>n;<=n 1 1;r=fac -n 1;*n r' --jit fac 10
 ```
+
+**Why the VM is the default.** It supports every opcode in the language (closures, listview windows, fused len-of-filter, every modern shape) without compile-and-bail cost. The pre-v0.11.9 default was Cranelift JIT with VM fallback - it paid the JIT compile cost on every program before discovering the JIT couldn't handle some opcode and falling back anyway. Opt into the JIT explicitly when a hot numeric loop justifies the compile time.
 
 ## REPL
 

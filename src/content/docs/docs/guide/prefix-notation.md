@@ -185,9 +185,17 @@ Different-precedence pairs like `+*a b c` (= `(a*b)+c`) and same-op repeats like
 
 ### Operand rules
 
-Operator operands must be atoms (literals, variable references, field access) or nested prefix operators. Function calls are not valid operands - bind their results first:
+Operator operands must be atoms (literals, variable references, field access) or nested prefix operators. Function calls are generally not valid operands - bind their results first:
 
 ```ilo
 -- WRONG: *n fac -n 1    (fac is treated as an atom, not a call)
 -- RIGHT: r=fac -n 1;*n r (bind the call result, then use it)
 ```
+
+**Exception: known-arity idents expand inline.** When a binop operand is an identifier whose arity is known (a defined function or a fixed-arity builtin), the parser expands it as a call by consuming the right number of following atoms - mirroring the existing `??` behaviour:
+
+```ilo
+sq x:n>n;*x x main xs:L n>n;+sum xs sq hd xs    -- = +(sum xs) (sq (hd xs))
+```
+
+This keeps simple compositions paren-free without forcing a bind-first rewrite. For anything more complex, bind the call result and use the variable.

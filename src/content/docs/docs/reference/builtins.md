@@ -42,10 +42,8 @@ description: Complete reference for ilo's built-in functions
 | `spl` | `t t > L t` | Split string by delimiter | `spl "a,b,c" ","` → `["a","b","c"]` |
 | `has` | `t t > b` | Check if string contains substring | `has "hello" "ell"` → `true` |
 | `rgx` | `t t > L t` | Regex match (returns captures) | `rgx "abc123" "[0-9]+"` → `["123"]` |
-| `padl` | `t n > t` | Left-pad to width with spaces (no-op if already wider) | `padl "hi" 5` → `"   hi"` |
-| `padr` | `t n > t` | Right-pad to width with spaces (no-op if already wider) | `padr "hi" 5` → `"hi   "` |
-| `padl` | `t n t > t` | Left-pad to width with a 1-character pad string. Common for sortable zero-padded numeric keys | `padl "42" 5 "0"` → `"00042"` |
-| `padr` | `t n t > t` | Right-pad to width with a 1-character pad string. Common for dot-leader alignment | `padr "x" 4 "."` → `"x..."` |
+| `rgxall` | `t t > L (L t)` | All matches with captures - one inner list per match. With no capture groups, each inner list holds the whole match. | `rgxall "(\\w+)=(\\d+)" "a=1 b=2"` → `[["a","1"],["b","2"]]` |
+| `rgxall1` | `t t > L t` | All matches of a single-group pattern, flattened. With no capture groups, returns the list of whole matches. Errors at verify-time if the pattern has 2+ capture groups - use `rgxall` instead. | `rgxall1 "(\\d+)" "a=1 b=2"` → `["1","2"]` |
 | `fmt` | `t ... > t` | Format string with values. **`fmt` is pure-functional sprintf, not print** — a bare `fmt "..." v` statement is silently discarded on every engine. Use `prnt fmt "..." v` to print or `line=fmt "..." v` to capture. The verifier emits **ILO-T032** when `fmt`/`fmt2` is a non-tail statement with no binding (tail position, e.g. `f v:n>t;fmt "x={}" v`, is the documented "return formatted text" idiom and does not warn) | `fmt "{} is {}" "sky" "blue"` |
 
 ## Collections (Lists)
@@ -55,6 +53,7 @@ description: Complete reference for ilo's built-in functions
 | `len` | `length` | `L _ > n` | List length | `len [1,2,3]` → `3` |
 | `hd` | `head` | `L _ > _` | First element | `hd [1,2,3]` → `1` |
 | `tl` | `tail` | `L _ > L _` | All elements except first | `tl [1,2,3]` → `[2,3]` |
+| `at` | | `L _ n > _` | i-th element (0-indexed; negative counts from end; float `i` auto-floors) | `at [10,20,30] 1` → `20`; `at xs 1.7` floors to `at xs 1` |
 | `rev` | `reverse` | `L _ > L _` | Reverse a list | `rev [1,2,3]` → `[3,2,1]` |
 | `srt` | `sort` | `L _ > L _` | Sort a list | `srt [3,1,2]` → `[1,2,3]` |
 | `srt` | `sort` | `fn L _ > L _` | Sort by key function | `srt cmp xs` |
@@ -70,6 +69,7 @@ description: Complete reference for ilo's built-in functions
 | `map` | | `fn L _ > L _` | Apply function to each element | `map dbl [1,2,3]` |
 | `mapr` | | `fn L _ > R (L _) _` | Map with short-circuit Result propagation: collects Ok values, returns the first Err | `mapr num ["1","2","3"]` → `~[1,2,3]` |
 | `flt` | `filter` | `fn L _ > L _` | Keep elements where function returns true | `flt pos [1,-2,3]` |
+| `ct` | `count` | `fn L _ > n` | Count elements where predicate returns true. Predicate must return `b` (verifier error otherwise). Allocation-free vs `len (flt fn xs)`. | `ct pos [-1,2,-3,4]` → `2` |
 | `fld` | `fold` | `fn _ L _ > _` | Reduce list to single value | `fld add 0 [1,2,3]` |
 | `grp` | `group` | `fn L _ > M t L _` | Group elements by function result | `grp cat xs` |
 
@@ -202,6 +202,7 @@ All builtins accept long-form names that resolve to the canonical short form. il
 | `slice` | `slc` |
 | `unique` | `unq` |
 | `filter` | `flt` |
+| `count` | `ct` |
 | `fold` | `fld` |
 | `flatten` | `flat` |
 | `concat` | `cat` |

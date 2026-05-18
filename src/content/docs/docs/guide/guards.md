@@ -130,6 +130,15 @@ The condition must start with a comparison operator (`=`, `>`, `<`, `>=`, `<=`, 
 f x:n>n;v=?=x 0 10 20;+v 1   -- v is 10 or 20, then add 1
 ```
 
+**Bare-bool prefix ternary.** When the condition is already a boolean - a bound `b` variable or a call returning `b` - drop the comparison and use `?` directly:
+
+```ilo
+f x:n h:b>n;?h 10 20             -- if h then 10 else 20
+g x:n>n;?pos x 1 -1              -- pos x : b, returns 1 or -1
+```
+
+The braced form `?h{a}{b}` is also accepted and equivalent.
+
 ### Braced ternary
 
 A guard with **two** brace blocks - `{then}{else}`:
