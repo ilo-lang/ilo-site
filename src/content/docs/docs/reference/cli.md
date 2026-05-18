@@ -29,7 +29,7 @@ ilo file.ilo /tmp/data.json      # routes to main, /tmp/data.json is arg 1
 ilo file.ilo 1,2,3               # routes to main, list literal is arg 1
 ```
 
-This matches the default-engine heuristic: if there's only one function, or there's a `main`, no explicit dispatch is needed. The same auto-pick-main applies to the engine-selection flags (`--run-tree`, `--run-vm`, `--run-cranelift`) - they fall back to `main` (or the sole function) when no subcommand is supplied:
+This matches the default-engine heuristic: if there's only one function, or there's a `main`, no explicit dispatch is needed. The same auto-pick-main applies to the engine-selection flags (`--run-tree`, `--run-vm`, `--jit`) - they fall back to `main` (or the sole function) when no subcommand is supplied:
 
 ```bash
 ilo file.ilo --run-vm 5          # runs main 5 on the VM
@@ -234,20 +234,18 @@ Requires the `cranelift` feature (enabled by default in release builds).
 
 ## Backend selection
 
-ilo supports multiple execution backends. The default is the bytecode register VM. Cranelift JIT is opt-in via `--cranelift` for hot numeric loops:
+ilo supports multiple execution backends. The default is the bytecode register VM. Cranelift JIT is opt-in via `--jit` for hot numeric loops:
 
 | Flag | Backend |
 |------|---------|
 | *(default)* | Register VM (closure-aware, all opcodes supported) |
-| `--cranelift` | Cranelift JIT (hot numeric loops; falls back to VM on bailout) |
-| `--run-cranelift` | Same as `--cranelift` |
+| `--jit` | Cranelift JIT (hot numeric loops; falls back to VM on bailout) |
 | `--run-vm` | Register VM (explicit form of the default) |
 | `--run-tree` | Tree-walking interpreter (reference semantics) |
-| `--run-jit` | Custom ARM64 JIT (macOS Apple Silicon only) |
 | `--run-llvm` | LLVM JIT (requires `--features llvm` build) |
 
 ```bash
-ilo 'fac n:n>n;<=n 1 1;r=fac -n 1;*n r' --cranelift fac 10
+ilo 'fac n:n>n;<=n 1 1;r=fac -n 1;*n r' --jit fac 10
 ```
 
 **Why the VM is the default.** It supports every opcode in the language (closures, listview windows, fused len-of-filter, every modern shape) without compile-and-bail cost. The pre-v0.11.9 default was Cranelift JIT with VM fallback - it paid the JIT compile cost on every program before discovering the JIT couldn't handle some opcode and falling back anyway. Opt into the JIT explicitly when a hot numeric loop justifies the compile time.
