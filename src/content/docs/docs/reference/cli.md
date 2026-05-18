@@ -12,6 +12,29 @@ ilo file.ilo funcname args              # from file
 
 First argument is code or a file path (auto-detected). Remaining arguments are passed to the first function.
 
+### Verb-noun subcommands
+
+For consistency with `cargo`, `go`, and similar toolchains, ilo also exposes verb forms:
+
+```bash
+ilo run file.ilo arg1 arg2              # run (alias for the bare positional)
+ilo check file.ilo                      # verify without running (exit 0 if clean)
+ilo build file.ilo -o ./bin             # AOT compile (alias for `ilo compile`)
+```
+
+The bare positional forms (`ilo file.ilo`, `ilo compile ...`) remain fully supported; the verbs are aliases, not replacements. Use whichever shape you prefer.
+
+`ilo check` is the only verb that adds new behaviour: it runs the lexer, parser, import resolver, and verifier on the input and exits 0 if the program is well-typed and verifier-clean, or 1 with diagnostics on stderr otherwise. It does not execute the program. Useful for editor save-hooks, agent inner loops, and CI gates that want fast type-only feedback without running the workload.
+
+```bash
+ilo check file.ilo                # human-readable diagnostics (auto-detects ANSI/text/JSON)
+ilo check file.ilo --json         # NDJSON diagnostics on stderr
+```
+
+On a syntactically-broken input `ilo check` still emits the parse error and exits 1 rather than crashing, so it's safe to point at half-written code.
+
+
+
 Select a named function in a multi-function program:
 
 ```bash
