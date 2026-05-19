@@ -89,6 +89,7 @@ Every diagnostic ilo emits has the shape `ILO-<letter><digits>`. The letter is t
 | `ILO-P019` | `use`-import name not found |
 | `ILO-P020` | Incomplete function header |
 | `ILO-P021` | Double-minus prefix-binop trap rejected - `- -<op> a b <op> c d` for `<op> ∈ {+, *, /}` is rejected at parse time because it silently miscompiles into `-(a-b)`. Use `- 0 +*a b *c d` or bind the inner result first. |
+| `ILO-P101` | List-literal element starts with a variadic builtin (`fmt`, `fmt2`) followed by operands - rejected at parse time because the bare form would fall through as multiple elements with the builtin name as an undefined Ref. Wrap the call in parens (`[k (fmt2 v 2)]`) or bind first (`s=fmt2 v 2;[k s]`). |
 
 ## Type / verifier errors (ILO-T)
 
