@@ -1,0 +1,1102 @@
+---
+// Agent surface index - structured agent material for ilo
+import BaseHead from '../../components/BaseHead.astro';
+import JsonLd from '../../components/JsonLd.astro';
+import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../../lib/schema';
+
+const skills = [
+  {
+    name: 'ilo-language',
+    tokens: '~155',
+    description: 'Writing or reviewing .ilo source: prefix notation, type sigils, guards, match, pipes, records, Result.',
+  },
+  {
+    name: 'ilo-builtins',
+    tokens: '~120',
+    description: 'Calling builtin functions: list, text, IO, HTTP, JSON, map, math, time, and HOF builtins.',
+  },
+  {
+    name: 'ilo-errors',
+    tokens: '~115',
+    description: 'Reading ILO-XXXX error codes or fixing failures. Common codes with one-line cause and fix.',
+  },
+  {
+    name: 'ilo-tools',
+    tokens: '~95',
+    description: 'Declaring and using MCP tools in ilo programs: the tool keyword, HTTP and MCP providers.',
+  },
+  {
+    name: 'ilo-engines',
+    tokens: '~92',
+    description: 'Choosing between VM, JIT, or AOT execution: feature matrix, defaults, and when each backend matters.',
+  },
+  {
+    name: 'ilo-agent',
+    tokens: '~90',
+    description: 'Integrating ilo into an agent loop: skill discovery, running programs, and the output contract.',
+  },
+  {
+    name: 'ilo-examples',
+    tokens: '~75',
+    description: 'Finding a runnable pattern by task shape: curated index of examples/*.ilo.',
+  },
+  {
+    name: 'ilo-edit-loop',
+    tokens: '~103',
+    description: 'Recovering from failures: the repair cycle, JSON diagnostics, --explain, and fix patterns.',
+  },
+];
+---
+
+<html lang="en">
+<head>
+  <BaseHead
+    title="ilo for Agents - structured agent surface"
+    description="ilo's complete agent surface: modular skills, ILO-* diagnostic codes, JSON_OUTPUT schemas, MCP tools, Claude Code plugin, and ai.txt. Every surface is structured."
+    fonts="Bricolage+Grotesque:opsz,wght@12..96,200..800&family=JetBrains+Mono:wght@400;500"
+  />
+  <link rel="canonical" href={`${SITE_URL}/agent/`} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={`${SITE_URL}/agent/`} />
+  <meta property="og:title" content="ilo for Agents" />
+  <meta property="og:description" content="ilo's complete agent surface: modular skills, ILO-* diagnostic codes, JSON envelopes, MCP tools, Claude Code plugin." />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="ilo for Agents" />
+  <meta name="twitter:description" content="ilo is built for AI agents. Every surface is structured." />
+  <JsonLd data={softwareApplicationSchema} />
+  <JsonLd data={websiteSchema} />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">ilo</a>
+      <div class="nav-links">
+        <a href="https://github.com/ilo-lang/ilo" target="_blank" rel="noopener" class="nav-github">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
+        </a>
+        <a href="/docs/introduction/" class="nav-cta">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-badge">agent surface</div>
+        <h1 class="hero-title">ilo is built for AI agents.</h1>
+        <p class="hero-subtitle">Every surface is structured. Skills load on demand. Errors carry repair plans. Output contracts are machine-readable from day one.</p>
+        <div class="hero-actions">
+          <a href="/docs/introduction/" class="btn btn-primary">Get Started</a>
+          <a href="https://github.com/ilo-lang/ilo" target="_blank" rel="noopener" class="btn btn-outline">GitHub</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section class="section" data-animate>
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Modular skills</h2>
+          <p class="section-subtitle">Eight task-focused modules. Load only what the task needs - typically 1-2 slices. Served by the installed binary via <code>ilo skill get &lt;name&gt;</code>.</p>
+        </div>
+
+        <div class="skills-discovery">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-label">skill discovery</span>
+            </div>
+            <pre><code>ilo skill list                 <span class="code-comment"># name + description per skill</span>
+ilo skill list --json          <span class="code-comment"># {schemaVersion:1, skills:[...]}</span>
+ilo skill get ilo-agent        <span class="code-comment"># full content</span>
+ilo skill get ilo-errors       <span class="code-comment"># ILO-* codes with fixes</span></code></pre>
+          </div>
+        </div>
+
+        <div class="skills-grid">
+          {skills.map((skill) => (
+            <div class="skill-card">
+              <div class="skill-top">
+                <code class="skill-name">{skill.name}</code>
+                <span class="skill-tokens">{skill.tokens} tokens</span>
+              </div>
+              <p class="skill-desc">{skill.description}</p>
+            </div>
+          ))}
+        </div>
+
+        <p class="skills-note">The Claude Code plugin surfaces all eight skills as slash commands. Content is bundled into the binary - no network needed, no drift between spec and runtime.</p>
+      </div>
+    </section>
+
+    <!-- DIAGNOSTIC CODES -->
+    <section class="section section-alt" data-animate>
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Diagnostic codes</h2>
+          <p class="section-subtitle">Every error ilo emits has the shape <code>ILO-&lt;letter&gt;&lt;digits&gt;</code>. The letter is the phase namespace. Agents route on prefix without parsing the message.</p>
+        </div>
+
+        <div class="diag-grid">
+          <div class="diag-range">
+            <span class="diag-code">ILO-L</span>
+            <span class="diag-area">Lexer / tokenisation</span>
+          </div>
+          <div class="diag-range">
+            <span class="diag-code">ILO-P</span>
+            <span class="diag-area">Parser / syntax</span>
+          </div>
+          <div class="diag-range">
+            <span class="diag-code">ILO-T</span>
+            <span class="diag-area">Type checker</span>
+          </div>
+          <div class="diag-range">
+            <span class="diag-code">ILO-R</span>
+            <span class="diag-area">Runtime</span>
+          </div>
+        </div>
+
+        <div class="diag-feature">
+          <div class="diag-block">
+            <div class="diag-block-title">fixSafety field</div>
+            <p class="diag-block-text">Every diagnostic carries <code>fixSafety</code>: <code>safe</code> (apply without confirmation), <code>likely</code> (apply and note), <code>risky</code> (propose and ask), or <code>manual</code> (surface and stop). Agents never have to guess repair confidence.</p>
+          </div>
+          <div class="diag-block">
+            <div class="diag-block-title">Structured repair plans</div>
+            <p class="diag-block-text">Diagnostics with mechanical repairs attach a JSON block to <code>ilo check --json</code> output. The plan lists ordered edits. Run <code>ilo --explain ILO-XNNN --json</code> for the per-code contract.</p>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-label">example diagnostic</span></div>
+          <pre><code>{`{
+  "code": "ILO-T004",
+  "message": "undefined variable 'y'",
+  "fixSafety": "likely",
+  "repair": [
+    {"kind": "rename", "from": "y", "to": "x"}
+  ]
+}`}</code></pre>
+        </div>
+
+        <div class="section-link">
+          <a href="/docs/reference/diagnostics/" class="link-card">
+            <span>Full ILO-* catalogue</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- JSON ENVELOPES -->
+    <section class="section" data-animate>
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">JSON envelopes</h2>
+          <p class="section-subtitle">Every ilo subcommand that produces machine-readable output supports <code>--json</code>. New envelopes carry <code>schemaVersion: 1</code> so agents route on contract, not heuristics.</p>
+        </div>
+
+        <div class="envelope-grid">
+          <div class="envelope-card">
+            <code class="envelope-cmd">ilo run --json</code>
+            <p class="envelope-shape"><code>{"{ \"ok\": value }"}</code> or <code>{"{ \"error\": {...} }"}</code></p>
+          </div>
+          <div class="envelope-card">
+            <code class="envelope-cmd">ilo check --json</code>
+            <p class="envelope-shape">One diagnostic object per error to stdout. Exit 0 on clean.</p>
+          </div>
+          <div class="envelope-card">
+            <code class="envelope-cmd">ilo skill list --json</code>
+            <p class="envelope-shape"><code>{"{ \"schemaVersion\": 1, \"skills\": [...] }"}</code></p>
+          </div>
+          <div class="envelope-card">
+            <code class="envelope-cmd">ilo version --json</code>
+            <p class="envelope-shape"><code>{"{ \"schemaVersion\": 1, \"version\": \"...\", \"features\": [...] }"}</code></p>
+          </div>
+          <div class="envelope-card">
+            <code class="envelope-cmd">ilo build --json</code>
+            <p class="envelope-shape"><code>{"{ \"schemaVersion\": 1, \"ok\": true, \"sizeBytes\": N }"}</code></p>
+          </div>
+          <div class="envelope-card">
+            <code class="envelope-cmd">ilo explain &lt;code&gt; --json</code>
+            <p class="envelope-shape"><code>{"{ \"schemaVersion\": 1, \"code\": \"ILO-...\", \"short\": \"...\" }"}</code></p>
+          </div>
+        </div>
+
+        <p class="envelope-note">JSON output contracts are locked by a CI test (<code>tests/json_output_contracts.rs</code>) that exercises each command on a known input and asserts top-level key shape.</p>
+
+        <div class="section-link">
+          <a href="https://github.com/ilo-lang/ilo/blob/main/JSON_OUTPUT.md" target="_blank" rel="noopener" class="link-card">
+            <span>Full JSON_OUTPUT.md reference</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLI TOOLS -->
+    <section class="section section-alt" data-animate>
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">CLI tools and serv mode</h2>
+          <p class="section-subtitle">ilo runs programs, composes MCP tools, and stays resident as a JSON-Lines daemon for agent loops that can't afford process-spawn overhead.</p>
+        </div>
+
+        <div class="tools-grid">
+          <div class="tools-block">
+            <div class="tools-block-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+              ilo serv - JSONL stdio daemon
+            </div>
+            <p class="tools-block-text">Long-lived JSON request/response loop on stdin/stdout. Send one object per line, get one back. Zero process-spawn overhead.</p>
+            <div class="code-block code-block-sm">
+              <pre><code><span class="code-comment"># request</span>
+{"program":"fn p:n>n;*p 2","func":"fn","args":[21]}
+
+<span class="code-comment"># response</span>
+{"ok": 42}</code></pre>
+            </div>
+          </div>
+
+          <div class="tools-block">
+            <div class="tools-block-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+              MCP tool surface
+            </div>
+            <p class="tools-block-text">Connect any MCP server and call its tools as typed prefix functions. ilo infers signatures and verifies call sites before execution.</p>
+            <div class="code-block code-block-sm">
+              <pre><code><span class="code-comment"># discover tools from an MCP server</span>
+ilo tools --mcp m.json --ilo
+
+<span class="code-comment"># run with tools attached</span>
+ilo serv --mcp m.json --tools http.json</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INSTALLATION -->
+    <section class="section" data-animate>
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Installation paths</h2>
+          <p class="section-subtitle">Pick the path that fits your agent's environment. All produce the same binary with identical output contracts.</p>
+        </div>
+
+        <div class="install-grid">
+          <div class="install-card install-card-featured">
+            <div class="install-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            </div>
+            <div class="install-card-name">Claude Code plugin</div>
+            <div class="install-card-desc">Installs ilo, exposes all 8 skills as slash commands. The recommended path for Claude agents.</div>
+            <div class="code-block code-block-sm">
+              <pre><code>/plugin marketplace add ilo-lang/ilo</code></pre>
+            </div>
+          </div>
+
+          <div class="install-card">
+            <div class="install-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            </div>
+            <div class="install-card-name">Shell installer</div>
+            <div class="install-card-desc">One-liner for macOS and Linux. Pulls the latest release binary.</div>
+            <div class="code-block code-block-sm">
+              <pre><code>curl -fsSL https://raw.githubusercontent.com/ilo-lang/ilo/main/install.sh | sh</code></pre>
+            </div>
+          </div>
+
+          <div class="install-card">
+            <div class="install-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            </div>
+            <div class="install-card-name">Homebrew</div>
+            <div class="install-card-desc">macOS tap. Managed updates via <code>brew upgrade</code>.</div>
+            <div class="code-block code-block-sm">
+              <pre><code>brew install ilo-lang/tap/ilo</code></pre>
+            </div>
+          </div>
+
+          <div class="install-card">
+            <div class="install-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            </div>
+            <div class="install-card-name">npm</div>
+            <div class="install-card-desc">Node.js environments. Pulls the platform binary on postinstall.</div>
+            <div class="code-block code-block-sm">
+              <pre><code>npm install -g ilo-lang</code></pre>
+            </div>
+          </div>
+
+          <div class="install-card">
+            <div class="install-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <div class="install-card-name">crates.io</div>
+            <div class="install-card-desc">Build from source with Cargo. Enables optional Cranelift JIT.</div>
+            <div class="code-block code-block-sm">
+              <pre><code>cargo install ilo --features cranelift</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI.TXT -->
+    <section class="section section-alt" data-animate>
+      <div class="container">
+        <div class="aitxt-block">
+          <div class="aitxt-left">
+            <div class="aitxt-badge">ai.txt</div>
+            <h2 class="aitxt-title">Token-minimal whole-spec pointer</h2>
+            <p class="aitxt-desc">A single flat file containing the full ilo spec in the most compressed form possible. Designed to be injected into an LLM context window directly when a specific skill slice isn't appropriate. Think of it as the emergency fallback: if an agent has no skill loaded and needs to understand ilo, <code>ilo spec ai</code> gives them the whole language in one token-efficient hit.</p>
+            <div class="aitxt-actions">
+              <a href="/llms.txt" class="link-card" target="_blank">
+                <span>View ai.txt</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+              <a href="/llms-full.txt" class="link-card link-card-muted" target="_blank">
+                <span>Full spec (llms-full.txt)</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+          <div class="aitxt-right">
+            <div class="code-block">
+              <div class="code-header"><span class="code-label">serve via CLI</span></div>
+              <pre><code>ilo spec ai     <span class="code-comment"># token-minimal ai.txt</span>
+ilo spec lang   <span class="code-comment"># full SPEC.md</span>
+ilo -ai         <span class="code-comment"># alias for spec ai (back-compat)</span></code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <span class="footer-logo">ilo</span>
+        <span class="footer-copy">MIT License</span>
+        <span class="footer-byline">Built by <a href="https://danieljohnmorris.com" target="_blank" rel="noopener">Daniel John Morris</a></span>
+      </div>
+      <div class="footer-links">
+        <a href="/docs/introduction/">Docs</a>
+        <a href="/agent/">Agents</a>
+        <a href="https://github.com/ilo-lang/ilo" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.npmjs.com/package/ilo-lang" target="_blank" rel="noopener">npm</a>
+        <a href="https://crates.io/crates/ilo" target="_blank" rel="noopener">crates.io</a>
+        <a href="mailto:hello@ilo-lang.ai">hello@ilo-lang.ai</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
+
+<style>
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --bg: #08080c;
+    --bg-raised: #0e0e14;
+    --bg-card: #111118;
+    --bg-card-hover: #16161f;
+    --bg-alt: #0b0b11;
+    --border: rgba(255, 255, 255, 0.06);
+    --border-hover: rgba(245, 158, 11, 0.25);
+    --text: #e4e4e8;
+    --text-muted: #7a7a90;
+    --text-dim: #3e3e52;
+    --accent: #f59e0b;
+    --accent-bright: #fbbf24;
+    --accent-dim: rgba(245, 158, 11, 0.08);
+    --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+    --font-body: 'Bricolage Grotesque', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --container: 1100px;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  main { flex: 1; }
+
+  .container {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(8, 8, 12, 0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-inner {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 0 2rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .nav-github {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+  }
+
+  .nav-github:hover { color: var(--text); }
+
+  .nav-cta {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 6px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .nav-cta:hover { background: var(--accent-bright); }
+
+  /* HERO */
+  .hero {
+    padding: 6rem 0 5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 20px;
+    padding: 4px 14px;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+    line-height: 1.1;
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin-bottom: 2.5rem;
+    line-height: 1.7;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-primary:hover { background: var(--accent-bright); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  .btn-outline:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-card);
+  }
+
+  /* SECTIONS */
+  .section {
+    padding: 5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-alt {
+    background: var(--bg-alt);
+  }
+
+  .section-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+    color: var(--text-muted);
+    max-width: 680px;
+    line-height: 1.7;
+  }
+
+  .section-subtitle code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+
+  .code-block-sm {
+    margin: 1rem 0 0;
+    font-size: 0.8rem;
+  }
+
+  .code-header {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .code-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .code-block pre {
+    padding: 1.25rem;
+    overflow-x: auto;
+  }
+
+  .code-block code {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--text);
+    display: block;
+  }
+
+  .code-comment { color: var(--text-dim); }
+
+  /* SKILLS */
+  .skills-discovery { margin-bottom: 2rem; }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .skill-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    transition: border-color 0.2s;
+  }
+
+  .skill-card:hover {
+    border-color: rgba(245, 158, 11, 0.18);
+  }
+
+  .skill-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+  }
+
+  .skill-name {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .skill-tokens {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+  }
+
+  .skill-desc {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .skills-note {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    max-width: 680px;
+  }
+
+  /* DIAGNOSTICS */
+  .diag-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .diag-range {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .diag-code {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .diag-area {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .diag-feature {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .diag-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+  }
+
+  .diag-block-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .diag-block-text {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .diag-block-text code {
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+
+  /* LINK CARDS */
+  .section-link {
+    margin-top: 1.5rem;
+  }
+
+  .link-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    background: var(--accent-dim);
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+
+  .link-card:hover {
+    background: rgba(245, 158, 11, 0.14);
+    border-color: rgba(245, 158, 11, 0.35);
+  }
+
+  .link-card-muted {
+    color: var(--text-muted);
+    background: var(--bg-card);
+    border-color: var(--border);
+  }
+
+  .link-card-muted:hover {
+    color: var(--text);
+    border-color: var(--border-hover);
+    background: var(--bg-card-hover);
+  }
+
+  /* ENVELOPE GRID */
+  .envelope-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .envelope-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+  }
+
+  .envelope-cmd {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+
+  .envelope-shape {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .envelope-shape code {
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+    color: var(--text);
+  }
+
+  .envelope-note {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    max-width: 680px;
+    margin-bottom: 0;
+  }
+
+  .envelope-note code {
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+    color: var(--text-muted);
+  }
+
+  /* TOOLS GRID */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .tools-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem;
+  }
+
+  .tools-block-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+
+  .tools-block-title svg {
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .tools-block-text {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 0;
+  }
+
+  /* INSTALL GRID */
+  .install-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .install-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+  }
+
+  .install-card:hover {
+    border-color: var(--border-hover);
+  }
+
+  .install-card-featured {
+    border-color: rgba(245, 158, 11, 0.2);
+    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(245, 158, 11, 0.04) 100%);
+    grid-column: span 2;
+  }
+
+  @media (max-width: 640px) {
+    .install-card-featured {
+      grid-column: span 1;
+    }
+  }
+
+  .install-icon {
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .install-card-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .install-card-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin-bottom: 0.5rem;
+  }
+
+  .install-card-desc code {
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+    color: var(--text-muted);
+  }
+
+  /* AI.TXT */
+  .aitxt-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  @media (max-width: 768px) {
+    .aitxt-block {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+
+  .aitxt-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 20px;
+    padding: 3px 12px;
+    margin-bottom: 1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .aitxt-title {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+
+  .aitxt-desc {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .aitxt-desc code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
+  .aitxt-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 0;
+  }
+
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-logo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text);
+  }
+
+  .footer-copy {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  .footer-byline {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  .footer-byline a {
+    color: var(--text-dim);
+    transition: color 0.2s;
+    text-decoration: none;
+  }
+
+  .footer-byline a:hover { color: var(--accent); }
+
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-links a {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--text); }
+
+  @media (max-width: 640px) {
+    .tools-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .footer-inner {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .footer-links {
+      justify-content: center;
+    }
+  }
+</style>
