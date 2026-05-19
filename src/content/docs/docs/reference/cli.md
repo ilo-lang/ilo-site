@@ -31,9 +31,21 @@ The bare positional forms (`ilo file.ilo`, `ilo compile ...`) remain fully suppo
 ```bash
 ilo check file.ilo                # human-readable diagnostics (auto-detects ANSI/text/JSON)
 ilo check file.ilo --json         # NDJSON diagnostics on stderr
+ilo check file.ilo --strict       # warnings (ILO-T032, ILO-T033) become exit-code failures
 ```
 
 On a syntactically-broken input `ilo check` still emits the parse error and exits 1 rather than crashing, so it's safe to point at half-written code.
+
+#### `--strict` for CI
+
+By default `ilo check` only exits 1 on error-severity diagnostics. Warning-severity diagnostics (ILO-T032 bare `fmt`, ILO-T033 bare `mset` / `+=` / `mdel`, future warning codes) are emitted on stderr but the exit code stays 0, which is appropriate for interactive use where warnings are advisory.
+
+CI harnesses that gate merges on `ilo check` need warnings to fail the build instead. `--strict` flips the exit-code decision: any warning bumps the exit code to 1. The diagnostic stream itself is unchanged: warnings still emit with `severity: "warning"` in the JSON output, so editor integrations that route by severity keep working correctly. Only the exit code is elevated.
+
+```bash
+# In CI:
+ilo check src/*.ilo --strict --json
+```
 
 
 
