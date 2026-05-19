@@ -20,6 +20,14 @@ Browse Plugins → Add marketplace from GitHub → `ilo-lang/ilo` → install.
 
 Binary auto-installs via npm. Note: Cowork uses the WASM build - HTTP and process builtins (`get`, `pst`, `run`, `$`) are not yet supported.
 
+## Agent skills (npx skills)
+
+```bash
+npx skills add ilo-lang/ilo
+```
+
+Install via the [skills](https://www.npmjs.com/package/skills) npm package (for Claude Code and AI agent workflows). Installs the ilo Agent Skill into any compatible agent environment.
+
 ## npm / npx
 
 ```bash
