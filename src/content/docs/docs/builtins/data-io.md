@@ -46,10 +46,12 @@ parse s:t>R _ t;rdb s "json"
 
 ### Listing directories
 
-`ls dir` returns the entries of `dir` (filenames only, not full paths), sorted lexicographically. Both file and directory entries are included. Missing directories surface as `Err`; empty directories return `[]`, not `Err`.
+`lsd dir` returns the entries of `dir` (filenames only, not full paths), sorted lexicographically. Both file and directory entries are included. Missing directories surface as `Err`; empty directories return `[]`, not `Err`.
+
+Renamed from `ls` in 0.12.1 so the natural `ls=rdl! p` binding for "lines" stays free for user code.
 
 ```ilo
-entries d:t>R (L t) t;ls d
+entries d:t>R (L t) t;lsd d
 ```
 
 ### Recursive walk
