@@ -43,7 +43,9 @@ All comparisons return `b`.
 | `abs` | `n > n` | Absolute value | `abs -5` -> `5` |
 | `flr` | `n > n` | Floor | `flr 3.7` -> `3` |
 | `cel` | `n > n` | Ceiling | `cel 3.2` -> `4` |
-| `rnd` | `n n > n` | Round to N decimal places | `rnd 3.14159 2` -> `3.14` |
+| `rou` | `n > n` | Round to nearest integer (banker's rounding) | `rou 3.7` -> `4` |
+| `rnd` | `> n` | Random float in `[0, 1)`. Aliases: `rand`, `random`. Read this as random, not round; for rounding use `rou`. | `rnd` -> `0.42…` |
+| `rnd` | `n n > n` | Random integer in `[a, b]` inclusive | `rnd 1 6` -> dice |
 
 ## Aggregation
 
@@ -73,6 +75,8 @@ All comparisons return `b`.
 | `average` | `avg` |
 | `floor` | `flr` |
 | `ceil` | `cel` |
-| `round` | `rnd` |
+| `round` | `rou` |
+| `random` | `rnd` |
+| `rand` | `rnd` |
 | `number` | `num` |
 | `string` | `str` |
