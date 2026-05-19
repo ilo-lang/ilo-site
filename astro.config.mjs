@@ -79,6 +79,7 @@ export default defineConfig({
       customCss: ['./src/styles/global.css'],
       components: {
         ThemeSelect: './src/components/ThemeSelect.astro',
+        Head: './src/components/StarlightHead.astro',
       },
       sidebar: [
         {
