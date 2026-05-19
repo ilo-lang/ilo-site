@@ -60,6 +60,9 @@ All comparisons return `b`.
 | `median` | `L n > n` | Median of a numeric list | `median [1,2,3,4,5]` -> `3` |
 | `stdev` | `L n > n` | Sample standard deviation (divides by N-1) | `stdev [2,4,4,4,5,5,7,9]` |
 | `variance` | `L n > n` | Sample variance (divides by N-1) | `variance [...]` |
+| `argmax` | `L n > n` | Index of max element (first occurrence wins on ties; errors on empty) | `argmax [3,1,9,2]` -> `2` |
+| `argmin` | `L n > n` | Index of min element (first occurrence wins on ties; errors on empty) | `argmin [3,1,9,2]` -> `1` |
+| `argsort` | `L n > L n` | Sorted-index permutation ascending (stable; empty returns `[]`) | `argsort [3,1,2]` -> `[1,2,0]` |
 
 ## Conversions
 
