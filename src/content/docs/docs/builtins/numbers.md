@@ -71,7 +71,7 @@ All comparisons return `b`.
 | Function | Signature | Description | Example |
 |----------|-----------|-------------|---------|
 | `str` | `_ > t` | Convert to string | `str 42` -> `"42"` |
-| `num` | `t > n` | Parse string to number | `num "42"` -> `42` |
+| `num` | `t\|n > R n t` | Polymorphic: parse text or identity-wrap a number as Ok. Saves the `num (str x)` roundtrip when `x` may already be numeric (e.g. from `jpar!` on a JSON number) | `num "42"` -> `Ok 42`, `num 42` -> `Ok 42` |
 
 ## Aliases
 

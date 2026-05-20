@@ -37,7 +37,7 @@ Use this when concatenating, formatting, splitting, searching, or matching strin
 | Function | Signature | Description | Example |
 |----------|-----------|-------------|---------|
 | `str` | `_ > t` | Convert any value to string | `str 42` -> `"42"` |
-| `num` | `t > n` | Parse string to number | `num "42"` -> `42` |
+| `num` | `t\|n > R n t` | Polymorphic: parse text or identity-wrap a number as Ok. Saves the `num (str x)` roundtrip when `x` may already be numeric (e.g. from `jpar!` on a JSON number) | `num "42"` -> `Ok 42`, `num 42` -> `Ok 42` |
 
 ## Output
 
