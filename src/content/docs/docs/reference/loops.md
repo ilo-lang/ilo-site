@@ -212,3 +212,28 @@ ilo 'first-big xs:L n>n;@x xs{>=x 10{ret x}};0' 3,7,12,5
 | **Fresh binding** | Yes | Yes | No |
 
 For simple list transforms, prefer [`map`](/docs/builtins/collections#higher-order-functions), [`flt`](/docs/builtins/collections#higher-order-functions), and [`fld`](/docs/builtins/collections#higher-order-functions). Loops are for when you need mutable state or early exit.
+
+## Tail-call optimisation
+
+ilo deliberately has no `loop` keyword — every iteration shape that can't be written with `@` foreach should be expressed as a tail-recursive function. To make that safe, the runtime guarantees that **tail calls do not consume host-stack frames**: a function that recurses only in tail position can run to arbitrary depth, because the runtime rebinds parameters in place rather than pushing a frame.
+
+```ilo
+-- Count down from n to 0. Runs at any depth.
+count-down n:n>n;=n 0 0;count-down -n 1
+
+-- Tail-recursive sum. `acc` carries the partial result.
+sum-acc xs:L n acc:n>n;empty=len xs;=empty 0 acc;sum-acc tl xs +acc hd xs
+```
+
+A call is in **tail position** when its return value is the function's return value:
+
+- the last statement of a function body,
+- the expression of a `ret` statement,
+- an arm of a `?` match that is itself in tail position,
+- the body of a braceless guard.
+
+Calls inside `@` foreach, `@..` range, or `wh` loops are **not** in tail position — the loop header runs after each iteration, so the call's return doesn't become the function's return. Operands of further computation (e.g. `*n fac -n 1`) are also not in tail position.
+
+The peephole only fires when the callee is a direct user-defined function name (not a `FnRef` in scope, not a closure, not a builtin, not a tool) and the call has no auto-unwrap (`!` / `!!`). These constraints cover the common recursive-accumulator and state-machine shapes.
+
+The tree interpreter trampolines tail calls today. The bytecode VM (`--vm`) and Cranelift backends (`--jit`, AOT) gain matching support in subsequent releases; until then, deep recursion on those engines is bounded by each engine's stack model.
