@@ -46,6 +46,8 @@ All comparisons return `b`.
 | `rou` | `n > n` | Round to nearest integer (banker's rounding) | `rou 3.7` -> `4` |
 | `rnd` | `> n` | Random float in `[0, 1)`. Aliases: `rand`, `random`. Read this as random, not round; for rounding use `rou`. | `rnd` -> `0.42…` |
 | `rnd` | `n n > n` | Random integer in `[a, b]` inclusive | `rnd 1 6` -> dice |
+| `rndn` | `n n > n` | One sample from N(mu, sigma) (Box-Muller) | `rndn 0 1` -> `0.34…` |
+| `seed` | `n > _` | Set the shared PRNG state (SplitMix64). All subsequent `rnd`/`rndn` on every engine use this state. Default seed is deterministic (no wall-clock). Returns `_`. For entropy: `seed (now-ms)`. | `seed 42` |
 
 ## Aggregation
 
