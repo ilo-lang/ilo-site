@@ -184,6 +184,8 @@ home>t;env! "HOME"
 | `dtfmt` | `n t > R t t` | Format Unix epoch as text (strftime, UTC) | `dtfmt 1700000000 "%Y-%m-%d"` |
 | `dtparse` | `t t > R n t` | Parse text to Unix epoch (strftime, UTC) | `dtparse "2024-01-15" "%Y-%m-%d"` |
 | `dtparse-rel` | `t n > R n t` | Resolve relative-date phrase to epoch anchored at `now` (today/yesterday/tomorrow, `N days/weeks/months ago`, `in N days/weeks/months`, `last/next/this <weekday>`, ISO-8601 passthrough) | `dtparse-rel "last friday" (now)` |
+| `dur-parse` | `t > R n t` | Parse human duration string into seconds. Accepts `s`/`m`/`h`/`d`/`w` abbreviations and full names (singular + plural), decimal quantities, mixed sequences. Months are **not** supported (variable length); use explicit day counts. A leading `-` is sticky — it applies to every following token until an explicit `+` resets it, so `"-1m 30s"` = `-90`. | `dur-parse "1.5 hours"` |
+| `dur-fmt` | `n > t` | Format seconds as human-readable duration. Drops zero parts, uses largest units, preserves fractional seconds (up to 3 dp, trailing zeros stripped). Negative values get a single leading `-` which round-trips through `dur-parse`. | `dur-fmt 9720` → `"2h 42m"` |
 
 ## Auto-unwrap `!`
 
