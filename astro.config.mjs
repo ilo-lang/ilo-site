@@ -123,6 +123,7 @@ export default defineConfig({
             { label: 'Collections', slug: 'docs/builtins/collections' },
             { label: 'Data & I/O', slug: 'docs/builtins/data-io' },
             { label: 'HTTP', slug: 'docs/builtins/http' },
+            { label: 'Crypto & encoding', slug: 'docs/builtins/crypto' },
             { label: 'Tools', slug: 'docs/builtins/tools' },
           ],
         },
