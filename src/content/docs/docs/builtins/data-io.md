@@ -183,6 +183,7 @@ home>t;env! "HOME"
 | `sleep` | `n > _` | Pause current engine for `ms` milliseconds | `sleep 100` |
 | `dtfmt` | `n t > R t t` | Format Unix epoch as text (strftime, UTC) | `dtfmt 1700000000 "%Y-%m-%d"` |
 | `dtparse` | `t t > R n t` | Parse text to Unix epoch (strftime, UTC) | `dtparse "2024-01-15" "%Y-%m-%d"` |
+| `dtparse-rel` | `t n > R n t` | Resolve relative-date phrase to epoch anchored at `now` (today/yesterday/tomorrow, `N days/weeks/months ago`, `in N days/weeks/months`, `last/next/this <weekday>`, ISO-8601 passthrough) | `dtparse-rel "last friday" (now)` |
 
 ## Auto-unwrap `!`
 
