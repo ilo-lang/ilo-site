@@ -1,6 +1,6 @@
 ---
 title: Crypto and encoding
-description: Use this when hashing, signing, encoding, or verifying secrets in ilo. Covers sha256, hmac-sha256, base64, hex, and ct-eq.
+description: Use this when hashing, signing, encoding, or verifying secrets in ilo. Covers sha256, hmac-sha256, b64u, urlenc, hex, and ct-eq.
 ---
 
 Use this when hashing, signing, encoding, or verifying secrets. All crypto builtins are tree-bridge eligible: pure text/bytes operations with no I/O, so VM and Cranelift inherit them automatically.
@@ -39,26 +39,37 @@ verify sig:t body:t>b
 
 Always use `ct-eq` instead of `==` when comparing secrets (HMAC digests, tokens, API keys). `==` short-circuits on the first differing byte, which leaks timing information that an attacker can exploit. `ct-eq` always reads every byte.
 
-## Base64 encoding
+## Base64url encoding
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `base64-enc` | `t > t` | Standard base64 encode (RFC 4648 section 4, with `=` padding) |
-| `base64-dec` | `t > R t t` | Standard base64 decode; Err on invalid input |
-| `base64url-enc` | `t > t` | Base64url encode (RFC 4648 section 5, no padding, URL-safe alphabet) |
-| `base64url-dec` | `t > R t t` | Base64url decode; Err on invalid input |
+| `b64u` | `t > t` | Base64url encode (RFC 4648 section 5, no padding, URL-safe `-`/`_` alphabet). Total. |
+| `b64u-dec` | `t > R t t` | Base64url decode; Err on input outside the alphabet, on `=` padding (strict no-pad round-trip), or on non-UTF-8 decoded bytes |
 
 ```ilo
-base64-enc "hello"                     -- "aGVsbG8="
-base64-dec! (base64-enc "hello")       -- "hello"
-
-base64url-enc "hello"                  -- "aGVsbG8" (no padding)
-base64url-dec! (base64url-enc "hello") -- "hello"
+b64u "hello"                     -- "aGVsbG8" (no padding)
+b64u-dec! (b64u "hello")         -- "hello"
+b64u "??>"                       -- "Pz8-" (URL-safe; standard b64 would emit "Pz8+")
 ```
 
-`base64-dec` and `base64url-dec` return `R t t`. Use `!` to auto-unwrap or handle the `Err` arm for invalid input. The Ok branch holds a decoded text string (valid UTF-8); non-UTF-8 decoded bytes always Err.
+`b64u-dec` returns `R t t`. Use `!` to auto-unwrap or handle the `Err` arm for invalid input. The Ok branch holds a decoded text string (valid UTF-8); non-UTF-8 decoded bytes always Err.
 
-Use `base64-enc`/`base64-dec` for standard (padded) base64. Use `base64url-enc`/`base64url-dec` for URL-safe base64 (JWT headers, URL parameters).
+Use `b64u`/`b64u-dec` for URL-safe base64 (JWT headers, URL parameters, webhook payloads).
+
+## URL percent-encoding
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `urlenc` | `t > t` | RFC 3986 percent-encode; unreserved chars (`ALPHA`/`DIGIT`/`-._~`) pass through, everything else becomes `%HH`. Total. |
+| `urldec` | `t > R t t` | Inverse of `urlenc`; Err on invalid percent escape or non-UTF-8 decoded bytes |
+
+```ilo
+urlenc "a b&c=d"                 -- "a%20b%26c%3Dd"
+urldec! "a%20b%26c%3Dd"          -- "a b&c=d"
+urlenc "café"                    -- "caf%C3%A9" (UTF-8 byte-by-byte)
+```
+
+Both are tree-bridge eligible (no I/O, no FnRef). The encoder is total; the decoder returns `Result` so malformed input (`"abc%"`, `"abc%2"`, or escapes that decode to invalid UTF-8) surfaces typed at the boundary.
 
 ## Hex encoding
 
@@ -87,13 +98,20 @@ verify sig:t body:t>b
 **JWT header construction:**
 
 ```ilo
-header=base64url-enc (jdmp (pt alg:"HS256" typ:"JWT"))
-payload=base64url-enc (jdmp data)
+header=b64u (jdmp (pt alg:"HS256" typ:"JWT"))
+payload=b64u (jdmp data)
+```
+
+**OAuth query string:**
+
+```ilo
+q=cat [(urlenc "client_id") "=" (urlenc cid) "&" (urlenc "redirect_uri") "=" (urlenc ru)] ""
 ```
 
 **Round-trip check:**
 
 ```ilo
-s="hello world"
-base64-dec! (base64-enc s)   -- "hello world"
+s="hello world & friends=42"
+urldec! (urlenc s)   -- "hello world & friends=42"
+b64u-dec! (b64u s)   -- "hello world & friends=42"
 ```
