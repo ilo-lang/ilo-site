@@ -30,7 +30,7 @@ funcname param1:type param2:type>returntype;body
 
 ```ilo
 dbl x:n>n;*x 2                            -- number → number
-greet first:t last:t>t;cat first " " last -- text params, text return
+greet first:t last:t>t;fmt "{} {}" first last -- text params, text return
 truthy x:_>b;!!x                          -- any type, boolean return
 pi>n;3.14159                              -- zero-arg function
 ```
@@ -53,3 +53,5 @@ ilo 'calc a:n b:n>n;s=+a b;p=*a b;+s p' 3 4
 ```
 
 Each statement binds a variable or returns a value. The last expression is the return value.
+
+Newlines inside `[...]` or `(...)` are treated as whitespace, not statement separators, so list literals and parenthesised expressions can span multiple lines without problems. Windows CRLF (`\r\n`) is normalised to LF before parsing, so files edited on Windows work identically.
