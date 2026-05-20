@@ -186,6 +186,10 @@ home>t;env! "HOME"
 | `dtparse-rel` | `t n > R n t` | Resolve relative-date phrase to epoch anchored at `now` (today/yesterday/tomorrow, `N days/weeks/months ago`, `in N days/weeks/months`, `last/next/this <weekday>`, ISO-8601 passthrough) | `dtparse-rel "last friday" (now)` |
 | `dur-parse` | `t > R n t` | Parse human duration string into seconds. Accepts `s`/`m`/`h`/`d`/`w` abbreviations and full names (singular + plural), decimal quantities, mixed sequences. Months are **not** supported (variable length); use explicit day counts. A leading `-` is sticky — it applies to every following token until an explicit `+` resets it, so `"-1m 30s"` = `-90`. | `dur-parse "1.5 hours"` |
 | `dur-fmt` | `n > t` | Format seconds as human-readable duration. Drops zero parts, uses largest units, preserves fractional seconds (up to 3 dp, trailing zeros stripped). Negative values get a single leading `-` which round-trips through `dur-parse`. | `dur-fmt 9720` → `"2h 42m"` |
+| `add-mo` | `n n > n` | Add N calendar months to epoch, snapping to last valid day (Jan 31 + 1 = Feb 28/29). N may be negative. Returns epoch at 00:00 UTC. | `add-mo 1706659200 1` → `1709164800` |
+| `last-dom` | `n > n` | Epoch of the last day of the month containing `dt`, at 00:00 UTC. | `last-dom 1707955200` → `1709164800` (Feb 29 2024) |
+| `next-business-day` | `n > n` | Next weekday after `dt` (Fri→Mon, Sat→Mon, Sun→Mon, Mon-Thu→+1d). Returns 00:00 UTC. | `next-business-day 1705622400` → `1705881600` |
+| `day-of-week` | `n > n` | Day of week: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat. | `day-of-week 1705276800` → `1` (Monday) |
 
 ## Auto-unwrap `!`
 
