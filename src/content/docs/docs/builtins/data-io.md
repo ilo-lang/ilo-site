@@ -190,6 +190,7 @@ home>t;env! "HOME"
 | `last-dom` | `n > n` | Epoch of the last day of the month containing `dt`, at 00:00 UTC. | `last-dom 1707955200` → `1709164800` (Feb 29 2024) |
 | `next-business-day` | `n > n` | Next weekday after `dt` (Fri→Mon, Sat→Mon, Sun→Mon, Mon-Thu→+1d). Returns 00:00 UTC. | `next-business-day 1705622400` → `1705881600` |
 | `day-of-week` | `n > n` | Day of week: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat. | `day-of-week 1705276800` → `1` (Monday) |
+| `tz-offset` | `t n > R n t` | UTC offset in seconds for a named IANA timezone at a given Unix epoch. DST-aware (chrono-tz). Positive = east of UTC. `Err` on unknown timezone name. | `tz-offset "Europe/London" 1719792000` → `3600` (BST) |
 
 ## Auto-unwrap `!`
 
