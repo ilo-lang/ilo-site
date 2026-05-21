@@ -106,6 +106,37 @@ Use braces when the body has multiple statements:
 >=sp 1000{a=classify sp;a}
 ```
 
+## The three conditional forms (side by side)
+
+ilo has three syntactically distinct conditional shapes. They look similar at a glance and agents regularly mix them up, so it pays to learn the differences once.
+
+| Form | Shape | Semantics | When to reach for it |
+|---|---|---|---|
+| Braceless guard | `cond expr` | Early return `expr` from the function if `cond` is true; otherwise fall through to the next statement. | Single-expression early exit inside a fn body. |
+| Braced conditional | `cond{body}` | Run `body` if `cond` is true. **No early return** - execution continues to the next statement after the brace. | Side-effects mid-function (e.g. `prnt`), or `ret` inside a loop. |
+| Brace ternary | `cond{then}{else}` | Evaluate `then` or `else`. **No early return** - produces a value. | Value with two arms, statement or expression position. |
+| Prefix ternary (`?h`) | `?h cond a b` | Value: `if cond then a else b`. | Cheapest shape when the cond is a bool ref or complex bool expr. |
+
+Worked side-by-side. The condition is `> x 0`; the arms are `"pos"` and `"nonpos"`:
+
+```ilo
+-- braceless guard: early return, fallthrough is the else
+f x:n>t;>x 0 "pos";"nonpos"
+
+-- braced conditional: body runs, no early return; explicit ret if needed
+f x:n>t;>x 0{ret "pos"};"nonpos"
+
+-- brace ternary: value, no early return, tail expr returns
+f x:n>t;>x 0{"pos"}{"nonpos"}
+
+-- prefix ternary keyword: cheapest when the bool is already named
+f x:n>t;c=>x 0;?h c "pos" "nonpos"
+```
+
+**Common mistake.** `?h cond{...}` is **not** a legal shape - `?h` is the keyword prefix-ternary, so braces after the condition trigger ILO-P009. The parser hint enumerates the three canonical forms; the fix is to drop `?h` (for `cond{...}` or `cond{a}{b}`) or to drop the braces (for `?h cond a b`).
+
+Negation: a leading `!` works on every form - `!cond expr`, `!cond{body}`, `!cond{a}{b}`, `!=x 1{"not one"}{"one"}`.
+
 ## Ternary
 
 Like `x == 0 ? 10 : 20` in JS/C/Go, a ternary produces a value. Unlike guards, it does **not** return early - code after it keeps running, unless it's the last expression in the function.
