@@ -73,3 +73,34 @@ Common misfires:
 
 Pick the shape by intent: boolean -> 2 arms, no labels. Value match -> `val:` labels plus `_:` default. Variant match -> tag names as keys, all variants covered.
 
+## Call vs binary-op: `dx=xj 0-xi`
+
+Whitespace-juxtaposition is the call syntax in ilo. Any bare name followed by another token in an expression parses as a call, not as "name then operator". The classic case:
+
+```ilo
+f xi:n xj:n>n;dx=xj 0-xi;dx
+```
+
+This parses as `dx=(xj 0) - xi`, a call to `xj` with argument `0`, whose result is subtracted from `xi`. Verification fails with `ILO-T005` because `xj` is a number, not a function. The error message includes the call-vs-binop hint pointing at the canonical fixes.
+
+In ilo's prefix-operator world the agent almost always meant one of:
+
+```ilo
+-xj xi                         -- subtract: prefix `-` means `xj - xi`
+nxi=0-xi;+xj nxi               -- pre-bind the operand, then add
+```
+
+The misparse comes up when an agent reaches for infix arithmetic between a parameter and a subexpression. Pre-binding the operand always resolves the ambiguity, and `ilo --explain ILO-T005` includes the full walkthrough.
+
+## `zip` returns lists, not tuples
+
+ilo has no tuple type. `zip xs ys` returns `L (L n)` - a list of two-element lists. Destructure pairs with `at pair 0` / `at pair 1`, not `pair.0` / `pair.1` when the pair name is unbound.
+
+```ilo
+-- DON'T: zs=zip xs ys; +tup.0 tup.1   -- 'tup' never bound; reads as tuple access
+-- DO:    zs=zip xs ys;
+          map (pair:L n>n;+at pair 0 at pair 1) zs
+```
+
+`ILO-T004` on `tup.0` / `pair.0` carries a hint naming the exact `at <name> <N>` call. The field-access sugar (`pair.0`) is still valid once `pair` is bound to an `L T` parameter; the diagnostic only fires when the identifier is unbound, which is the agent-frequent shape after a `zip`.
+
