@@ -157,6 +157,8 @@ Every diagnostic ilo emits has the shape `ILO-<letter><digits>`. The letter is t
 | `ILO-R012` | No functions defined |
 | `ILO-R013` | Internal VM error |
 | `ILO-R014` | Auto-unwrap propagated Err / nil |
+| `ILO-R016` | Wall-clock runtime budget exceeded - `ilo run` killed the program at the default 60 s budget. Almost always an infinite loop (missing loop increment, recursion without base case). Raise with `--max-runtime SECS` (0 disables) if a legitimate program needs longer. |
+| `ILO-R017` | Stdout output budget exceeded - `ilo run` killed the program at the default ~100 MB budget. Usually a `prnt` call inside an unbounded loop. Raise with `--max-output-bytes BYTES` (0 disables) if legitimate. |
 | `ILO-R026` | Panic-unwrap on Err / nil |
 | `ILO-R099` | Internal runtime error |
 

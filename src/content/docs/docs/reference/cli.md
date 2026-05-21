@@ -107,7 +107,10 @@ Tokens with `=` (`--key=val`), trailing or doubled dashes (`--foo-`, `--foo--bar
 | `--tools tools.json` | Load HTTP tool declarations |
 | `--mcp mcp.json` | Connect MCP servers |
 | `--no-hints`, `-nh` | Suppress idiomatic hints |
+| `--silent`, `-s` | Suppress program stdout (mainly for `--bench`; bench output still reaches stdout) |
 | `--max-ast-depth N` | Cap parser nesting at N (default 256). Protects `ilo serv` and other untrusted-source paths from `((((...))))` DoS payloads; raises `ILO-P103`. Applies to every subcommand that parses source. |
+| `--max-runtime SECS` | Cap wall-clock runtime for `ilo run` at SECS (default 60). Aborts with `ILO-R016` on overrun. Pass `0` to disable for batch / training workloads. |
+| `--max-output-bytes BYTES` | Cap total stdout output for `ilo run` at BYTES (default ~100 MB). Aborts with `ILO-R017` on overrun. Pass `0` to disable. |
 | `compile` | AOT compile to standalone native binary |
 
 ## List arguments
