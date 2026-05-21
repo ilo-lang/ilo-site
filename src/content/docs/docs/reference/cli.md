@@ -107,6 +107,7 @@ Tokens with `=` (`--key=val`), trailing or doubled dashes (`--foo-`, `--foo--bar
 | `--tools tools.json` | Load HTTP tool declarations |
 | `--mcp mcp.json` | Connect MCP servers |
 | `--no-hints`, `-nh` | Suppress idiomatic hints |
+| `--max-ast-depth N` | Cap parser nesting at N (default 256). Protects `ilo serv` and other untrusted-source paths from `((((...))))` DoS payloads; raises `ILO-P103`. Applies to every subcommand that parses source. |
 | `compile` | AOT compile to standalone native binary |
 
 ## List arguments

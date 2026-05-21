@@ -90,6 +90,7 @@ Every diagnostic ilo emits has the shape `ILO-<letter><digits>`. The letter is t
 | `ILO-P020` | Incomplete function header |
 | `ILO-P021` | Double-minus prefix-binop trap rejected - `- -<op> a b <op> c d` for `<op> ∈ {+, *, /}` is rejected at parse time because it silently miscompiles into `-(a-b)`. Use `- 0 +*a b *c d` or bind the inner result first. |
 | `ILO-P101` | List-literal element starts with a variadic builtin (`fmt`, `fmt2`) followed by operands - rejected at parse time because the bare form would fall through as multiple elements with the builtin name as an undefined Ref. Wrap the call in parens (`[k (fmt2 v 2)]`) or bind first (`s=fmt2 v 2;[k s]`). |
+| `ILO-P103` | AST nesting depth exceeded - the parser refused source nesting more than 256 levels deep. Default cap guards `ilo serv` and other untrusted-source paths from `((((...((1+1))))...))` DoS payloads. Flatten by binding intermediates, or raise with `--max-ast-depth N`. |
 
 ## Type / verifier errors (ILO-T)
 
