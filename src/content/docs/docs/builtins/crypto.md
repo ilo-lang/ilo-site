@@ -1,6 +1,6 @@
 ---
 title: Crypto and encoding
-description: Use this when hashing, signing, encoding, or verifying secrets in ilo. Covers sha256, hmac-sha256, b64u, urlenc, hex, and ct-eq.
+description: Use this when hashing, signing, encoding, or verifying secrets in ilo. Covers sha256, hmac-sha256, b64, b64u, urlenc, hex, and ct-eq.
 ---
 
 Use this when hashing, signing, encoding, or verifying secrets. All crypto builtins are tree-bridge eligible: pure text/bytes operations with no I/O, so VM and Cranelift inherit them automatically.
@@ -87,19 +87,36 @@ urlenc "café"                    -- "caf%C3%A9" (UTF-8 byte-by-byte)
 
 Both are tree-bridge eligible (no I/O, no FnRef). The encoder is total; the decoder returns `Result` so malformed input (`"abc%"`, `"abc%2"`, or escapes that decode to invalid UTF-8) surfaces typed at the boundary.
 
+## Standard base64
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `b64` | `t > t` | Standard base64 encode (RFC 4648 section 4, with `=` padding). Total. |
+| `b64-dec` | `t > R t t` | Standard base64 decode; Err on input outside the standard alphabet or on non-UTF-8 decoded bytes |
+
+```ilo
+b64 "foobar"            -- "Zm9vYmFy"
+b64 "Ma"                -- "TWE=" (one padding char)
+b64 "M"                 -- "TQ==" (two padding chars)
+b64-dec! "Zm9vYmFy"     -- "foobar"
+```
+
+`b64`/`b64-dec` use the standard alphabet (`+`/`/`) with `=` padding. Use these when interoperating with anything that expects RFC 4648 standard base64 (most non-URL contexts). For URL-safe contexts (JWT headers, query strings) use `b64u`/`b64u-dec` instead.
+
 ## Hex encoding
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `hex-enc` | `L n > t` | Encode list of integers 0-255 as lowercase hex string |
-| `hex-dec` | `t > R (L n) t` | Decode hex string to list of byte values 0-255; Err on invalid input |
+| `hex` | `t > t` | Lowercase hex encode of the UTF-8 bytes of `s`. Every byte produces exactly 2 hex chars. Total. |
 
 ```ilo
-hex-enc [104 101 108 108 111]   -- "68656c6c6f"
-hex-dec! "68656c6c6f"           -- [104, 101, 108, 108, 111]
+hex "abc"               -- "616263"
+hex ""                  -- ""
+len (hex "hello")       -- 10 (every byte → 2 chars)
+hex "ñ"                 -- "c3b1" (UTF-8 byte representation)
 ```
 
-`hex-enc` takes a list of integers in the range 0-255. Values outside this range produce ILO-R009. `hex-dec` accepts upper- or lowercase hex; odd-length or non-hex input returns `Err`.
+`hex` encodes the raw UTF-8 bytes of the input, not Unicode codepoints. A multi-byte character like `"ñ"` (UTF-8: `0xc3 0xb1`) becomes `"c3b1"`, not its codepoint hex.
 
 ## Common patterns
 
