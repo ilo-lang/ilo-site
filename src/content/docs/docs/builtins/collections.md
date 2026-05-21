@@ -53,6 +53,8 @@ rsrt slen ["banana" "fig" "apple" "kiwi"]   -- → [banana apple kiwi fig]
 
 Both `srt` and `rsrt` also accept a 3-arg `fn ctx list` form where `fn` takes `(elem, ctx)`. This is the cross-engine alternative when you want explicit state without forming a closure.
 
+`srt` is **stable**: elements (or items with equal keys, for the key-function form) keep their relative input order. This matters when merging parallel streams sorted by a shared key — e.g. timeline events that share a timestamp keep their per-source ordering inside each tie group. The guarantee holds on every engine (tree, VM, Cranelift JIT, Cranelift AOT). `argsort` is also stable; `rsrt` mirrors `srt`'s stability.
+
 Number functions that pair well with lists:
 
 ```ilo
@@ -199,17 +201,33 @@ ilo 'f xs:L n>L n;slc xs 1 3' 10,20,30,40
 # → [20, 30]
 ```
 
-Negative indices count from the end (Python-style); bounds clamp instead of wrapping:
+Negative indices count from the end (Python-style); bounds clamp instead of wrapping. One ergonomic exception: when the start is non-negative and the end is exactly `-1`, the end is read as `len xs` (Python/JS "to end of list/text" sugar):
 
 ```bash
-ilo 'f xs:L n>L n;slc xs 0 -1' 10,20,30,40   # drop the last
-# → [10, 20, 30]
+ilo 'f xs:L n>L n;slc xs 2 -1' 10,20,30,40   # "to end" sugar
+# → [30, 40]
+
+ilo 'f xs:L n>L n;slc xs 0 -1' 10,20,30,40   # full list (-1 = to end)
+# → [10, 20, 30, 40]
 
 ilo 'f xs:L n>L n;slc xs -2 (len xs)' 10,20,30,40   # keep last two
 # → [30, 40]
+
+ilo 'f xs:L n>L n;slc xs -3 -1' 10,20,30,40   # negative start: Python style
+# → [20, 30]
+
+ilo 'f xs:L n>L n;slc xs 0 -2' 10,20,30,40   # end -2 keeps Python style
+# → [10, 20]
 ```
 
-`at xs i`, `take n xs`, and `drop n xs` follow the same rule. `take -1 xs` keeps all but the last element; `drop -1 xs` keeps only the last.
+`at xs i`, `take n xs`, and `drop n xs` follow the same Python-style rule. To "drop the last element" use `take -1 xs` (the `slc xs 0 -1` shape was repurposed as the "to end" sugar above):
+
+```bash
+ilo 'f xs:L n>L n;take -1 xs' 10,20,30,40   # drop the last
+# → [10, 20, 30]
+```
+
+`drop -1 xs` keeps only the last.
 
 ### `has` - contains check
 
