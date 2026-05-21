@@ -232,6 +232,24 @@ ilo 'f xs:L n>L n;+=xs 99' 1,2,3
 # → [1, 2, 3, 99]
 ```
 
+### `lst` - set element at index (list-set / `lset`)
+
+`lst xs i v` returns a new list with index `i` replaced by `v`. This is the canonical list-update builtin: same role as `lset`, `setat`, or `set-at` in other languages, and exactly what you'd write `xs[i] = v` for in Python. `lset` is the long-form alias. Lists are immutable, so rebind the result:
+
+```bash
+ilo 'f xs:L n>L n;lst xs 1 99' 10,20,30
+# → [10, 99, 30]
+```
+
+Negative indices count from the end (same convention as `at`/`slc`):
+
+```bash
+ilo 'f xs:L n>L n;lst xs -1 99' 10,20,30
+# → [10, 20, 99]
+```
+
+Reach for `lst` whenever you'd reach for in-place index assignment in another language. For flat-array 2D grids, combine with stride arithmetic: `grid=lst grid (+(*r w) c) v`.
+
 ## Maps (`M k v`)
 
 Maps are key-value collections, like dictionaries in Python or objects in JavaScript. Keys are typed: text (`t`) or integer (`n`). `Int(1)` and `Text("1")` are distinct, so a numeric index map and a string-keyed map can't accidentally collide. Maps are immutable: `mset` and `mdel` return new maps rather than modifying in place.
@@ -369,6 +387,7 @@ ilo 'f xs:L t>L t;unq xs' a,b,a,c,b
 | `tl` | `tail` | `L _ > L _` | All elements except first |
 | `at` | | `L _ n > _` | i-th element (0-indexed; negative counts from end; float `i` auto-floors) |
 | `lget-or` | | `L a n a > a` | element at index `i`, or `default` if out of range (negative indices like `at`; never errors on OOB) |
+| `lst` | `lset` | `L a n a > L a` | list-set: new list with index `i` replaced by `v` (same role as `lset`/`setat` in other languages; rebind because lists are immutable) |
 | `rev` | `reverse` | `L _ > L _` | Reverse a list |
 | `srt` | `sort` | `L _ > L _` | Sort a list |
 | `srt` | `sort` | `fn L _ > L _` | Sort by key function |
