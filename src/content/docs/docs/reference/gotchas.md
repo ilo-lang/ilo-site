@@ -53,3 +53,23 @@ mod n -2        -- glued -N as call arg / list element / binop operand (load-bea
 
 The lexer auto-splits `-N` back into `Minus + Number` when the previous token introduces a fresh-expression position (`;`, newline, `=`, `{`, `(`, or `-`), so `-0 v` at the start of a body, `r=-1 x`, `{-1}`, and `(-1)` all work. After an Ident, `[`, or another prefix binop, the glued form is preserved.
 
+## Ternary brace shapes: three canonical forms
+
+`?` followed by braces is one operator with three shapes. Mixing them produces `ILO-P009`. The hint is context-aware: the parser looks at the arm shape and tells you which form you were closest to.
+
+```ilo
+?cond{T_arm; F_arm}             -- if/else on a boolean (exactly 2 arms)
+?expr{val:T; val:T; _:T}        -- match on a value (one arm per case, `_:` catch-all)
+?expr{Ok:body; Err:body}        -- match on a result/option (variant tags as arm keys)
+```
+
+Common misfires:
+
+```ilo
+?x{1:"a";2:"b"}                 -- ILO-P009: looks like match-on-value, missing `_:` catch-all
+?cond{a;b;c}                    -- ILO-P009: 3 unlabelled arms, ternary takes exactly 2
+?r{Ok:v}                        -- ILO-P009: result match missing `Err:` arm
+```
+
+Pick the shape by intent: boolean -> 2 arms, no labels. Value match -> `val:` labels plus `_:` default. Variant match -> tag names as keys, all variants covered.
+
