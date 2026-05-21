@@ -312,6 +312,22 @@ ilo 'f>L n;cprod [1,2,3,4]' f
 
 Output length always matches input length. Empty input returns `[]`.
 
+### `ewm` - exponential moving average
+
+`ewm xs a > L n` smooths a numeric list with the IIR recurrence
+`ewm[0] = xs[0]`, `ewm[i] = a*xs[i] + (1-a)*ewm[i-1]`. The smoothing factor
+`a` must lie in `[0, 1]`; out-of-range values raise `ILO-R009` at runtime.
+
+```bash
+ilo 'f>L n;ewm [1,2,3,4,5] 0.5' f
+# → [1, 1.5, 2.25, 3.125, 4.0625]
+```
+
+Boundary cases: `a=0` freezes at `xs[0]` (constant output); `a=1` reproduces
+`xs` exactly. Empty input returns `[]`; a single-element list passes through
+unchanged regardless of `a`. Replaces the fold-with-running-state pattern in
+one call.
+
 ### `grp` - group by key function
 
 `grp fn xs` groups a list by a key function, returning `M t (L a)`:
