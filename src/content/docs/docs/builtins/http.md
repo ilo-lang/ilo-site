@@ -17,6 +17,16 @@ HTTP and process-spawn builtins require the native binary. They are not availabl
 | `pst` | `t t > R t t` | HTTP POST (url, body). Renamed from `post` in 0.12.0 | `pst url body` |
 | `pst` | `t t M > R t t` | HTTP POST with headers | `pst url body headers` |
 | `pst-to` | `t t n > R t t` | HTTP POST with timeout (ms) | `pst-to url body 5000` |
+| `put` | `t t > R t t` | HTTP PUT (url, body) | `put url body` |
+| `put` | `t t M > R t t` | HTTP PUT with headers | `put url body headers` |
+| `pat` | `t t > R t t` | HTTP PATCH (url, body) | `pat url body` |
+| `pat` | `t t M > R t t` | HTTP PATCH with headers | `pat url body headers` |
+| `del` | `t > R t t` | HTTP DELETE | `del url` |
+| `del` | `t M > R t t` | HTTP DELETE with headers | `del url headers` |
+| `hed` | `t > R t t` | HTTP HEAD (body typically empty; success via Ok/Err) | `hed url` |
+| `hed` | `t M > R t t` | HTTP HEAD with headers | `hed url headers` |
+| `opt` | `t > R t t` | HTTP OPTIONS | `opt url` |
+| `opt` | `t M > R t t` | HTTP OPTIONS with headers | `opt url headers` |
 | `run` | `t L > R (M t t) t` | Spawn `cmd` with argv list. No shell, no glob. | `run "git" ["status"]` |
 | `$` | `t L > R (M t t) t` | `run` shorthand (sugar for `run`) | `$"git" ["status"]` |
 | `env` | `t > R t t` | Read environment variable | `env "API_KEY"` |
@@ -26,6 +36,8 @@ In 0.12.0 the `$` sigil was rebound from HTTP `get` (parochial — `$` for HTTP 
 `post` was renamed to `pst` to bring it into line with the I/O compression family (`rd`, `wr`, `srt`, `flt`, `fld`, `fmt`). The old name no longer resolves; the verifier surfaces a did-you-mean hint pointing at `pst`.
 
 `get-to` and `pst-to` add an explicit per-request timeout in milliseconds. The timeout rounds up to the nearest second internally (minreq granularity). On timeout, the call returns `Err` just like any other connection failure.
+
+`put`, `pat`, `del`, `hed`, `opt` round out the HTTP verb cluster (PUT, PATCH, DELETE, HEAD, OPTIONS). `put`/`pat` take a body like `pst`; `del`/`hed`/`opt` take only the URL (DELETE bodies exist in RFC 7231 but are honoured by almost no API, so the headers-only variant is the canonical shape). All five return `R t t` and accept the same `!` / `!!` auto-unwrap as `pst`. The cluster is intentionally limited to the seven safe methods (GET/POST/PUT/PATCH/DELETE/HEAD/OPTIONS); TRACE and CONNECT are out of scope.
 
 ```ilo
 -- 5-second timeout on GET
