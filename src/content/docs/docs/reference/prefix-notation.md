@@ -102,6 +102,9 @@ When using infix, standard mathematical precedence applies (higher binds tighter
 | 3 | `=` `!=` |
 | 2 | `&` |
 | 1 | `\|` |
+| 0 | `??` (binds looser than every arithmetic/boolean op; tighter than `>>`) |
+
+So `c??0+1` is `c ?? (0+1)`, not `(c??0)+1`. Inside a prefix-binop chain, `??` follows the standard "outer-prefix consumes the next prefix expression" rule — see [the `??` precedence trap](#-precedence-trap) below.
 
 Function application binds tighter than all infix operators:
 
@@ -184,6 +187,18 @@ r=*a b;/r c    -- bind, then divide → 4
 ```
 
 Different-precedence pairs like `+*a b c` (= `(a*b)+c`) and same-op repeats like `++a b c` (= `(a+b)+c`) match the left-to-right reading naturally and don't fire the hint.
+
+### `??` precedence trap
+
+`??` is parsed after the primary expression — it binds looser than every arithmetic, comparison, and boolean operator. Inside a prefix-binop chain it follows the standard rule: the outer op consumes its left operand, then `??` greedily takes the next two atoms as its value and default.
+
+```ilo
++a ??d b     -- = a + (d ?? b)        ← parses as prefix `??d b`
++(a??d) b    -- = (a ?? d) + b        ← parens force the grouping
+x=a??d;+x b  -- = (a ?? d) + b        ← bind-first, manifesto-preferred
+```
+
+This shape is the most-reported precedence pitfall in nil-coalesce code. The visual cue of `a ??` makes `??` look sticky to the preceding atom, but it isn't — the grouping is identical to `+a *b c` = `a + (b*c)`. The analogous shape with `|` / `&` parses the same way but trips a verify-time type error (`+` / `*` on a bool), so it fails loudly; the `??` form is the silent one because both sides can be `n`. When the LHS of `??` is the value being defaulted, bind first or wrap in parens.
 
 ### Operand rules
 
