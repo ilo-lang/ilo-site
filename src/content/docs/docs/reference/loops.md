@@ -236,4 +236,4 @@ Calls inside `@` foreach, `@..` range, or `wh` loops are **not** in tail positio
 
 The peephole only fires when the callee is a direct user-defined function name (not a `FnRef` in scope, not a closure, not a builtin, not a tool) and the call has no auto-unwrap (`!` / `!!`). These constraints cover the common recursive-accumulator and state-machine shapes.
 
-The tree interpreter trampolines tail calls today. The bytecode VM (`--vm`) and Cranelift backends (`--jit`, AOT) gain matching support in subsequent releases; until then, deep recursion on those engines is bounded by each engine's stack model.
+The shared runtime module (`src/runtime/`) trampolines tail calls today. The bytecode VM (`--vm`) and Cranelift backends (`--jit`, AOT) gain matching support in subsequent releases; until then, deep recursion on those engines is bounded by each engine's stack model.

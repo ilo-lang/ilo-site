@@ -47,7 +47,35 @@ CI harnesses that gate merges on `ilo check` need warnings to fail the build ins
 ilo check src/*.ilo --strict --json
 ```
 
+### `ilo test`
 
+`ilo test <path>` runs the `-- run: <fn> <args>` / `-- out: <expected>` (or `-- err: <stderr>`) annotations embedded in `.ilo` source files - the same format the in-tree integration harness already uses. A file path tests that one file; a directory walks `*.ilo` recursively.
+
+```bash
+ilo test program.ilo                  # single file
+ilo test tests/                       # walk a directory recursively
+ilo test program.ilo --engine all     # vm + jit, tag PASS/FAIL with [vm]/[jit]
+```
+
+Output format is `PASS  path::fn (line N)` / `FAIL  path::fn (line N) (got: X, want: Y)`. A final `N passed, M failed` summary line follows. Exit code is 0 on all-pass, 1 if any case failed or no annotations were found. Default engine is `--vm`; pass `--engine jit` to switch, or `--engine all` to run every engine and surface per-engine failures.
+
+`-- engine-skip: vm jit` annotations in the file source skip the listed engines for that file, matching the integration harness.
+
+Because every `examples/*.ilo` file in the repo uses this annotation format already, `ilo test examples/` doubles as a smoke test for the language - and any nearby example serves as a worked reference when you're writing tests for your own program.
+
+```ilo
+m x:n>n;+ x 1
+
+-- run: m 41
+-- out: 42
+```
+
+```bash
+$ ilo test add-one.ilo
+PASS  add-one.ilo::m (line 3)
+
+1 passed, 0 failed
+```
 
 Select a named function in a multi-function program:
 
@@ -325,7 +353,7 @@ ilo supports multiple execution backends. The default is the bytecode register V
 | `--run-vm` | Deprecated alias for `--vm`. Emits a one-shot stderr hint; removed in 0.13.0. |
 | `--run-llvm` | LLVM JIT (requires `--features llvm` build) |
 
-`--run-tree` / `--run` were removed from the public CLI in the 0.12.x soft-deprecation. The tree-walking interpreter stays in-tree as the internal dispatch target for a small set of HOF / regex / IO shapes the VM and Cranelift haven't lifted natively yet; the VM bails to it transparently. Full removal is deferred to 0.13.0+.
+The tree-walking interpreter was removed as a user-selectable engine in 0.13.0; `--run-tree` and `--run` are no longer recognised flags. The shared runtime module stays in-tree as the internal dispatch target for the ~30 builtins routed through the VM/Cranelift tree-bridge; the VM bails to it transparently with negligible round-trip cost (ILO-234).
 
 ```bash
 ilo 'fac n:n>n;<=n 1 1;r=fac -n 1;*n r' --jit fac 10

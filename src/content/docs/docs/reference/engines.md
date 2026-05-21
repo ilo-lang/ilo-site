@@ -5,7 +5,7 @@ description: Use this when you need to pick or understand an ilo execution engin
 
 Use this when you need to pick or understand an ilo execution engine.
 
-ilo programs verify once and then run on one of three public engines. Every engine accepts the same source. They differ only in start-up cost, peak throughput, and platform reach.
+ilo programs verify once and then run on either the bytecode VM or Cranelift (JIT or AOT). Both accept the same source. They differ only in start-up cost, peak throughput, and platform reach.
 
 ## Engine profiles
 
@@ -15,7 +15,7 @@ ilo programs verify once and then run on one of three public engines. Every engi
 | **JIT** (Cranelift) | Medium | High | Hot loops, benchmarks, long-running services |
 | **AOT** | Highest (build) | Highest | Shipping a single native binary with no runtime |
 
-The tree-walking interpreter is no longer a user-selectable engine: `--run-tree` / `--run` were removed from the public CLI in the 0.12.x soft-deprecation. The tree-walker stays in-tree as the internal dispatch target for a small set of HOF / regex / IO shapes the VM and Cranelift haven't lifted natively yet; the VM bails to it transparently. Full removal is deferred to 0.13.0+.
+As of 0.13.0 ilo ships with two engines: the VM and Cranelift. The tree-walking interpreter was removed as a user-selectable engine; the shared runtime module (`src/runtime/`) stays in-tree as the internal dispatch target for ~30 builtins routed through the VM/Cranelift tree-bridge — HOF / regex / fmt / IO / sleep / ct / rsrt / closure-bind-ctx / crypto / calendar shapes the VM and Cranelift haven't lifted natively. The VM bails to it transparently; per ILO-234 the round-trip cost is negligible.
 
 The CLI picks a sensible default per command. To force an engine, see `--vm` / `--jit` in the [CLI Reference](/docs/reference/cli/).
 
@@ -31,7 +31,7 @@ The CLI picks a sensible default per command. To force an engine, see `--vm` / `
 ### VM
 - Default engine for `ilo run` on a native binary.
 - Capped at 256 registers per function (`ILO-T035`).
-- Internally bails to the tree-walker for a small set of HOFs (`map`/`flt`/`fld`/`srt`/`rsrt` with a ctx arg), regex (`rgx`/`rgxall`/`rgxall1`), variadic `fmt`, 2-arg `rd`/`rdb`, 1-arg `sleep`, and 2/3-arg `ct`/`rsrt`. Transparent: same output, same diagnostics, no user-visible difference.
+- Internally bails to the shared runtime module for a small set of HOFs (`map`/`flt`/`fld`/`srt`/`rsrt` with a ctx arg), regex (`rgx`/`rgxall`/`rgxall1`), variadic `fmt`, 2-arg `rd`/`rdb`, 1-arg `sleep`, and 2/3-arg `ct`/`rsrt`. Transparent: same output, same diagnostics, no user-visible difference.
 
 ### JIT (Cranelift)
 - Enabled with `--features cranelift` in a source build.
