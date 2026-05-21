@@ -56,6 +56,22 @@ b64u "??>"                       -- "Pz8-" (URL-safe; standard b64 would emit "P
 
 Use `b64u`/`b64u-dec` for URL-safe base64 (JWT headers, URL parameters, webhook payloads).
 
+## Cryptographic random
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `rand-bytes` | `n > t` | `n` cryptographically random bytes from the platform CSPRNG (via `getrandom`), encoded as base64url-no-pad. Distinct from `rnd` / `rndn` (seedable, for simulations). Capped at 1 MiB; non-negative `n` only |
+
+```ilo
+rand-bytes 16        -- 22-char b64url, 128 bits of entropy (jti / CSRF token)
+rand-bytes 32        -- 43-char b64url, 256 bits of entropy (session id)
+len (rand-bytes 16)  -- always 22 (output length is deterministic)
+```
+
+Use `rand-bytes` for JWT `jti` claims, CSRF tokens, session IDs, and nonces. Output is base64url-no-pad so the result drops into HTTP headers, cookies, and query strings without further encoding. Encoded length is deterministic: `ceil(n * 4 / 3)` characters with the trailing `=` chars stripped. The bytes themselves are unpredictable.
+
+`rand-bytes` is NOT the same as `rnd`. `rnd` is a seedable PRNG suitable for simulations and Monte Carlo work, NOT for tokens or keys. If a value will be checked against an attacker-controlled comparison, reach for `rand-bytes`, never `rnd`.
+
 ## URL percent-encoding
 
 | Function | Signature | Description |
