@@ -29,12 +29,8 @@ const shipped = [
 ];
 
 const installPaths = [
-  { id: 'claude',  label: 'Claude Code',   sub: 'Recommended. Agent learns ilo automatically via the bundled Agent Skill.', cmd: '/plugin marketplace add ilo-lang/ilo\n/plugin install ilo-lang/ilo' },
-  { id: 'curl',    label: 'macOS / Linux', sub: 'One-line installer for any *nix shell.',                                    cmd: 'curl -fsSL https://ilo-lang.ai/install.sh | sh' },
-  { id: 'npm',     label: 'npm / npx',     sub: 'Node 20+. WASM interpreter — no HTTP builtins.',                            cmd: "npx ilo-lang 'dbl x:n>n;*x 2' 5\n\n# or globally\nnpm i -g ilo-lang" },
-  { id: 'cargo',   label: 'From source',   sub: 'Build the full Cranelift JIT + AOT toolchain from crates.io or git.',       cmd: 'cargo install ilo\n\n# from git\ncargo install --git https://github.com/ilo-lang/ilo' },
-  { id: 'skills',  label: 'Agent Skills',  sub: 'For Codex, Opencode, and any tool supporting the Agent Skills standard.',   cmd: 'npx skills add ilo-lang/ilo' },
-  { id: 'windows', label: 'Windows',       sub: 'Native MSVC build, downloaded from the latest GitHub release.',             cmd: 'Invoke-WebRequest -Uri https://github.com/ilo-lang/ilo/releases/latest/download/ilo-x86_64-pc-windows-msvc.exe -OutFile ilo.exe' },
+  { id: 'humans', label: 'For humans', hint: 'curl', cmd: 'curl -fsSL ilo-lang.ai/install.sh | sh' },
+  { id: 'agents', label: 'For agents', hint: 'mcp',  cmd: 'claude mcp add ilo-lang/ilo' },
 ];
 
 const benchmarks = [
@@ -137,28 +133,31 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
         <div class="hero-right">
           <div class="frame frame-muted">
             <div class="frame-title">
-              <span>Python · 30 tokens</span>
-              <span>93 chars</span>
+              <span>python · script.py</span>
+              <span class="mono">30 tokens · 93 chars</span>
             </div>
-            <pre class="frame-body"><span class="kw">def</span> tot(p: <span class="ty">float</span>, q: <span class="ty">float</span>, r: <span class="ty">float</span>) <span class="op">-&gt;</span> <span class="ty">float</span>:
-    s = p * q
-    t = s * r
-    <span class="kw">return</span> s + t</pre>
+            <pre class="frame-body"><span class="kw">def</span> tot(p<span class="op">:</span> <span class="op">float</span>, q<span class="op">:</span> <span class="op">float</span>, r<span class="op">:</span> <span class="op">float</span>) <span class="op">-&gt;</span> <span class="op">float</span>:
+    s <span class="op">=</span> p <span class="op">*</span> q
+    t <span class="op">=</span> s <span class="op">*</span> r
+    <span class="kw">return</span> s <span class="op">+</span> t</pre>
           </div>
-          <div class="frame frame-accent">
-            <div class="frame-title accent">
-              <span>ilo · 10 tokens</span>
-              <span>38 chars</span>
+          <div class="frame">
+            <div class="frame-title">
+              <span>ilo · script.@</span>
+              <span class="mono">10 tokens · 38 chars</span>
             </div>
-            <pre class="frame-body"><span class="com">-- subtotal + tax</span>
-tot p:<span class="ty">n</span> q:<span class="ty">n</span> r:<span class="ty">n</span><span class="op">&gt;</span><span class="ty">n</span>
+            <pre class="frame-body"><span class="kw">tot</span> p<span class="op">:n</span> q<span class="op">:n</span> r<span class="op">:n</span><span class="op">&gt;n</span>
   s<span class="op">=*</span>p q
   t<span class="op">=*</span>s r
   <span class="op">+</span>s t</pre>
           </div>
-          <div class="receipt">
-            <span class="receipt-num">0.33×</span>
-            <span class="receipt-text">the tokens · 0.22× the characters · same semantics</span>
+          <div class="stat-hero">
+            <div class="stat-nums">
+              <span>python <b>30</b> tokens</span>
+              <span class="arrow">→</span>
+              <span>ilo <b>10</b> tokens</span>
+            </div>
+            <span class="pill pill-lime">−67% tokens</span>
           </div>
         </div>
       </div>
@@ -217,44 +216,38 @@ tot p:<span class="ty">n</span> q:<span class="ty">n</span> r:<span class="ty">n
 
     <!-- INSTALL -->
     <section id="install" class="install">
-      <div class="container-wide">
+      <div class="container-wide install-wrap">
         <div class="section-head">
           <div class="kicker">Install</div>
-          <h2>One binary. Six paths. No surprise dependencies.</h2>
-          <p class="sub">Native binary on Linux, macOS, Windows. WASM via npm. Cargo from source. Bundled with the Agent Skill for every major coding agent.</p>
+          <h2>Two paths. One binary.</h2>
+          <p class="sub">One-line shell installer for humans. MCP registration for agents. Native binary on Linux, macOS, Windows; WASM via npm. The rest live in the docs.</p>
         </div>
-        <div class="install-card">
+
+        <div class="install-block">
           <div class="install-tabs" role="tablist">
             {installPaths.map((p, i) => (
               <button class={`install-tab${i === 0 ? ' active' : ''}`} role="tab" data-install-tab={p.id} aria-selected={i === 0}>
                 <span>{p.label}</span>
-                <svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="hint mono">{p.hint}</span>
               </button>
             ))}
           </div>
-          <div class="install-body">
-            {installPaths.map((p, i) => (
-              <div class={`install-panel${i === 0 ? ' active' : ''}`} data-install-panel={p.id}>
-                <div class="install-panel-head">
-                  <div class="install-panel-title">{p.label}</div>
-                  <div class="install-panel-sub">{p.sub}</div>
-                </div>
-                <div class="frame">
-                  <div class="frame-title">
-                    <span class="frame-shell">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-                      shell
-                    </span>
-                    <button class="frame-copy" data-copy={p.cmd} aria-label={`Copy ${p.label} install command`}>copy</button>
-                  </div>
-                  <pre class="frame-body">{p.cmd}</pre>
-                </div>
-                <div class="install-verify">
-                  Verify it works: <code>ilo 'dbl x:n&gt;n;*x 2' 5</code> → <span class="mono accent">10</span>
-                </div>
+          {installPaths.map((p, i) => (
+            <div class={`install-term${i === 0 ? ' active' : ''}`} data-install-panel={p.id}>
+              <div class="install-term-body">
+                <span class="dollar">$</span> {p.cmd}
               </div>
-            ))}
-          </div>
+              <button class="install-term-copy frame-copy" data-copy={p.cmd} aria-label={`Copy ${p.label} install command`}>copy</button>
+            </div>
+          ))}
+        </div>
+
+        <div class="install-verify">
+          Verify it works: <code>ilo 'dbl x:n&gt;n;*x 2' 5</code> → <span class="mono accent">10</span>
+          <a class="btn-text install-more" href="/docs/learn/install/">
+            All install paths
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
         </div>
       </div>
     </section>
@@ -369,9 +362,9 @@ tot p:<span class="ty">n</span> q:<span class="ty">n</span> r:<span class="ty">n
     });
   }
 
-  // Install tab switching
+  // Install tab switching (For humans / For agents)
   const tabs = document.querySelectorAll<HTMLButtonElement>('[data-install-tab]');
-  const panels = document.querySelectorAll<HTMLElement>('[data-install-panel]');
+  const terms = document.querySelectorAll<HTMLElement>('[data-install-panel]');
   tabs.forEach(t => {
     t.addEventListener('click', () => {
       const id = t.getAttribute('data-install-tab');
@@ -380,7 +373,7 @@ tot p:<span class="ty">n</span> q:<span class="ty">n</span> r:<span class="ty">n
         x.classList.toggle('active', on);
         x.setAttribute('aria-selected', String(on));
       });
-      panels.forEach(p => p.classList.toggle('active', p.getAttribute('data-install-panel') === id));
+      terms.forEach(p => p.classList.toggle('active', p.getAttribute('data-install-panel') === id));
     });
   });
 
@@ -482,18 +475,36 @@ tot p:<span class="ty">n</span> q:<span class="ty">n</span> r:<span class="ty">n
   .frame-title { padding: 8px 14px; border-bottom: 1px solid var(--ilo-hairline); display: flex; justify-content: space-between; align-items: center; font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 12px; color: var(--ilo-fg-4); }
   .frame-title.accent { color: var(--ilo-accent); }
   .frame-body { padding: 18px 20px; margin: 0; font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 14px; line-height: 1.65; color: var(--ilo-fg-1); white-space: pre; overflow-x: auto; }
-  .frame-body .op { color: var(--ilo-accent); }
-  .frame-body .ty { color: var(--ilo-accent); }
-  .frame-body .com { opacity: 0.45; font-style: italic; }
-  .frame-body .kw { color: var(--ilo-amber-high); }
+  .frame-body .kw  { color: var(--ilo-syn-kw); }
+  .frame-body .op  { color: var(--ilo-syn-op); }
+  .frame-body .str { color: var(--ilo-syn-str); }
+  .frame-body .num { color: var(--ilo-syn-num); }
+  .frame-body .com { color: var(--ilo-syn-cmt); font-style: italic; }
+  .frame-body .err { color: var(--ilo-syn-err); }
   .frame-shell { display: inline-flex; align-items: center; gap: 6px; }
   .frame-copy { background: transparent; color: var(--ilo-fg-4); border: 0; cursor: pointer; font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 12px; padding: 0; transition: color var(--ilo-duration-1) var(--ilo-ease); }
   .frame-copy:hover { color: var(--ilo-accent); }
   .frame-copy.done { color: var(--ilo-ok); }
 
-  .receipt { display: flex; align-items: baseline; gap: 14px; padding-left: 4px; }
-  .receipt-num { font-family: var(--ilo-font-sans); font-weight: 700; font-size: 32px; color: var(--ilo-accent); letter-spacing: -0.02em; line-height: 1; }
-  .receipt-text { color: var(--ilo-fg-3); font-size: 13px; }
+  /* Positive-delta hero row — neutral numbers + single lime pill */
+  .stat-hero {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--ilo-hairline);
+    border-radius: var(--ilo-radius-md);
+    background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent);
+  }
+  .stat-nums { display: flex; align-items: baseline; gap: 14px; font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 12.5px; color: var(--ilo-fg-3); }
+  .stat-nums b { color: var(--ilo-fg-1); font-weight: 600; font-family: var(--ilo-font-sans); font-size: 15px; }
+  .stat-nums .arrow { color: var(--ilo-fg-4); }
+  .pill { font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 11.5px; padding: 4px 12px; border-radius: var(--ilo-radius-full); border: 1px solid transparent; line-height: 1.4; display: inline-flex; align-items: center; gap: 6px; }
+  .pill-lime {
+    background: rgba(200, 240, 74, 0.10);
+    color: var(--ilo-lime);
+    border-color: rgba(200, 240, 74, 0.28);
+    font-weight: 600;
+    margin-left: auto;
+  }
 
   /* ===== section heads ===== */
   section { padding: 96px 0; }
@@ -540,37 +551,72 @@ tot p:<span class="ty">n</span> q:<span class="ty">n</span> r:<span class="ty">n
 
   /* ===== install ===== */
   .install { border-top: 1px solid var(--ilo-hairline); }
-  .install-card {
-    display: grid;
-    grid-template-columns: 240px 1fr;
-    gap: 1px;
-    background: var(--ilo-hairline);
-    border: 1px solid var(--ilo-hairline);
-    border-radius: 10px;
-    overflow: hidden;
+  .install-wrap { max-width: 760px; }
+  .install-block { display: flex; flex-direction: column; }
+  .install-tabs {
+    display: flex; gap: 4px; align-items: flex-end;
+    margin-bottom: -1px;
+    position: relative; z-index: 1;
   }
-  .install-tabs { background: var(--ilo-ink-1); padding: 12px 0; display: flex; flex-direction: column; }
   .install-tab {
-    display: flex; align-items: center; justify-content: space-between;
-    width: 100%; padding: 12px 20px;
-    border: 0; background: transparent; cursor: pointer; text-align: left;
+    font-family: var(--ilo-font-sans);
+    font-size: 13px; font-weight: 500;
+    padding: 8px 14px 9px;
+    background: transparent;
     color: var(--ilo-fg-3);
-    font-family: var(--ilo-font-sans); font-size: 14px; font-weight: 400;
-    border-left: 2px solid transparent;
-    transition: color var(--ilo-duration-1) var(--ilo-ease), border-color var(--ilo-duration-1) var(--ilo-ease), background var(--ilo-duration-1) var(--ilo-ease);
+    border: 1px solid transparent; border-bottom: 0;
+    border-top-left-radius: 6px; border-top-right-radius: 6px;
+    cursor: pointer; line-height: 1.2;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: color var(--ilo-duration-1) var(--ilo-ease);
   }
   .install-tab:hover { color: var(--ilo-fg-1); }
-  .install-tab.active { color: var(--ilo-fg-1); font-weight: 600; border-left-color: var(--ilo-accent); }
-  .install-tab .chev { opacity: 0; transition: opacity var(--ilo-duration-1) var(--ilo-ease); }
-  .install-tab.active .chev { opacity: 1; }
-  .install-body { background: var(--ilo-ink-0); padding: 32px 36px; display: flex; flex-direction: column; }
-  .install-panel { display: none; flex-direction: column; gap: 18px; }
-  .install-panel.active { display: flex; }
-  .install-panel-title { font-size: 18px; font-weight: 600; color: var(--ilo-fg-1); }
-  .install-panel-sub { font-size: 14px; color: var(--ilo-fg-3); margin-top: 4px; }
-  .install-panel .frame-body { white-space: pre-wrap; }
-  .install-verify { font-size: 13px; color: var(--ilo-fg-4); }
+  .install-tab.active {
+    background: var(--ilo-ink-2);
+    color: var(--ilo-accent);
+    border-color: var(--ilo-hairline);
+    box-shadow: inset 0 -1px 0 0 var(--ilo-ink-2);
+  }
+  .install-tab .hint { font-size: 10.5px; color: var(--ilo-fg-4); font-weight: 400; }
+  .install-tab.active .hint { color: rgba(224, 148, 34, 0.65); }
+
+  .install-term {
+    display: none;
+    align-items: stretch;
+    background: var(--ilo-ink-2);
+    border: 1px solid var(--ilo-hairline);
+    border-radius: 8px;
+    border-top-left-radius: 0;
+    overflow: hidden;
+  }
+  .install-term.active { display: flex; }
+  .install-term-body {
+    padding: 14px 18px;
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 14px; line-height: 1.4;
+    color: var(--ilo-fg-1);
+    flex: 1; min-width: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .install-term-body .dollar { color: var(--ilo-fg-4); }
+  .install-term-copy {
+    background: transparent;
+    color: var(--ilo-accent);
+    border: 0; border-left: 1px solid var(--ilo-hairline);
+    padding: 0 18px;
+    font-family: var(--ilo-font-sans); font-size: 13px; font-weight: 500;
+    cursor: pointer;
+  }
+  .install-term-copy:hover { background: rgba(255, 255, 255, 0.03); }
+  .install-term-copy.done { color: var(--ilo-ok); }
+
+  .install-verify {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 18px;
+    margin-top: 24px;
+    font-size: 13px; color: var(--ilo-fg-4);
+  }
   .install-verify code { font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 0.9em; background: var(--ilo-inline-code-bg); padding: 0.12em 0.4em; border-radius: 4px; }
+  .install-more { margin-left: auto; }
 
   /* ===== benchmarks ===== */
   .benchmarks { border-top: 1px solid var(--ilo-hairline); }
@@ -610,11 +656,6 @@ tot p:<span class="ty">n</span> q:<span class="ty">n</span> r:<span class="ty">n
     .hero-title { font-size: 52px; }
     .principles-grid { grid-template-columns: repeat(2, 1fr); }
     .shipped-grid { grid-template-columns: 1fr; }
-    .install-card { grid-template-columns: 1fr; }
-    .install-tabs { flex-direction: row; flex-wrap: wrap; padding: 8px; }
-    .install-tab { width: auto; padding: 8px 14px; border-left: 0; border-bottom: 2px solid transparent; }
-    .install-tab.active { border-left: 0; border-bottom-color: var(--ilo-accent); }
-    .install-tab .chev { display: none; }
     .footer-grid { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 640px) {
