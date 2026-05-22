@@ -121,7 +121,7 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
                 <span class="sia-pane-lang sia-pane-lang--ilo">ilo</span>
                 <span class="sia-pane-file" id="ilo-filename">script.ilo</span>
                 <button class="sia-toggle" id="sia-toggle" title="Toggle multi-line ↔ compact">
-                  <span class="sia-toggle-label" id="sia-toggle-label">multi-line</span>
+                  <span class="sia-toggle-label" id="sia-toggle-label">compact</span>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
                 </button>
               </div>
@@ -1881,7 +1881,7 @@ main>t;classify 85`,
 ];
 
 let activePreset = 0;
-let isMultiLine = true;
+let isMultiLine = false;
 let isApiResult = false;
 let autoCycleTimer: ReturnType<typeof setTimeout> | null = null;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
