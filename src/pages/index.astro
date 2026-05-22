@@ -32,6 +32,7 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
         <a href="https://github.com/ilo-lang/ilo" target="_blank" rel="noopener" class="nav-github">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
         </a>
+        <a href="/docs/learn/manifesto/" class="nav-manifesto">Manifesto</a>
         <a href="/docs/introduction/" class="nav-cta">Get Started</a>
       </div>
     </div>
@@ -359,13 +360,49 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
           <p class="philosophy-quote">
             Named from <a href="https://tokipona.org/" target="_blank" rel="noopener" class="philosophy-link">Toki Pona</a> for &ldquo;tool&rdquo;&mdash;a constructed language that captures all of human expression in ~120 words. <em>ilo</em> does the same for machine programmers.
           </p>
-          <div class="principles">
-            <span class="principle">Token-conservative</span>
-            <span class="principle">Constrained</span>
-            <span class="principle">Self-contained</span>
-            <span class="principle">Language-agnostic</span>
-            <span class="principle">Graph-native</span>
-          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIX PRINCIPLES -->
+    <section class="manifesto-section" data-animate>
+      <div class="container">
+        <h2 class="section-title">What ilo Optimizes For</h2>
+        <p class="section-subtitle">Six principles, all measured against one metric: total tokens from intent to working code.</p>
+        <div class="manifesto-grid">
+          <a href="/docs/learn/manifesto/#1-token-conservative" class="manifesto-card">
+            <div class="manifesto-num">01</div>
+            <h3>Token-Conservative</h3>
+            <p>The north star. Every choice evaluated against total token cost across the full loop&mdash;not just short syntax, but retries, errors, and context loading.</p>
+          </a>
+          <a href="/docs/learn/manifesto/#2-constrained" class="manifesto-card">
+            <div class="manifesto-num">02</div>
+            <h3>Constrained</h3>
+            <p>Small vocabulary. Closed world. Few ways to do things. Fewer valid next-tokens means fewer wrong choices means fewer retries.</p>
+          </a>
+          <a href="/docs/learn/manifesto/#3-self-contained" class="manifesto-card">
+            <div class="manifesto-num">03</div>
+            <h3>Self-Contained</h3>
+            <p>Each unit carries its own context: deps, types, rules. The agent never needs to hunt for definitions elsewhere.</p>
+          </a>
+          <a href="/docs/learn/manifesto/#4-language-agnostic" class="manifesto-card">
+            <div class="manifesto-num">04</div>
+            <h3>Language-Agnostic</h3>
+            <p>Minimise dependency on English or any natural language. Sigils and short names over prose keywords.</p>
+          </a>
+          <a href="/docs/learn/manifesto/#5-graph-reducible" class="manifesto-card">
+            <div class="manifesto-num">05</div>
+            <h3>Graph-Reducible</h3>
+            <p>When analysing code, load only the relevant subgraph. As programs grow, the savings compound.</p>
+          </a>
+          <a href="/docs/learn/manifesto/#6-structured-compiler-to-agent-surface" class="manifesto-card">
+            <div class="manifesto-num">06</div>
+            <h3>Structured Compiler-to-Agent Surface</h3>
+            <p>Every path from the compiler to an agent is machine-readable by default. JSON out, zero screen-scraping.</p>
+          </a>
+        </div>
+        <div class="manifesto-cta">
+          <a href="/docs/learn/manifesto/" class="btn btn-outline">Read the full manifesto &rarr;</a>
         </div>
       </div>
     </section>
@@ -518,6 +555,17 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
     display: flex;
     align-items: center;
     gap: 0.3em;
+  }
+
+  .nav-manifesto {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: color 0.2s;
+  }
+
+  .nav-manifesto:hover {
+    color: var(--text);
   }
 
   .nav-cta {
@@ -1150,6 +1198,74 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
     font-size: 0.95rem;
     color: var(--text-dim);
     line-height: 1.5;
+  }
+
+  /* ===== SIX PRINCIPLES ===== */
+  .manifesto-section {
+    padding: 6rem 0;
+  }
+
+  .manifesto-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .manifesto-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    transition: border-color 0.3s, transform 0.2s, box-shadow 0.3s;
+    text-decoration: none;
+    display: block;
+  }
+
+  .manifesto-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .manifesto-num {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+
+  .manifesto-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  .manifesto-card p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .manifesto-cta {
+    text-align: center;
+  }
+
+  @media (max-width: 900px) {
+    .manifesto-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .manifesto-grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   /* ===== PHILOSOPHY ===== */

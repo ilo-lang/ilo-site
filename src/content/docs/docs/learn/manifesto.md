@@ -27,13 +27,13 @@ Every design decision is evaluated against this number. If a feature reduces it,
 
 Until agents are trained on ilo, spec clarity is itself a token cost - a confusing spec means more retries. Some decisions that look like "readability" concessions are actually optimising the spec-loading term.
 
-## The Five Principles
+## The Six Principles
 
 ### 1. Token-Conservative
 
 The north star. Every choice evaluated against total token cost across the full loop - not just "short syntax," but including retries, error feedback, and context loading.
 
-A named argument like `amount: 42` costs more tokens than positional `42`. I initially worried positional args would cause parameter-swap errors - but across 10 syntax variants and 4 task types, positional args scored 10/10 generation accuracy. The swap concern was unfounded. Positional args are the single biggest token saver.
+A named argument like `amount: 42` costs more tokens than positional `42`. Across 10 syntax variants and 4 task types, positional args scored 10/10 generation accuracy. The swap concern was unfounded. Positional args are the single biggest token saver.
 
 :::note[What the agent cares about]
 "How many tokens will this cost me end-to-end?"
@@ -128,6 +128,23 @@ Writing code costs the same tokens regardless of program size. But *reading* cod
 "How much do I need to read before I can write?"
 
 The agent loads the target function's source, its dependencies' signatures, and the types it references - nothing more. As programs grow, the savings compound.
+:::
+
+### 6. Structured Compiler-to-Agent Surface
+
+Every path from the compiler to an agent is machine-readable by default.
+
+Diagnostics, AST output, call graphs, fix plans, skill content, size reports — all of it ships as structured JSON. Not as an optional flag you might forget to pass, but as the default contract. Prose output exists for human TTYs; JSON is the agent path.
+
+- **Every CLI subcommand has a `--json` mode.** An agent driving `ilo check`, `ilo graph`, `ilo bench`, or any other subcommand gets a typed, parseable response with no screen-scraping.
+- **Every emitted artifact carries a stable `schemaVersion` field.** Schemas evolve; the version field lets agents detect and adapt to changes rather than silently misparse them.
+- **Every diagnostic carries machine-readable fields:** error code, source span, candidate fixes, and related locations. An agent reading a diagnostic knows exactly what went wrong, where it went wrong, and what to try next — without parsing human prose.
+- **Fix plans are typed:** each suggested repair carries a `FixSafety` classification so the agent can decide autonomously whether to apply it.
+
+:::note[What the agent cares about]
+"Can I parse the compiler's response without writing a regex?"
+
+Zero screen-scraping, zero retry cycles caused by format ambiguity. The agent reads typed JSON, acts on it, and moves on.
 :::
 
 ## Principles We Considered and Dropped
