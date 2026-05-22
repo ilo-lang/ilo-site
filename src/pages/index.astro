@@ -1,347 +1,345 @@
 ---
-// Custom landing page - bypasses Starlight entirely
+// Custom landing page - bypasses Starlight entirely.
+// Implements the design system handoff (ilo-design-system v1).
 import BaseHead from '../components/BaseHead.astro';
 import JsonLd from '../components/JsonLd.astro';
 import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schema';
+import '../styles/global.css';
+
+const principles = [
+  { n: '01', name: 'Token-Conservative', body: 'Every choice evaluated against total token cost — generation, errors, retries, context loading. Prefix notation. Single-char names. Guards instead of nested if/else.', href: '/docs/learn/manifesto/#1-token-conservative' },
+  { n: '02', name: 'Constrained',         body: 'Small vocabulary, closed world. Every callable function is known ahead of time. The agent cannot hallucinate an API. Fewer valid next-tokens means fewer retries.', href: '/docs/learn/manifesto/#2-constrained' },
+  { n: '03', name: 'Self-Contained',      body: 'Each unit carries its own context: deps, types, rules. The less context required per step, the more of the window is available for the actual task.', href: '/docs/learn/manifesto/#3-self-contained' },
+  { n: '04', name: 'Language-Agnostic',   body: 'Minimise dependency on English. Single-char sigils outperform keywords. Agents learn the full vocabulary from spec + examples with 10/10 accuracy.', href: '/docs/learn/manifesto/#4-language-agnostic' },
+  { n: '05', name: 'Graph-Reducible',     body: 'The dependency graph is explicit and queryable. ilo graph extracts call graphs, types, callers as JSON. Modify one function, load 6–10% of the code.', href: '/docs/learn/manifesto/#5-graph-reducible' },
+  { n: '06', name: 'Structured Surface',  body: 'Every CLI subcommand has --json. Every diagnostic carries an error code, source span, and FixSafety. Zero screen-scraping, zero retry cycles from format ambiguity.', href: '/docs/learn/manifesto/#6-structured-compiler-to-agent-surface' },
+];
+
+const shipped = [
+  { tag: 'language',  name: 'Sum types',       body: 'Discriminated unions with generics, recursive variants, exhaustive match.' },
+  { tag: 'language',  name: 'Generics',        body: 'Bounded and multi-bound type variables across functions.' },
+  { tag: 'language',  name: 'Brace-lambda',    body: 'Multi-statement lambda bodies: { |x:n>n; s=*x x; +s 1| }' },
+  { tag: 'compiler',  name: 'Cranelift TCO',   body: 'Tail-call optimisation via return_call in the JIT. Recursion is now free.' },
+  { tag: 'runtime',   name: 'par-map',         body: 'Parallel map with chunking and a native VM opcode for the common case.' },
+  { tag: 'runtime',   name: 'WASM HTTP fetch', body: '$url works inside WASM builds — Node, the browser, Cowork.' },
+  { tag: 'tooling',   name: 'ilo trace',       body: 'Execution trace with per-step timing, JSON output by default.' },
+  { tag: 'tooling',   name: 'Fix plans',       body: 'ilo apply applies structured repair plans from ilo check --json.' },
+  { tag: 'ecosystem', name: 'Package registry',body: 'ilo add installs packages from the registry. Reproducible.' },
+  { tag: 'ecosystem', name: 'ilo httpd',       body: 'Serve functions as HTTP endpoints. One command, no framework.' },
+];
+
+const installPaths = [
+  { id: 'claude',  label: 'Claude Code',   sub: 'Recommended. Agent learns ilo automatically via the bundled Agent Skill.', cmd: '/plugin marketplace add ilo-lang/ilo\n/plugin install ilo-lang/ilo' },
+  { id: 'curl',    label: 'macOS / Linux', sub: 'One-line installer for any *nix shell.',                                    cmd: 'curl -fsSL https://ilo-lang.ai/install.sh | sh' },
+  { id: 'npm',     label: 'npm / npx',     sub: 'Node 20+. WASM interpreter — no HTTP builtins.',                            cmd: "npx ilo-lang 'dbl x:n>n;*x 2' 5\n\n# or globally\nnpm i -g ilo-lang" },
+  { id: 'cargo',   label: 'From source',   sub: 'Build the full Cranelift JIT + AOT toolchain from crates.io or git.',       cmd: 'cargo install ilo\n\n# from git\ncargo install --git https://github.com/ilo-lang/ilo' },
+  { id: 'skills',  label: 'Agent Skills',  sub: 'For Codex, Opencode, and any tool supporting the Agent Skills standard.',   cmd: 'npx skills add ilo-lang/ilo' },
+  { id: 'windows', label: 'Windows',       sub: 'Native MSVC build, downloaded from the latest GitHub release.',             cmd: 'Invoke-WebRequest -Uri https://github.com/ilo-lang/ilo/releases/latest/download/ilo-x86_64-pc-windows-msvc.exe -OutFile ilo.exe' },
+];
+
+const benchmarks = [
+  { lang: 'Rust',     ns: 329,   tag: 'native',     ilo: false },
+  { lang: 'LuaJIT',   ns: 442,   tag: 'JIT',        ilo: false },
+  { lang: 'Node/V8',  ns: 451,   tag: 'JIT',        ilo: false },
+  { lang: 'Kotlin',   ns: 528,   tag: 'JVM',        ilo: false },
+  { lang: 'Go',       ns: 665,   tag: 'native',     ilo: false },
+  { lang: 'PyPy 3',   ns: 1500,  tag: 'JIT',        ilo: false },
+  { lang: 'ilo JIT',  ns: 4200,  tag: 'Cranelift',  ilo: true  },
+  { lang: 'ilo AOT',  ns: 5300,  tag: 'Cranelift',  ilo: true  },
+  { lang: 'PHP',      ns: 6700,  tag: 'interp',     ilo: false },
+  { lang: 'ilo VM',   ns: 14700, tag: 'bytecode',   ilo: true  },
+  { lang: 'Python 3', ns: 29500, tag: 'interp',     ilo: false },
+];
+const benchMax = Math.max(...benchmarks.map(r => r.ns));
+const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}ns`;
 ---
 
 <html lang="en">
 <head>
   <BaseHead
     title="ilo | AI Agent Language"
-    description="0.33x the tokens, 0.22x the characters of Python. Type-verified before execution. A programming language with LLMs as the intended author."
+    description="0.33× the tokens, 0.22× the characters of Python. Type-verified before execution. A programming language with LLMs as the intended author."
   />
   <link rel="canonical" href={SITE_URL} />
   <meta property="og:type" content="website" />
   <meta property="og:url" content={SITE_URL} />
   <meta property="og:title" content="ilo | AI Agent Language" />
-  <meta property="og:description" content="Token-optimised programming language for AI agents. 0.33x the tokens of Python. Type-verified before execution." />
+  <meta property="og:description" content="Token-optimised programming language for AI agents. 0.33× the tokens of Python. Type-verified before execution." />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="ilo | AI Agent Language" />
-  <meta name="twitter:description" content="Token-optimised programming language for AI agents. 0.33x the tokens of Python. Type-verified before execution." />
+  <meta name="twitter:description" content="Token-optimised programming language for AI agents. 0.33× the tokens of Python. Type-verified before execution." />
   <JsonLd data={softwareApplicationSchema} />
   <JsonLd data={websiteSchema} />
 </head>
 <body>
 
-  <!-- NAV -->
-  <nav>
-    <div class="nav-inner">
-      <a href="/" class="nav-logo">ilo lang</a>
-      <div class="nav-links">
-        <a href="https://github.com/ilo-lang/ilo" target="_blank" rel="noopener" class="nav-github">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
-        </a>
-        <a href="/docs/learn/manifesto/" class="nav-manifesto">Manifesto</a>
-        <a href="/docs/introduction/" class="nav-cta">Get Started</a>
-      </div>
+  <!-- TOP NAV -->
+  <header class="topnav">
+    <div class="container-wide topnav-inner">
+      <a href="/" class="brand">
+        <span class="brand-mark">ilo</span>
+        <span class="brand-version">v0.13.0</span>
+      </a>
+      <nav class="nav-links">
+        <a href="/docs/introduction/">Docs</a>
+        <a href="/docs/learn/manifesto/">Manifesto</a>
+        <a href="#install">Install</a>
+        <a href="#benchmarks">Benchmarks</a>
+      </nav>
+      <div class="nav-spacer"></div>
+      <a class="nav-github" href="https://github.com/ilo-lang/ilo" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        <span>GitHub</span>
+      </a>
     </div>
-  </nav>
+  </header>
 
   <main>
     <!-- HERO -->
     <section class="hero">
-      <div class="hero-glow"></div>
-      <div class="hero-grid"></div>
-      <div class="container hero-content">
-        <div class="hero-badge">programming language for AI agents</div>
-        <p class="hero-tagline">
-          Designed for machines.<br />
-          <span class="hero-tagline-accent">0.33&times; the tokens. 0.22&times; the characters. Type-verified before execution.</span>
-        </p>
-        <div class="install-tabs">
-          <div class="tab-buttons">
-            <button class="tab-btn active" data-tab="mac">macOS / Linux</button>
-            <button class="tab-btn" data-tab="windows">Windows</button>
-            <button class="tab-btn" data-tab="claude">Claude Code</button>
-          </div>
-          <div class="hero-terminal" id="install-cmd">
-            <span class="terminal-prompt">$</span>
-            <span class="terminal-text" data-cmd="mac">curl -fsSL https://ilo-lang.ai/install.sh | sh</span>
-            <span class="terminal-text" data-cmd="windows" style="display:none">irm https://ilo-lang.ai/install.ps1 | iex</span>
-            <span class="terminal-text" data-cmd="claude" style="display:none">/plugin marketplace add ilo-lang/ilo && /plugin install ilo-lang/ilo</span>
-            <button class="terminal-copy" id="copy-btn" aria-label="Copy install command">
-              <svg class="icon-copy" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              <svg class="icon-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
-            </button>
-          </div>
-        </div>
-        <div class="hero-actions">
-          <a href="/docs/introduction/" class="btn btn-primary">
-            Get Started
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-          <a href="https://github.com/ilo-lang/ilo" target="_blank" rel="noopener" class="btn btn-outline">
-            View on GitHub
-          </a>
-        </div>
-      </div>
-    </section>
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="container-wide hero-grid">
+        <div class="hero-left">
+          <div class="kicker">Programming language · for AI agents</div>
+          <h1 class="hero-title">
+            The fewest tokens from intent to <span class="accent">working code.</span>
+          </h1>
+          <p class="hero-lede">
+            ilo is a token-optimised language designed for the brain that produces code: an LLM.
+            Prefix notation, single-character variables, type-verified before execution.
+            One metric: <em>total cost from intent to working code.</em>
+          </p>
 
-    <!-- SEE IT IN ACTION (merged interactive demo) -->
-    <section class="sia-section" data-animate>
-      <div class="container">
-        <h2 class="section-title">See it in action</h2>
-        <p class="section-subtitle">Real Python side-by-side with its ilo equivalent. Click a preset or edit the Python yourself.</p>
-
-        <div class="sia-card">
-          <!-- Panes row -->
-          <div class="sia-panes">
-            <!-- Python pane -->
-            <div class="sia-pane">
-              <div class="sia-pane-header">
-                <div class="window-dots">
-                  <span class="dot dot--red"></span>
-                  <span class="dot dot--yellow"></span>
-                  <span class="dot dot--green"></span>
-                </div>
-                <span class="sia-pane-lang">Python</span>
-                <span class="sia-pane-file" id="py-filename">script.py</span>
-              </div>
-              <div id="demo-python-wrap" style="position:relative">
-                <pre id="py-highlight" class="sia-editor sia-editor--highlight" aria-hidden="true"><code></code></pre>
-                <textarea id="demo-python" class="sia-editor sia-editor--overlay" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
-              </div>
-              <div class="sia-stats" id="stats-python">
-                <span class="sia-stat-tokens">Tokens: <b id="py-tokens">—</b></span>
-                <span class="sia-stat-sep">·</span>
-                <span class="sia-stat-chars">Chars: <b id="py-chars">—</b></span>
-              </div>
+          <div class="install-pill">
+            <div class="install-pill-cmd">
+              <span class="dollar">$</span> curl -fsSL ilo-lang.ai/install.sh | sh
             </div>
-
-            <!-- Arrow -->
-            <div class="sia-arrow" aria-hidden="true">→</div>
-
-            <!-- ilo pane -->
-            <div class="sia-pane sia-pane--ilo">
-              <div class="sia-pane-header">
-                <div class="window-dots">
-                  <span class="dot dot--red"></span>
-                  <span class="dot dot--yellow"></span>
-                  <span class="dot dot--green"></span>
-                </div>
-                <span class="sia-pane-lang sia-pane-lang--ilo">ilo</span>
-                <span class="sia-pane-file" id="ilo-filename">script.@</span>
-                <button class="sia-toggle" id="sia-toggle" title="Toggle multi-line ↔ compact">
-                  <span class="sia-toggle-label" id="sia-toggle-label">compact</span>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
-                </button>
-              </div>
-              <div id="demo-ilo-wrap" style="position:relative">
-                <pre id="demo-ilo" class="sia-editor sia-editor--ilo"><code id="ilo-code"></code></pre>
-                <div class="sia-converting" id="sia-converting" style="display:none">
-                  <span class="sia-converting-dot"></span>converting…
-                </div>
-              </div>
-              <div class="sia-stats sia-stats--ilo" id="stats-ilo">
-                <span class="sia-stat-tokens">Tokens: <b id="ilo-tokens">—</b></span>
-                <span class="sia-stat-sep">·</span>
-                <span class="sia-stat-chars">Chars: <b id="ilo-chars">—</b></span>
-                <span class="sia-stat-diff" id="sia-diff"></span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Controls: presets + convert -->
-          <div class="sia-controls">
-            <div class="sia-presets" id="demo-presets">
-              <!-- chips injected by JS -->
-            </div>
-            <button class="sia-convert-btn" id="sia-convert-btn">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 7l-7 7-7-7"/></svg>
-              Convert
+            <button class="install-pill-copy" id="hero-copy" aria-label="Copy install command">
+              <svg class="ic-copy" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <svg class="ic-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
+              <span class="label">copy</span>
             </button>
           </div>
 
-          <!-- Output -->
-          <div class="sia-output" id="demo-output" style="display:none">
-            <div class="sia-output-label">output</div>
-            <pre class="sia-output-text" id="demo-output-text"></pre>
+          <div class="hero-actions">
+            <a href="/docs/introduction/" class="btn btn-primary">
+              Get started
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <a href="/docs/learn/manifesto/" class="btn btn-ghost">Read the manifesto</a>
+            <a href="https://github.com/ilo-lang/ilo" target="_blank" rel="noopener" class="btn-text license">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+              MIT &amp; Apache-2.0
+            </a>
           </div>
+        </div>
 
-          <!-- Error -->
-          <div class="sia-error" id="sia-error" style="display:none"></div>
+        <div class="hero-right">
+          <div class="frame frame-muted">
+            <div class="frame-title">
+              <span>Python · 30 tokens</span>
+              <span>93 chars</span>
+            </div>
+            <pre class="frame-body"><span class="kw">def</span> tot(p: <span class="ty">float</span>, q: <span class="ty">float</span>, r: <span class="ty">float</span>) <span class="op">-&gt;</span> <span class="ty">float</span>:
+    s = p * q
+    t = s * r
+    <span class="kw">return</span> s + t</pre>
+          </div>
+          <div class="frame frame-accent">
+            <div class="frame-title accent">
+              <span>ilo · 10 tokens</span>
+              <span>38 chars</span>
+            </div>
+            <pre class="frame-body"><span class="com">-- subtotal + tax</span>
+tot p:<span class="ty">n</span> q:<span class="ty">n</span> r:<span class="ty">n</span><span class="op">&gt;</span><span class="ty">n</span>
+  s<span class="op">=*</span>p q
+  t<span class="op">=*</span>s r
+  <span class="op">+</span>s t</pre>
+          </div>
+          <div class="receipt">
+            <span class="receipt-num">0.33×</span>
+            <span class="receipt-text">the tokens · 0.22× the characters · same semantics</span>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- STATS -->
-    <section class="stats" data-animate>
-      <div class="container stats-grid">
-        <div class="stat">
-          <div class="stat-number">67%</div>
-          <div class="stat-label">fewer tokens</div>
-          <div class="stat-context">vs Python</div>
+    <!-- PRINCIPLES -->
+    <section id="manifesto" class="principles">
+      <div class="container-wide">
+        <div class="section-head">
+          <div class="kicker">The Six Principles</div>
+          <h2>Every design decision is evaluated against one number.</h2>
+          <p class="sub">If a feature reduces total tokens from intent to working code, it's in. If it increases it, it's out. No exceptions for elegance, readability, or convention.</p>
         </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <div class="stat-number">78%</div>
-          <div class="stat-label">fewer characters</div>
-          <div class="stat-context">vs Python</div>
+        <div class="principles-grid">
+          {principles.map((it) => (
+            <a class="principle" href={it.href}>
+              <div class="principle-meta">
+                <span class="mono num">{it.n}</span>
+                <span class="ekicker">principle</span>
+              </div>
+              <h3>{it.name}</h3>
+              <p>{it.body}</p>
+            </a>
+          ))}
         </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <div class="stat-number">&check;</div>
-          <div class="stat-label">type-verified</div>
-          <div class="stat-context">before execution</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- FEATURES -->
-    <section class="features" data-animate>
-      <div class="container">
-        <h2 class="section-title">Designed for machines</h2>
-        <p class="section-subtitle">Every feature exists to reduce total token cost.</p>
-        <div class="feature-grid">
-
-          <div class="feature-card feature-card--wide">
-            <div class="feature-label">Syntax</div>
-            <h3>Prefix Notation</h3>
-            <p>Operators before operands. No parentheses. No precedence ambiguity. 22% fewer tokens, 42% fewer characters vs infix.</p>
-            <div class="feature-code">
-              <code><span class="syn-op">+*</span><span class="syn-p">a</span> <span class="syn-p">b</span> <span class="syn-p">c</span></code>
-              <span class="feature-code-note">(a &times; b) + c</span>
-            </div>
-          </div>
-
-          <div class="feature-card feature-card--wide">
-            <div class="feature-label">Safety</div>
-            <h3>Verified Before Execution</h3>
-            <p>Every program is type-checked before it runs. Agents get compact error codes, not stack traces. One token, not a paragraph.</p>
-            <div class="feature-code feature-code--error">
-              <code>ILO-T004: expected n, got t</code>
-            </div>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-label">Control</div>
-            <h3>Guards</h3>
-            <p>Flat conditionals. No nesting. No braces.</p>
-            <div class="feature-code">
-              <code><span class="syn-op">&gt;=</span><span class="syn-p">sp</span> 1000 <span class="syn-s">"gold"</span></code>
-            </div>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-label">Composition</div>
-            <h3>Pipes</h3>
-            <p>Chain functions left-to-right.</p>
-            <div class="feature-code">
-              <code><span class="syn-p">x</span><span class="syn-op">&gt;&gt;</span><span class="syn-fn">dbl</span><span class="syn-op">&gt;&gt;</span><span class="syn-fn">inc</span></code>
-            </div>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-label">Ergonomics</div>
-            <h3>Auto-unwrap !</h3>
-            <p>12 tokens down to 1. Error propagation without the ceremony.</p>
-            <div class="feature-code">
-              <code><span class="syn-fn">inner</span><span class="syn-op">!</span> <span class="syn-p">x</span></code>
-            </div>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-label">Integrations</div>
-            <h3>MCP & HTTP Tools</h3>
-            <p>Wire external APIs as typed functions. Type-checked at load time.</p>
-            <div class="feature-code">
-              <code><span class="syn-op">--</span><span class="syn-p">tools</span> tools.json</code>
-            </div>
-          </div>
-
+        <div class="principles-cta">
+          <a class="btn-text" href="/docs/learn/manifesto/">
+            Read the full manifesto
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
         </div>
       </div>
     </section>
 
-    <!-- examples section removed — merged into sia-section above -->
+    <!-- SHIPPED -->
+    <section id="shipped" class="shipped">
+      <div class="container-wide">
+        <div class="section-head">
+          <div class="kicker">v0.13.0 · largest release since 0.10</div>
+          <h2>Sum types, generics, package registry, Cranelift TCO.</h2>
+          <p class="sub">A focused release: closing the gap on language expressivity (sum types, generics, brace-lambdas) while keeping the token cost flat.</p>
+        </div>
+        <div class="shipped-grid">
+          {shipped.map((it) => (
+            <div class="ship-card">
+              <div class="ship-head">
+                <span class="ship-name">{it.name}</span>
+                <span class="mono ship-tag">{it.tag}</span>
+              </div>
+              <p>{it.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
 
-    <!-- PHILOSOPHY -->
-    <section class="philosophy" data-animate>
-      <div class="container">
-        <div class="philosophy-inner">
-          <p class="philosophy-quote">
-            Named from <a href="https://tokipona.org/" target="_blank" rel="noopener" class="philosophy-link">Toki Pona</a> for &ldquo;tool&rdquo;&mdash;a constructed language that captures all of human expression in ~120 words. <em>ilo</em> does the same for machine programmers.
+    <!-- INSTALL -->
+    <section id="install" class="install">
+      <div class="container-wide">
+        <div class="section-head">
+          <div class="kicker">Install</div>
+          <h2>One binary. Six paths. No surprise dependencies.</h2>
+          <p class="sub">Native binary on Linux, macOS, Windows. WASM via npm. Cargo from source. Bundled with the Agent Skill for every major coding agent.</p>
+        </div>
+        <div class="install-card">
+          <div class="install-tabs" role="tablist">
+            {installPaths.map((p, i) => (
+              <button class={`install-tab${i === 0 ? ' active' : ''}`} role="tab" data-install-tab={p.id} aria-selected={i === 0}>
+                <span>{p.label}</span>
+                <svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            ))}
+          </div>
+          <div class="install-body">
+            {installPaths.map((p, i) => (
+              <div class={`install-panel${i === 0 ? ' active' : ''}`} data-install-panel={p.id}>
+                <div class="install-panel-head">
+                  <div class="install-panel-title">{p.label}</div>
+                  <div class="install-panel-sub">{p.sub}</div>
+                </div>
+                <div class="frame">
+                  <div class="frame-title">
+                    <span class="frame-shell">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                      shell
+                    </span>
+                    <button class="frame-copy" data-copy={p.cmd} aria-label={`Copy ${p.label} install command`}>copy</button>
+                  </div>
+                  <pre class="frame-body">{p.cmd}</pre>
+                </div>
+                <div class="install-verify">
+                  Verify it works: <code>ilo 'dbl x:n&gt;n;*x 2' 5</code> → <span class="mono accent">10</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BENCHMARKS -->
+    <section id="benchmarks" class="benchmarks">
+      <div class="container-wide">
+        <div class="section-head">
+          <div class="kicker">Honest benchmarks</div>
+          <h2>Three engines. None of them is the fastest. That's not the metric.</h2>
+          <p class="sub">
+            ilo runs on a bytecode VM, a Cranelift JIT, and a Cranelift AOT compiler.
+            They sit in the middle of the runtime field — faster than Python or Ruby, slower than V8 or Go.
+            The number that matters is the one above the keyboard, not the one below it.
           </p>
         </div>
-      </div>
-    </section>
-
-    <!-- SIX PRINCIPLES -->
-    <section class="manifesto-section" data-animate>
-      <div class="container">
-        <h2 class="section-title">What ilo Optimizes For</h2>
-        <p class="section-subtitle">Six principles, all measured against one metric: total tokens from intent to working code.</p>
-        <div class="manifesto-grid">
-          <a href="/docs/learn/manifesto/#1-token-conservative" class="manifesto-card">
-            <div class="manifesto-num">01</div>
-            <h3>Token-Conservative</h3>
-            <p>The north star. Every choice evaluated against total token cost across the full loop&mdash;not just short syntax, but retries, errors, and context loading.</p>
-          </a>
-          <a href="/docs/learn/manifesto/#2-constrained" class="manifesto-card">
-            <div class="manifesto-num">02</div>
-            <h3>Constrained</h3>
-            <p>Small vocabulary. Closed world. Few ways to do things. Fewer valid next-tokens means fewer wrong choices means fewer retries.</p>
-          </a>
-          <a href="/docs/learn/manifesto/#3-self-contained" class="manifesto-card">
-            <div class="manifesto-num">03</div>
-            <h3>Self-Contained</h3>
-            <p>Each unit carries its own context: deps, types, rules. The agent never needs to hunt for definitions elsewhere.</p>
-          </a>
-          <a href="/docs/learn/manifesto/#4-language-agnostic" class="manifesto-card">
-            <div class="manifesto-num">04</div>
-            <h3>Language-Agnostic</h3>
-            <p>Minimise dependency on English or any natural language. Sigils and short names over prose keywords.</p>
-          </a>
-          <a href="/docs/learn/manifesto/#5-graph-reducible" class="manifesto-card">
-            <div class="manifesto-num">05</div>
-            <h3>Graph-Reducible</h3>
-            <p>When analysing code, load only the relevant subgraph. As programs grow, the savings compound.</p>
-          </a>
-          <a href="/docs/learn/manifesto/#6-structured-compiler-to-agent-surface" class="manifesto-card">
-            <div class="manifesto-num">06</div>
-            <h3>Structured Compiler-to-Agent Surface</h3>
-            <p>Every path from the compiler to an agent is machine-readable by default. JSON out, zero screen-scraping.</p>
-          </a>
-        </div>
-        <div class="manifesto-cta">
-          <a href="/docs/learn/manifesto/" class="btn btn-outline">Read the full manifesto &rarr;</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="final-cta" data-animate>
-      <div class="container">
-        <p class="cta-statement">Make your agents more efficient.</p>
-        <div class="hero-actions">
-          <a href="/docs/introduction/" class="btn btn-primary">
-            Get Started
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-          <a href="https://github.com/ilo-lang/ilo" target="_blank" rel="noopener" class="btn btn-outline">
-            View on GitHub
-          </a>
+        <div class="bench-card">
+          <div class="bench-head">
+            <span>numeric · sum 1..1000 · median ns/call · 10000 iterations</span>
+            <span>Darwin arm64 · 2026-03-13</span>
+          </div>
+          <div class="bench-body">
+            {benchmarks.map((r) => (
+              <div class={`bench-row${r.ilo ? ' ilo' : ''}`}>
+                <span class="bench-lang">{r.lang}</span>
+                <span class="mono bench-tag">{r.tag}</span>
+                <div class="bench-bar">
+                  <div class="bench-fill" style={`width:${(r.ns / benchMax) * 100}%`}></div>
+                </div>
+                <span class="mono bench-ns">{fmt(r.ns)}</span>
+              </div>
+            ))}
+          </div>
+          <div class="bench-foot">
+            <span>7 more benchmarks in the full table — string, record, mixed, foreach, recurse…</span>
+            <a class="btn-text" href="/docs/reference/benchmarks/">
+              All benchmarks
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
   <!-- FOOTER -->
-  <footer>
-    <div class="container footer-inner">
-      <div class="footer-left">
-        <span class="footer-logo">ilo</span>
-        <a href="https://github.com/ilo-lang/ilo/blob/main/LICENSE" target="_blank" rel="noopener" class="footer-copy">MIT License</a>
-        <span class="footer-byline"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><rect width="18" height="10" x="3" y="11" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" x2="8" y1="16" y2="16"/><line x1="16" x2="16" y1="16" y2="16"/></svg>Built for robots</span>
+  <footer class="ilo-footer">
+    <div class="container-wide">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="footer-mark">ilo</span>
+          <p>Token-optimised programming language for AI agents. Open source under MIT &amp; Apache-2.0. Toki Pona for &ldquo;tool&rdquo;.</p>
+        </div>
+        <div class="footer-col">
+          <div class="footer-head">Learn</div>
+          <a href="/docs/introduction/">Introduction</a>
+          <a href="/docs/learn/manifesto/">Manifesto</a>
+          <a href="/docs/learn/install/">Install</a>
+          <a href="/docs/learn/examples/">Examples</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-head">Reference</div>
+          <a href="/docs/reference/language/">Language</a>
+          <a href="/docs/reference/cli/">CLI</a>
+          <a href="/docs/reference/diagnostics/">Diagnostics</a>
+          <a href="/docs/reference/benchmarks/">Benchmarks</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-head">Builtins</div>
+          <a href="/docs/reference/builtins/">All builtins</a>
+          <a href="/docs/reference/builtins/#numbers">Numbers</a>
+          <a href="/docs/reference/builtins/#text">Text</a>
+          <a href="/docs/reference/builtins/#http">HTTP</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-head">Community</div>
+          <a href="https://github.com/ilo-lang/ilo" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://www.reddit.com/r/ilolang/" target="_blank" rel="noopener">Reddit</a>
+          <a href="https://github.com/ilo-lang/ilo/releases" target="_blank" rel="noopener">Releases</a>
+          <a href="/contact/">Contact</a>
+        </div>
       </div>
-      <div class="footer-links">
-        <a href="/docs/introduction/">Docs</a>
-        <a href="https://github.com/ilo-lang/ilo" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://www.npmjs.com/package/ilo-lang" target="_blank" rel="noopener">npm</a>
-        <a href="https://crates.io/crates/ilo" target="_blank" rel="noopener">crates.io</a>
-        <a href="/contact/">Contact</a>
-        <a href="https://github.com/ilo-lang/ilo/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy</a>
+      <div class="footer-bottom">
+        <span class="mono">v0.13.0 · MIT &amp; Apache-2.0</span>
+        <span class="mono">built with ilo</span>
       </div>
     </div>
   </footer>
@@ -349,1891 +347,286 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
 </body>
 </html>
 
+<script>
+  // Hero install command copy
+  const heroCopy = document.getElementById('hero-copy');
+  if (heroCopy) {
+    heroCopy.addEventListener('click', () => {
+      navigator.clipboard?.writeText('curl -fsSL ilo-lang.ai/install.sh | sh');
+      const cp = heroCopy.querySelector('.ic-copy') as HTMLElement | null;
+      const ck = heroCopy.querySelector('.ic-check') as HTMLElement | null;
+      const lbl = heroCopy.querySelector('.label') as HTMLElement | null;
+      if (cp) cp.style.display = 'none';
+      if (ck) ck.style.display = '';
+      if (lbl) lbl.textContent = 'copied';
+      heroCopy.classList.add('done');
+      setTimeout(() => {
+        if (cp) cp.style.display = '';
+        if (ck) ck.style.display = 'none';
+        if (lbl) lbl.textContent = 'copy';
+        heroCopy.classList.remove('done');
+      }, 1400);
+    });
+  }
+
+  // Install tab switching
+  const tabs = document.querySelectorAll<HTMLButtonElement>('[data-install-tab]');
+  const panels = document.querySelectorAll<HTMLElement>('[data-install-panel]');
+  tabs.forEach(t => {
+    t.addEventListener('click', () => {
+      const id = t.getAttribute('data-install-tab');
+      tabs.forEach(x => {
+        const on = x === t;
+        x.classList.toggle('active', on);
+        x.setAttribute('aria-selected', String(on));
+      });
+      panels.forEach(p => p.classList.toggle('active', p.getAttribute('data-install-panel') === id));
+    });
+  });
+
+  // Per-panel copy buttons
+  document.querySelectorAll<HTMLButtonElement>('.frame-copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cmd = btn.getAttribute('data-copy') || '';
+      navigator.clipboard?.writeText(cmd);
+      const orig = btn.textContent;
+      btn.textContent = 'copied';
+      btn.classList.add('done');
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.classList.remove('done');
+      }, 1400);
+    });
+  });
+</script>
+
 <style>
-  /* ===== RESET ===== */
-  *, *::before, *::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+  /* ===== reset ===== */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--ilo-ink-0); color: var(--ilo-fg-1); font-family: var(--ilo-font-sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  a { color: var(--ilo-accent); text-decoration: none; transition: color var(--ilo-duration-1) var(--ilo-ease); }
+  a:hover { color: var(--ilo-amber-high); }
+  ::selection { background: rgba(224, 148, 34, 0.3); color: var(--ilo-fg-1); }
+  em { font-style: normal; color: var(--ilo-fg-1); }
+  h1, h2, h3, p { margin: 0; }
 
-  /* ===== VARIABLES ===== */
-  :root {
-    --bg: #08080c;
-    --bg-raised: #0e0e14;
-    --bg-card: #111118;
-    --bg-card-hover: #16161f;
-    --border: rgba(255, 255, 255, 0.06);
-    --border-hover: rgba(245, 158, 11, 0.25);
-    --text: #e4e4e8;
-    --text-muted: #9a9ab0;
-    --text-dim: #6e6e88;
-    --accent: #f59e0b;
-    --accent-bright: #fbbf24;
-    --accent-dim: rgba(245, 158, 11, 0.08);
-    --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
-    --font-body: 'Bricolage Grotesque', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-    --font-serif: 'Instrument Serif', Georgia, serif;
-    --container: 1100px;
-  }
+  .container-wide { width: 100%; max-width: var(--ilo-container-wide); margin: 0 auto; padding: 0 28px; }
+  .mono { font-family: var(--ilo-font-mono); font-variant-ligatures: none; }
+  .accent { color: var(--ilo-accent); }
 
-  /* ===== BASE ===== */
-  html {
-    scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-variant-ligatures: none;
+  /* ===== top nav ===== */
+  .topnav {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--ilo-ink-nav);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--ilo-hairline);
   }
+  .topnav-inner { display: flex; align-items: center; gap: 28px; height: 60px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; }
+  .brand-mark { font-family: var(--ilo-font-sans); font-weight: 800; font-size: 22px; letter-spacing: -0.02em; color: var(--ilo-accent); line-height: 1; }
+  .brand-version { font-family: var(--ilo-font-mono); font-size: 11px; padding: 2px 7px; border-radius: 999px; color: var(--ilo-accent); background: rgba(224, 148, 34, 0.10); border: 1px solid rgba(224, 148, 34, 0.22); }
+  .nav-links { display: flex; gap: 22px; margin-left: 12px; }
+  .nav-links a { color: var(--ilo-fg-3); font-size: 14px; }
+  .nav-links a:hover { color: var(--ilo-fg-1); }
+  .nav-spacer { flex: 1; }
+  .nav-github { display: inline-flex; align-items: center; gap: 8px; color: var(--ilo-fg-3); font-size: 14px; }
+  .nav-github:hover { color: var(--ilo-fg-1); }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: 16px;
-    line-height: 1.6;
-    overflow-x: hidden;
-  }
-
-  .container {
-    max-width: var(--container);
-    margin: 0 auto;
-    padding: 0 24px;
-  }
-
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  /* ===== NAV ===== */
-  nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    background: rgba(8, 8, 12, 0.8);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .nav-inner {
-    max-width: var(--container);
-    margin: 0 auto;
-    padding: 0 24px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .nav-logo {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.4rem;
-    color: var(--accent);
-    letter-spacing: -0.02em;
-  }
-
-  .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-  }
-
-  .nav-links a {
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    transition: color 0.2s;
-  }
-
-  .nav-links a:hover {
-    color: var(--text);
-  }
-
-  .nav-github {
-    display: flex;
-    align-items: center;
-    gap: 0.3em;
-  }
-
-  .nav-manifesto {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    transition: color 0.2s;
-  }
-
-  .nav-manifesto:hover {
-    color: var(--text);
-  }
-
-  .nav-cta {
-    background: var(--accent) !important;
-    color: #000 !important;
-    padding: 6px 16px;
-    border-radius: 6px;
-    font-weight: 600 !important;
-    font-size: 1rem !important;
-    transition: filter 0.2s;
-  }
-
-  .nav-cta:hover {
-    filter: brightness(1.15);
-    color: #000 !important;
-  }
-
-  /* ===== HERO ===== */
-  .hero {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    padding-top: 60px;
-  }
-
+  /* ===== hero ===== */
+  .hero { position: relative; padding: 88px 0 64px; overflow: hidden; }
   .hero-glow {
-    position: absolute;
-    top: 15%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 800px;
-    height: 500px;
-    background: radial-gradient(ellipse, rgba(245, 158, 11, 0.07) 0%, rgba(245, 158, 11, 0.02) 40%, transparent 70%);
-    pointer-events: none;
-    animation: glowPulse 6s ease-in-out infinite;
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(900px 380px at 20% 30%, rgba(224, 148, 34, 0.10), transparent 60%);
   }
+  .hero-grid { position: relative; display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+  .hero-left { display: flex; flex-direction: column; gap: 18px; }
+  .kicker { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ilo-accent); font-weight: 500; }
+  .hero-title { font-family: var(--ilo-font-sans); font-weight: 700; font-size: 68px; line-height: 1.02; letter-spacing: -0.035em; color: var(--ilo-fg-1); }
+  .hero-title .accent { color: var(--ilo-accent); }
+  .hero-lede { font-size: 18px; line-height: 1.55; color: var(--ilo-fg-3); max-width: 520px; }
 
-  .hero-grid {
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px);
-    background-size: 32px 32px;
-    mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 20%, transparent 70%);
-    -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 20%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .hero-content {
-    position: relative;
-    text-align: center;
-    z-index: 1;
-  }
-
-  .hero-badge {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--accent);
-    background: var(--accent-dim);
-    border: 1px solid rgba(245, 158, 11, 0.15);
-    padding: 6px 16px;
-    border-radius: 100px;
-    margin-bottom: 2rem;
-    letter-spacing: 0.02em;
-    animation: fadeInUp 0.8s ease forwards;
-  }
-
-  .hero-title {
-    font-family: var(--font-display);
-    font-size: clamp(7rem, 18vw, 14rem);
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    line-height: 0.9;
-    margin-bottom: 1.5rem;
-    color: var(--text);
-    animation: heroReveal 1s ease forwards;
-  }
-
-  .hero-tagline {
-    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
-    color: var(--text-muted);
-    max-width: 560px;
-    margin: 0 auto 2.5rem;
-    line-height: 1.7;
-    font-weight: 400;
-    animation: fadeInUp 0.8s ease 0.2s forwards;
-    opacity: 0;
-  }
-
-  .hero-tagline-accent {
-    color: var(--text);
-    font-weight: 500;
-  }
-
-  .install-tabs {
-    animation: fadeInUp 0.8s ease 0.35s forwards;
-    opacity: 0;
-  }
-
-  .tab-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 2px;
-    margin-bottom: 0;
-  }
-
-  .tab-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-bottom: none;
-    color: var(--text-dim);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 500;
-    padding: 8px 16px;
-    cursor: pointer;
-    transition: color 0.2s, background 0.2s;
-    border-radius: 6px 6px 0 0;
-  }
-
-  .tab-btn:hover {
-    color: var(--text-muted);
-  }
-
-  .tab-btn.active {
-    background: var(--bg-raised);
-    color: var(--accent);
-    border-color: var(--border);
-  }
-
-  .hero-terminal {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--bg-raised);
-    border: 1px solid var(--border);
-    border-radius: 0 0 8px 8px;
-    padding: 14px 18px;
-    font-family: var(--font-mono);
-    font-size: 0.88rem;
-    cursor: pointer;
-    transition: border-color 0.3s, box-shadow 0.3s;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  .hero-terminal:hover {
-    border-color: var(--border-hover);
-    box-shadow: 0 0 30px rgba(245, 158, 11, 0.06);
-  }
-
-  .terminal-prompt {
-    color: var(--text-dim);
-    user-select: none;
-  }
-
-  .terminal-text {
-    color: var(--accent-bright);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .terminal-copy {
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    transition: color 0.2s;
-  }
-
-  .terminal-copy:hover {
-    color: var(--accent);
-  }
-
-  .hero-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 2rem;
-    flex-wrap: wrap;
-    animation: fadeInUp 0.8s ease 0.5s forwards;
-    opacity: 0;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
+  .install-pill {
+    margin-top: 14px; display: flex; align-items: stretch;
+    background: var(--ilo-ink-2);
+    border: 1px solid var(--ilo-hairline);
     border-radius: 8px;
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 0.95rem;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: #000;
-  }
-
-  .btn-primary:hover {
-    filter: brightness(1.15);
-    transform: translateY(-1px);
-  }
-
-  .btn-outline {
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-  }
-
-  .btn-outline:hover {
-    border-color: var(--border-hover);
-    color: var(--accent);
-  }
-
-  /* ===== STATS ===== */
-  .stats {
-    padding: 5rem 0;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .stats-grid {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 3rem;
-    flex-wrap: wrap;
-  }
-
-  .stat {
-    text-align: center;
-    min-width: 160px;
-  }
-
-  .stat-number {
-    font-family: var(--font-display);
-    font-size: clamp(3rem, 6vw, 4rem);
-    font-weight: 800;
-    color: var(--accent);
-    letter-spacing: -0.03em;
-    line-height: 1;
-  }
-
-  .stat-label {
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--text);
-    margin-top: 0.5rem;
-  }
-
-  .stat-context {
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    margin-top: 0.25rem;
-    font-family: var(--font-mono);
-  }
-
-  .stat-divider {
-    width: 1px;
-    height: 48px;
-    background: var(--border);
-  }
-
-  /* ===== SECTIONS (shared) ===== */
-  .section-title {
-    font-family: var(--font-display);
-    font-size: clamp(1.8rem, 4vw, 2.6rem);
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    text-align: center;
-    margin-bottom: 0.5rem;
-  }
-
-  .section-subtitle {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 1.05rem;
-    margin-bottom: 3rem;
-  }
-
-  /* ===== CODE COMPARISON ===== */
-  .comparison {
-    padding: 6rem 0;
-  }
-
-  .compare-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
-
-  .code-window {
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    background: var(--bg-raised);
-  }
-
-  .code-window--muted {
-    opacity: 0.7;
-    transition: opacity 0.3s;
-  }
-
-  .code-window--muted:hover {
-    opacity: 0.9;
-  }
-
-  .code-window--highlight {
-    border-color: rgba(245, 158, 11, 0.2);
-    box-shadow: 0 0 40px rgba(245, 158, 11, 0.04);
-  }
-
-  .code-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.015);
-  }
-
-  .window-dots {
-    display: flex;
-    gap: 6px;
-  }
-
-  .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    opacity: 0.5;
-  }
-
-  .dot--red { background: #ff5f57; }
-  .dot--yellow { background: #febc2e; }
-  .dot--green { background: #28c840; }
-
-  .code-filename {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    flex: 1;
-  }
-
-  .code-badge {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    color: var(--text-dim);
-    background: rgba(255, 255, 255, 0.04);
-    padding: 3px 10px;
-    border-radius: 100px;
-  }
-
-  .code-badge--accent {
-    color: var(--accent);
-    background: var(--accent-dim);
-  }
-
-  .code-body {
-    padding: 20px;
-    font-family: var(--font-mono);
-    font-size: 0.88rem;
-    line-height: 1.8;
-    overflow-x: auto;
-    background: transparent;
-    color: var(--text);
-  }
-
-  .code-body code {
-    font-family: inherit;
-  }
-
-  /* ===== SYNTAX COLORS ===== */
-  .syn-kw { color: #c792ea; }
-  .syn-fn { color: #82aaff; }
-  .syn-p { color: #d6d6e0; }
-  .syn-t { color: #89ddff; }
-  .syn-s { color: #c3e88d; }
-  .syn-op { color: #f59e0b; }
-  .syn-cm { color: #546e7a; }
-
-  /* ===== FEATURES ===== */
-  .features {
-    padding: 6rem 0;
-  }
-
-  .feature-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-
-  .feature-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 28px;
-    transition: border-color 0.3s, transform 0.2s, box-shadow 0.3s;
-  }
-
-  .feature-card:hover {
-    border-color: var(--border-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-  }
-
-  .feature-card--wide {
-    grid-column: span 1;
-  }
-
-  .feature-label {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    font-weight: 500;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 8px;
-  }
-
-  .feature-card h3 {
-    font-family: var(--font-display);
-    font-size: 1.15rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-    letter-spacing: -0.01em;
-  }
-
-  .feature-card p {
-    font-size: 0.88rem;
-    color: var(--text-muted);
-    line-height: 1.6;
-    margin-bottom: 16px;
-  }
-
-  .feature-code {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    background: rgba(0, 0, 0, 0.25);
-    padding: 10px 14px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    overflow-x: auto;
-  }
-
-  .feature-code code {
-    font-family: inherit;
-    white-space: nowrap;
-  }
-
-  .feature-code-note {
-    color: var(--text-dim);
-    font-size: 0.75rem;
-    white-space: nowrap;
-  }
-
-  .feature-code--error code {
-    color: #f87171;
-  }
-
-  .syn-dim { color: var(--text-dim); }
-  .syn-result { color: var(--accent); font-weight: 500; }
-
-  /* ===== SEE IT IN ACTION (merged demo) ===== */
-  .sia-section {
-    padding: 6rem 0;
-    border-top: 1px solid var(--border);
-  }
-
-  .sia-card {
-    background: var(--bg-raised);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px;
-    max-width: 1000px;
-    margin: 0 auto;
-    transition: border-color 0.3s, box-shadow 0.3s;
+    max-width: 560px;
+    box-shadow: 0 0 0 1px rgba(224,148,34,0.08), 0 8px 32px rgba(224,148,34,0.06);
     overflow: hidden;
   }
+  .install-pill-cmd { padding: 14px 18px; font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 14px; color: var(--ilo-fg-1); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .install-pill-cmd .dollar { color: var(--ilo-fg-4); }
+  .install-pill-copy { background: transparent; color: var(--ilo-accent); border: 0; border-left: 1px solid var(--ilo-hairline); padding: 0 18px; font-family: var(--ilo-font-sans); font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: color var(--ilo-duration-1) var(--ilo-ease); }
+  .install-pill-copy:hover { color: var(--ilo-amber-high); }
+  .install-pill-copy.done { color: var(--ilo-ok); }
 
-  .sia-card:hover {
-    border-color: rgba(245, 158, 11, 0.2);
-    box-shadow: 0 0 40px rgba(245, 158, 11, 0.04);
-  }
+  .hero-actions { display: flex; gap: 14px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
 
-  /* Panes layout */
-  .sia-panes {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 14px;
-    align-items: start;
-    margin-bottom: 18px;
-  }
+  /* buttons */
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 6px; font-family: var(--ilo-font-sans); font-size: 14px; font-weight: 600; border: 0; cursor: pointer; text-decoration: none; transition: background var(--ilo-duration-2) var(--ilo-ease), color var(--ilo-duration-2) var(--ilo-ease); }
+  .btn-primary { background: var(--ilo-accent); color: #1a0e02; box-shadow: var(--ilo-shadow-amber-glow); }
+  .btn-primary:hover { background: var(--ilo-amber-high); color: #1a0e02; }
+  .btn-ghost { background: transparent; color: var(--ilo-fg-1); border: 1px solid var(--ilo-hairline-strong); font-weight: 500; }
+  .btn-ghost:hover { background: var(--ilo-ink-2); color: var(--ilo-fg-1); }
+  .btn-text { display: inline-flex; align-items: center; gap: 6px; background: transparent; color: var(--ilo-accent); padding: 6px 0; font-family: var(--ilo-font-sans); font-size: 14px; font-weight: 500; }
+  .btn-text:hover { color: var(--ilo-amber-high); }
+  .btn-text.license { color: var(--ilo-fg-3); }
+  .btn-text.license:hover { color: var(--ilo-fg-1); }
 
-  .sia-pane {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
+  /* hero right — code frames */
+  .hero-right { display: flex; flex-direction: column; gap: 14px; }
+  .frame { background: var(--ilo-ink-1); border: 1px solid var(--ilo-hairline); border-radius: 8px; overflow: hidden; }
+  .frame-muted { opacity: 0.78; }
+  .frame-accent { border-color: rgba(224, 148, 34, 0.35); }
+  .frame-title { padding: 8px 14px; border-bottom: 1px solid var(--ilo-hairline); display: flex; justify-content: space-between; align-items: center; font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 12px; color: var(--ilo-fg-4); }
+  .frame-title.accent { color: var(--ilo-accent); }
+  .frame-body { padding: 18px 20px; margin: 0; font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 14px; line-height: 1.65; color: var(--ilo-fg-1); white-space: pre; overflow-x: auto; }
+  .frame-body .op { color: var(--ilo-accent); }
+  .frame-body .ty { color: var(--ilo-accent); }
+  .frame-body .com { opacity: 0.45; font-style: italic; }
+  .frame-body .kw { color: var(--ilo-amber-high); }
+  .frame-shell { display: inline-flex; align-items: center; gap: 6px; }
+  .frame-copy { background: transparent; color: var(--ilo-fg-4); border: 0; cursor: pointer; font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 12px; padding: 0; transition: color var(--ilo-duration-1) var(--ilo-ease); }
+  .frame-copy:hover { color: var(--ilo-accent); }
+  .frame-copy.done { color: var(--ilo-ok); }
 
-  .sia-pane-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(255,255,255,0.015);
-    border: 1px solid var(--border);
-    border-bottom: none;
-    border-radius: 8px 8px 0 0;
-    padding: 12px 16px;
-  }
+  .receipt { display: flex; align-items: baseline; gap: 14px; padding-left: 4px; }
+  .receipt-num { font-family: var(--ilo-font-sans); font-weight: 700; font-size: 32px; color: var(--ilo-accent); letter-spacing: -0.02em; line-height: 1; }
+  .receipt-text { color: var(--ilo-fg-3); font-size: 13px; }
 
-  .sia-pane-lang {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    flex: 1;
-  }
+  /* ===== section heads ===== */
+  section { padding: 96px 0; }
+  .section-head { display: flex; flex-direction: column; gap: 6px; margin-bottom: 40px; }
+  .section-head .kicker { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ilo-accent); font-weight: 500; }
+  .section-head h2 { font-family: var(--ilo-font-sans); font-size: 36px; line-height: 1.15; letter-spacing: -0.02em; font-weight: 600; color: var(--ilo-fg-1); max-width: 760px; }
+  .section-head .sub { font-size: 16px; color: var(--ilo-fg-3); max-width: 640px; margin-top: 6px; line-height: 1.55; }
 
-  .sia-pane-lang--ilo {
-    color: var(--accent);
-  }
-
-  .sia-pane-file {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    color: var(--text-dim);
-  }
-
-  .sia-toggle {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-family: var(--font-mono);
-    font-size: 0.66rem;
-    font-weight: 500;
-    color: var(--text-dim);
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 3px 8px;
-    cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
-    white-space: nowrap;
-  }
-
-  .sia-toggle:hover {
-    color: var(--accent);
-    border-color: rgba(245,158,11,0.3);
-  }
-
-  .sia-toggle-label {
-    pointer-events: none;
-  }
-
-  .sia-editor {
-    width: 100%;
-    min-height: 155px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 0 0 8px 8px;
-    padding: 20px;
-    font-family: var(--font-mono);
-    font-size: 0.88rem;
-    line-height: 1.8;
-    color: var(--text);
-    white-space: pre-wrap;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-    resize: none;
-    outline: none;
-    white-space: pre;
-    overflow-x: auto;
-    overflow-y: hidden;
-    transition: border-color 0.2s, opacity 0.15s;
-    field-sizing: content;
-  }
-
-  .sia-editor:focus {
-    border-color: rgba(245,158,11,0.2);
-  }
-
-  .sia-editor--ilo {
-    border-color: rgba(245,158,11,0.2);
-    box-shadow: 0 0 40px rgba(245,158,11,0.04);
-    color: var(--accent-bright);
-    cursor: default;
-    display: block;
-    margin: 0;
-  }
-
-  .sia-editor--ilo code {
-    font-family: inherit;
-    font-size: inherit;
-    line-height: inherit;
-    background: transparent;
-    display: block;
-  }
-
-  /* Python highlight overlay */
-  #demo-python-wrap {
-    position: relative;
-  }
-
-  .sia-editor--highlight {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    pointer-events: none;
-    z-index: 1;
-    margin: 0;
-    overflow: hidden;
-    white-space: pre;
-  }
-
-  .sia-editor--highlight code {
-    font-family: inherit;
-    font-size: inherit;
-    line-height: inherit;
-    background: transparent;
-    display: block;
-  }
-
-  .sia-editor--overlay {
-    position: relative;
-    z-index: 2;
-    background: transparent !important;
-    color: transparent !important;
-    caret-color: var(--text) !important;
-  }
-
-  .sia-editor.is-fading {
-    opacity: 0;
-  }
-
-  .sia-converting {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.55);
-    border-radius: 0 0 8px 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    gap: 8px;
-  }
-
-  @keyframes dotPulse {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
-  }
-
-  .sia-converting-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: dotPulse 1s ease-in-out infinite;
-  }
-
-  /* Stats row */
-  .sia-stats {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--text-dim);
-    flex-wrap: wrap;
-    padding: 0 2px;
-  }
-
-  .sia-stats--ilo {
-    color: var(--text-muted);
-  }
-
-  .sia-stats b {
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .sia-stats--ilo b {
-    color: var(--accent);
-  }
-
-  .sia-stat-sep {
-    opacity: 0.4;
-  }
-
-  .sia-stat-diff {
-    font-weight: 700;
-    color: #4ade80;
-    background: rgba(74, 222, 128, 0.08);
-    padding: 2px 8px;
-    border-radius: 100px;
-    transition: transform 0.2s;
-  }
-
-  .sia-stat-diff.bounce {
-    animation: diffBounce 0.4s ease;
-  }
-
-  @keyframes diffBounce {
-    0% { transform: scale(1); }
-    40% { transform: scale(1.15); }
-    100% { transform: scale(1); }
-  }
-
-  /* Arrow */
-  .sia-arrow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-top: 40px;
-    font-size: 1.5rem;
-    color: var(--accent);
-    opacity: 0.45;
-    user-select: none;
-  }
-
-  /* Controls */
-  .sia-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 14px;
-  }
-
-  .sia-presets {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    flex: 1;
-  }
-
-  .sia-preset-chip {
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--border);
-    border-bottom-width: 2px;
-    padding: 8px 16px;
-    border-radius: 6px 6px 0 0;
-    cursor: pointer;
-    transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s;
-    margin-bottom: -1px;
-  }
-
-  .sia-preset-chip:hover {
-    color: var(--accent);
-    background: rgba(245,158,11,0.06);
-  }
-
-  .sia-preset-chip.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-    background: var(--accent-dim);
-  }
-
-  .sia-convert-btn {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #000;
-    background: var(--accent);
-    border: none;
-    padding: 8px 18px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: filter 0.2s;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .sia-convert-btn:hover {
-    filter: brightness(1.1);
-  }
-
-  .sia-convert-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    filter: none;
-  }
-
-  /* Output */
-  .sia-output {
-    border-top: 1px solid var(--border);
-    padding-top: 14px;
-    margin-top: 4px;
-  }
-
-  .sia-output-label {
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 8px;
-  }
-
-  .sia-output-text {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    color: var(--accent);
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-
-  .sia-error {
-    margin-top: 10px;
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    color: #f87171;
-    background: rgba(248,113,113,0.06);
-    border: 1px solid rgba(248,113,113,0.15);
-    border-radius: 6px;
-    padding: 10px 14px;
-  }
-
-  @media (max-width: 700px) {
-    .sia-panes {
-      grid-template-columns: 1fr;
-    }
-    .sia-arrow {
-      display: none;
-    }
-    .sia-card {
-      padding: 18px;
-    }
-  }
-
-  /* ===== SIX PRINCIPLES ===== */
-  .manifesto-section {
-    padding: 6rem 0;
-  }
-
-  .manifesto-grid {
+  /* ===== principles ===== */
+  .principles { border-top: 1px solid var(--ilo-hairline); }
+  .principles-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    margin-bottom: 2.5rem;
+    gap: 1px;
+    background: var(--ilo-hairline);
+    border: 1px solid var(--ilo-hairline);
+    border-radius: 10px;
+    overflow: hidden;
   }
-
-  .manifesto-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 28px;
-    transition: border-color 0.3s, transform 0.2s, box-shadow 0.3s;
-    text-decoration: none;
-    display: block;
-  }
-
-  .manifesto-card:hover {
-    border-color: var(--border-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-  }
-
-  .manifesto-num {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    margin-bottom: 10px;
-  }
-
-  .manifesto-card h3 {
-    font-family: var(--font-display);
-    font-size: 1.05rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-    letter-spacing: -0.01em;
-    color: var(--text);
-  }
-
-  .manifesto-card p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
-
-  .manifesto-cta {
-    text-align: center;
-  }
-
-  @media (max-width: 900px) {
-    .manifesto-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (max-width: 600px) {
-    .manifesto-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* ===== PHILOSOPHY ===== */
-  .philosophy {
-    padding: 6rem 0;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .philosophy-inner {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto;
-  }
-
-  .philosophy-quote {
-    font-family: var(--font-serif);
-    font-size: clamp(1.3rem, 3vw, 1.7rem);
-    line-height: 1.7;
-    color: var(--text-muted);
-    margin-bottom: 2.5rem;
-    font-style: italic;
-  }
-
-  .philosophy-quote em {
-    color: var(--text);
-    font-style: italic;
-  }
-
-  .philosophy-link {
-    color: var(--text-muted);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    text-decoration-color: rgba(255,255,255,0.15);
-    transition: color 0.2s, text-decoration-color 0.2s;
-  }
-
-  .philosophy-link:hover {
-    color: var(--text);
-    text-decoration-color: var(--accent);
-  }
-
-  .principles {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
   .principle {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    padding: 6px 14px;
-    border-radius: 100px;
-    transition: border-color 0.2s, color 0.2s;
+    background: var(--ilo-ink-0);
+    padding: 32px 28px;
+    display: flex; flex-direction: column; gap: 12px;
+    min-height: 220px;
+    color: inherit;
+    transition: background var(--ilo-duration-2) var(--ilo-ease);
   }
+  .principle:hover { background: var(--ilo-ink-1); }
+  .principle-meta { display: flex; align-items: baseline; gap: 10px; }
+  .principle-meta .num { color: var(--ilo-accent); font-size: 13px; }
+  .principle-meta .ekicker { font-size: 11px; color: var(--ilo-fg-4); letter-spacing: 0.06em; text-transform: uppercase; }
+  .principle h3 { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; color: var(--ilo-fg-1); }
+  .principle p { font-size: 14px; line-height: 1.6; color: var(--ilo-fg-3); }
+  .principles-cta { margin-top: 28px; display: flex; justify-content: flex-end; }
 
-  .principle:hover {
-    border-color: var(--border-hover);
-    color: var(--accent);
+  /* ===== shipped ===== */
+  .shipped { border-top: 1px solid var(--ilo-hairline); background: var(--ilo-ink-1); }
+  .shipped-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .ship-card { padding: 20px 22px; border: 1px solid var(--ilo-hairline); border-radius: 8px; background: var(--ilo-ink-0); display: flex; flex-direction: column; gap: 8px; }
+  .ship-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .ship-name { font-family: var(--ilo-font-sans); font-size: 16px; font-weight: 600; color: var(--ilo-fg-1); }
+  .ship-tag { font-size: 11px; color: var(--ilo-fg-4); }
+  .ship-card p { font-size: 13px; line-height: 1.55; color: var(--ilo-fg-3); }
+
+  /* ===== install ===== */
+  .install { border-top: 1px solid var(--ilo-hairline); }
+  .install-card {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 1px;
+    background: var(--ilo-hairline);
+    border: 1px solid var(--ilo-hairline);
+    border-radius: 10px;
+    overflow: hidden;
   }
-
-  /* ===== FINAL CTA ===== */
-  .final-cta {
-    padding: 6rem 0;
-    text-align: center;
+  .install-tabs { background: var(--ilo-ink-1); padding: 12px 0; display: flex; flex-direction: column; }
+  .install-tab {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; padding: 12px 20px;
+    border: 0; background: transparent; cursor: pointer; text-align: left;
+    color: var(--ilo-fg-3);
+    font-family: var(--ilo-font-sans); font-size: 14px; font-weight: 400;
+    border-left: 2px solid transparent;
+    transition: color var(--ilo-duration-1) var(--ilo-ease), border-color var(--ilo-duration-1) var(--ilo-ease), background var(--ilo-duration-1) var(--ilo-ease);
   }
+  .install-tab:hover { color: var(--ilo-fg-1); }
+  .install-tab.active { color: var(--ilo-fg-1); font-weight: 600; border-left-color: var(--ilo-accent); }
+  .install-tab .chev { opacity: 0; transition: opacity var(--ilo-duration-1) var(--ilo-ease); }
+  .install-tab.active .chev { opacity: 1; }
+  .install-body { background: var(--ilo-ink-0); padding: 32px 36px; display: flex; flex-direction: column; }
+  .install-panel { display: none; flex-direction: column; gap: 18px; }
+  .install-panel.active { display: flex; }
+  .install-panel-title { font-size: 18px; font-weight: 600; color: var(--ilo-fg-1); }
+  .install-panel-sub { font-size: 14px; color: var(--ilo-fg-3); margin-top: 4px; }
+  .install-panel .frame-body { white-space: pre-wrap; }
+  .install-verify { font-size: 13px; color: var(--ilo-fg-4); }
+  .install-verify code { font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 0.9em; background: var(--ilo-inline-code-bg); padding: 0.12em 0.4em; border-radius: 4px; }
 
-  .cta-statement {
-    font-family: var(--font-display);
-    font-size: clamp(1.5rem, 3.5vw, 2.2rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-bottom: 2rem;
-    color: var(--text);
+  /* ===== benchmarks ===== */
+  .benchmarks { border-top: 1px solid var(--ilo-hairline); }
+  .bench-card { background: var(--ilo-ink-2); border: 1px solid var(--ilo-hairline); border-radius: 8px; overflow: hidden; }
+  .bench-head {
+    padding: 14px 24px; border-bottom: 1px solid var(--ilo-hairline);
+    display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 12px; color: var(--ilo-fg-4);
   }
+  .bench-body { padding: 18px 24px; display: flex; flex-direction: column; gap: 8px; }
+  .bench-row { display: grid; grid-template-columns: 120px 80px 1fr 100px; align-items: center; gap: 14px; }
+  .bench-lang { font-family: var(--ilo-font-sans); font-size: 14px; color: var(--ilo-fg-1); font-weight: 400; }
+  .bench-row.ilo .bench-lang { color: var(--ilo-accent); font-weight: 600; }
+  .bench-tag { font-size: 11px; color: var(--ilo-fg-4); }
+  .bench-bar { height: 6px; background: var(--ilo-ink-3); border-radius: 3px; overflow: hidden; }
+  .bench-fill { height: 100%; background: var(--ilo-fg-3); border-radius: 3px; transition: width 400ms var(--ilo-ease); }
+  .bench-row.ilo .bench-fill { background: var(--ilo-accent); }
+  .bench-ns { font-size: 13px; color: var(--ilo-fg-2); text-align: right; }
+  .bench-row.ilo .bench-ns { color: var(--ilo-accent); }
+  .bench-foot { padding: 14px 24px; border-top: 1px solid var(--ilo-hairline); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--ilo-fg-3); }
 
-  /* ===== FOOTER ===== */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 2rem 0;
+  /* ===== footer ===== */
+  .ilo-footer { border-top: 1px solid var(--ilo-hairline); padding: 64px 0 48px; background: var(--ilo-ink-0); }
+  .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr; gap: 32px; }
+  .footer-brand { display: flex; flex-direction: column; gap: 14px; }
+  .footer-mark { font-family: var(--ilo-font-sans); font-weight: 800; font-size: 24px; color: var(--ilo-accent); letter-spacing: -0.02em; }
+  .footer-brand p { font-size: 13px; line-height: 1.6; color: var(--ilo-fg-4); max-width: 260px; }
+  .footer-col { display: flex; flex-direction: column; gap: 10px; }
+  .footer-head { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ilo-fg-4); }
+  .footer-col a { font-size: 14px; color: var(--ilo-fg-3); }
+  .footer-col a:hover { color: var(--ilo-fg-1); }
+  .footer-bottom { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--ilo-hairline); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--ilo-fg-4); }
+
+  /* ===== responsive ===== */
+  @media (max-width: 980px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+    .hero-title { font-size: 52px; }
+    .principles-grid { grid-template-columns: repeat(2, 1fr); }
+    .shipped-grid { grid-template-columns: 1fr; }
+    .install-card { grid-template-columns: 1fr; }
+    .install-tabs { flex-direction: row; flex-wrap: wrap; padding: 8px; }
+    .install-tab { width: auto; padding: 8px 14px; border-left: 0; border-bottom: 2px solid transparent; }
+    .install-tab.active { border-left: 0; border-bottom-color: var(--ilo-accent); }
+    .install-tab .chev { display: none; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
   }
-
-  .footer-inner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
+  @media (max-width: 640px) {
+    .topnav-inner { gap: 16px; height: 56px; }
+    .nav-links { display: none; }
+    .hero { padding: 56px 0 40px; }
+    .hero-title { font-size: 40px; }
+    .section-head h2 { font-size: 28px; }
+    section { padding: 64px 0; }
+    .principles-grid { grid-template-columns: 1fr; }
+    .bench-row { grid-template-columns: 90px 1fr 80px; }
+    .bench-row .bench-tag { display: none; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
   }
-
-  .footer-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .footer-logo {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.1rem;
-    color: var(--accent);
-  }
-
-  .footer-copy {
-    font-size: 1rem;
-    color: var(--text-dim);
-    transition: color 0.2s;
-  }
-  .footer-copy:hover {
-    color: var(--accent);
-  }
-
-  .footer-byline {
-    font-size: 1rem;
-    color: var(--text-dim);
-  }
-  .footer-byline a {
-    color: var(--text-dim);
-    transition: color 0.2s;
-  }
-  .footer-byline a:hover {
-    color: var(--accent);
-  }
-
-  .footer-left {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .footer-links {
-    display: flex;
-    gap: 20px;
-  }
-
-  .footer-links a {
-    font-size: 1rem;
-    color: var(--text-dim);
-    transition: color 0.2s;
-  }
-
-  .footer-links a:hover {
-    color: var(--accent);
-  }
-
-  /* ===== ANIMATIONS ===== */
-  @keyframes heroReveal {
-    from {
-      opacity: 0;
-      letter-spacing: -0.06em;
-      filter: blur(6px);
-    }
-    to {
-      opacity: 1;
-      letter-spacing: -0.04em;
-      filter: blur(0);
-    }
-  }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(16px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes glowPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
-
-  /* Scroll animations: progressive enhancement, visible by default, animated only when JS adds .animate-ready */
-  .animate-ready [data-animate] {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-
-  .animate-ready [data-animate].is-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* ===== RESPONSIVE ===== */
-  @media (max-width: 768px) {
-    .compare-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .feature-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .examples-tabs {
-      flex-direction: column;
-    }
-
-    .examples-tab-buttons {
-      flex-direction: row;
-      flex-wrap: wrap;
-      border-right: none;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .examples-tab-btn {
-      padding: 8px 14px;
-      font-size: 0.72rem;
-      border-right: none;
-      border-bottom: 2px solid transparent;
-      margin-right: 0;
-      margin-bottom: -1px;
-    }
-
-    .examples-tab-btn.active {
-      border-right-color: transparent;
-      border-bottom-color: var(--accent);
-    }
-
-    .examples-panel {
-      border-left: 1px solid var(--border);
-      border-radius: 0 0 12px 12px;
-    }
-
-    .stats-grid {
-      gap: 2rem;
-    }
-
-    .stat-divider {
-      display: none;
-    }
-
-    .hero-title {
-      font-size: clamp(5rem, 20vw, 8rem);
-    }
-
-    .nav-links a:not(.nav-cta):not(.nav-github) {
-      display: none;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .hero-terminal {
-      font-size: 0.85rem;
-      padding: 10px 14px;
-    }
-  }
-
-  /* Feature grid: 3 columns for the bottom row on wider screens */
-  @media (min-width: 769px) {
-    .feature-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    /* Make the bottom 4 cards into a 4-column row? No, keep 2-col but vary */
-  }
-
-  @media (min-width: 1024px) {
-    .feature-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-
-
-
 </style>
-
-<script>
-  // Tab switching
-  const tabBtns = document.querySelectorAll('.tab-btn');
-  const cmdTexts = document.querySelectorAll('.terminal-text[data-cmd]');
-  const prompt = document.querySelector('.terminal-prompt') as HTMLElement;
-  let activeTab = 'mac';
-
-  const prompts: Record<string, string> = { mac: '$', windows: '>', claude: '>' };
-  const commands: Record<string, string> = {
-    mac: 'curl -fsSL https://ilo-lang.ai/install.sh | sh',
-    windows: 'irm https://ilo-lang.ai/install.ps1 | iex',
-    claude: '/plugin marketplace add ilo-lang/ilo && /plugin install ilo-lang/ilo',
-  };
-
-  tabBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const tab = (btn as HTMLElement).dataset.tab!;
-      activeTab = tab;
-      tabBtns.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      cmdTexts.forEach((t) => {
-        (t as HTMLElement).style.display = (t as HTMLElement).dataset.cmd === tab ? '' : 'none';
-      });
-      if (prompt) prompt.textContent = prompts[tab] || '$';
-    });
-  });
-
-  // Copy to clipboard
-  const copyBtn = document.getElementById('copy-btn');
-  const terminal = document.getElementById('install-cmd');
-
-  function handleCopy() {
-    navigator.clipboard.writeText(commands[activeTab] || commands.mac);
-    const iconCopy = copyBtn?.querySelector('.icon-copy') as HTMLElement;
-    const iconCheck = copyBtn?.querySelector('.icon-check') as HTMLElement;
-    if (iconCopy && iconCheck) {
-      iconCopy.style.display = 'none';
-      iconCheck.style.display = 'block';
-      setTimeout(() => {
-        iconCopy.style.display = 'block';
-        iconCheck.style.display = 'none';
-      }, 2000);
-    }
-  }
-
-  copyBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    handleCopy();
-  });
-  terminal?.addEventListener('click', handleCopy);
-
-  // (examples tab switching removed — section merged)
-
-  // Scroll animations: enable only after JS is ready
-  document.documentElement.classList.add('animate-ready');
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-        }
-      });
-    },
-    { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
-  );
-
-  document.querySelectorAll('[data-animate]').forEach((el) => observer.observe(el));
-</script>
-
-<script>
-// ===== SEE IT IN ACTION — merged interactive demo =====
-
-// Token approximation (cl100k_base proxy)
-function countTokens(text: string): number {
-  if (!text.trim()) return 0;
-  return text.split(/([^\w])/u).filter(p => p.trim().length > 0).length;
-}
-
-// Animated counter roll (~400ms ease-out)
-function animateCounter(el: HTMLElement, from: number, to: number) {
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduced || from === to) { el.textContent = String(to); return; }
-  const dur = 400;
-  const start = performance.now();
-  function step(now: number) {
-    const t = Math.min((now - start) / dur, 1);
-    const ease = 1 - Math.pow(1 - t, 3); // ease-out cubic
-    el.textContent = String(Math.round(from + (to - from) * ease));
-    if (t < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-
-interface Preset {
-  name: string;
-  python: string;
-  iloMulti: string;    // multi-line form
-  iloInline: string;   // one-liner semicolon form
-  output: string;
-}
-
-const PRESETS: Preset[] = [
-  {
-    name: 'pipes',
-    python: `def double(x: int) -> int:
-    return x * 2
-
-def increment(x: int) -> int:
-    return x + 1
-
-print(increment(double(5)))`,
-    iloMulti: `dbl x:n>n
-  *x 2
-
-inc x:n>n
-  +x 1
-
-main>n
-  5>>dbl>>inc`,
-    iloInline: `dbl x:n>n;*x 2\ninc x:n>n;+x 1\nmain>n;5>>dbl>>inc`,
-    output: '11',
-  },
-  {
-    name: 'fold-sum',
-    python: `from functools import reduce
-
-nums = [1, 2, 3, 4, 5]
-total = reduce(lambda a, b: a + b, nums, 0)
-print(total)`,
-    iloMulti: `add a:n b:n>n
-  +a b
-
-main>n
-  fld add [1,2,3,4,5] 0`,
-    iloInline: `main>n;fld (a:n b:n>n;+a b) [1,2,3,4,5] 0`,
-    output: '15',
-  },
-  {
-    name: 'map-double',
-    python: `nums = [1, 2, 3, 4, 5]
-result = list(map(lambda n: n * 2, nums))
-print(result)`,
-    iloMulti: `dbl n:n>n
-  *n 2
-
-main>L n
-  map dbl [1,2,3,4,5]`,
-    iloInline: `main>L n;map (n:n>n;*n 2) [1,2,3,4,5]`,
-    output: '[2, 4, 6, 8, 10]',
-  },
-  {
-    name: 'filter-even',
-    python: `nums = list(range(1, 11))
-result = list(filter(lambda n: n % 2 == 0, nums))
-print(result)`,
-    iloMulti: `even n:n>b
-  =(mod n 2) 0
-
-main>L n
-  flt even [1,2,3,4,5,6,7,8,9,10]`,
-    iloInline: `main>L n;flt (n:n>b;=(mod n 2) 0) [1,2,3,4,5,6,7,8,9,10]`,
-    output: '[2, 4, 6, 8, 10]',
-  },
-  {
-    name: 'text-upper',
-    python: `text = "hello world"
-print(text.upper())`,
-    iloMulti: `main>t
-  upr "hello world"`,
-    iloInline: `main>t;upr "hello world"`,
-    output: 'HELLO WORLD',
-  },
-  {
-    name: 'len-list',
-    python: `nums = [1, 2, 3, 4, 5]
-print(len(nums))`,
-    iloMulti: `main>n
-  len [1,2,3,4,5]`,
-    iloInline: `main>n;len [1,2,3,4,5]`,
-    output: '5',
-  },
-];
-
-let activePreset = 0;
-let isMultiLine = false;
-let isApiResult = false;
-let autoCycleTimer: ReturnType<typeof setTimeout> | null = null;
-let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-let prevPyTok = 0;
-let prevPyChar = 0;
-let prevIloTok = 0;
-let prevIloChar = 0;
-
-// ===== SYNTAX HIGHLIGHTING =====
-
-function escHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-// ilo tokenizer / highlighter
-const ILO_KW = new Set(['wh','ret','brk','cnt','main','if','else']);
-const ILO_BUILTIN = new Set(['map','flt','fld','len','upr','lwr','str','int','mod','spl','cat','at','prnt','hd','tl','srt','rev','rng','fmt','flt','fld','hd','tl','lst','frq','flat','grp','has','ord','sum','min','max','avg','abs','ceil','flr','rnd','log','exp','sqt','sin','cos','tan','zip','unz','rpl','trm','prfx','sfx','sub','idx','inn','cnt','uni','srt','rsrt','dbl','inc','range','push','pop']);
-
-function highlightIlo(src: string): string {
-  // Tokenize line by line
-  return src.split('\n').map(line => {
-    let out = '';
-    let i = 0;
-    while (i < line.length) {
-      const ch = line[i];
-      // string literal
-      if (ch === '"') {
-        let j = i + 1;
-        while (j < line.length && !(line[j] === '"' && line[j-1] !== '\\')) j++;
-        out += `<span class="syn-s">${escHtml(line.slice(i, j + 1))}</span>`;
-        i = j + 1;
-        continue;
-      }
-      // comment
-      if (ch === '-' && line[i+1] === '-') {
-        out += `<span class="syn-cm">${escHtml(line.slice(i))}</span>`;
-        break;
-      }
-      // number
-      if (/[0-9]/.test(ch) || (ch === '-' && /[0-9]/.test(line[i+1] || ''))) {
-        let j = i + 1;
-        while (j < line.length && /[0-9.]/.test(line[j])) j++;
-        out += `<span class="syn-p">${escHtml(line.slice(i, j))}</span>`;
-        i = j;
-        continue;
-      }
-      // operators / sigils
-      if (/[+\-*\/=<>!|&^%@?~]/.test(ch) || ch === ';' || (ch === '>' && line[i+1] === '>')) {
-        let j = i + 1;
-        // multi-char ops: >>, >=, <=, !=, >>, >>
-        if ((ch === '>' && line[i+1] === '>') || (ch === '>' && line[i+1] === '=') ||
-            (ch === '<' && line[i+1] === '=') || (ch === '!' && line[i+1] === '=') ||
-            (ch === '+' && line[i+1] === '+') || (ch === '-' && line[i+1] === '>')) {
-          j = i + 2;
-        }
-        const op = line.slice(i, j);
-        if (op === ';') {
-          out += escHtml(op);
-        } else if (op === '>') {
-          // could be return type sigil or op — highlight as op
-          out += `<span class="syn-op">${escHtml(op)}</span>`;
-        } else {
-          out += `<span class="syn-op">${escHtml(op)}</span>`;
-        }
-        i = j;
-        continue;
-      }
-      // identifier or keyword
-      if (/[a-zA-Z_\-]/.test(ch)) {
-        let j = i + 1;
-        while (j < line.length && /[a-zA-Z0-9_\-]/.test(line[j])) j++;
-        const word = line.slice(i, j);
-        if (ILO_KW.has(word)) {
-          out += `<span class="syn-kw">${escHtml(word)}</span>`;
-        } else if (ILO_BUILTIN.has(word)) {
-          out += `<span class="syn-fn">${escHtml(word)}</span>`;
-        } else if (/^[a-z]/.test(word) && j < line.length && line[j] === ' ') {
-          // first word on expression that looks like a fn call
-          out += `<span class="syn-fn">${escHtml(word)}</span>`;
-        } else if (/:[ntbLM]/.test(line.slice(j, j+2))) {
-          // param name followed by type sigil
-          out += `<span class="syn-p">${escHtml(word)}</span>`;
-        } else {
-          out += `<span class="syn-p">${escHtml(word)}</span>`;
-        }
-        i = j;
-        continue;
-      }
-      // type sigil after colon
-      if (ch === ':') {
-        let j = i + 1;
-        const next = line[j];
-        if (next && /[ntbLMR]/.test(next)) {
-          // :n :t :b :L :M etc
-          let k = j + 1;
-          // collect e.g. L n, L t
-          if (line[k] === ' ' && /[ntbLMR]/.test(line[k+1] || '')) k += 2;
-          out += `<span class="syn-t">${escHtml(line.slice(i, k))}</span>`;
-          i = k;
-        } else {
-          out += escHtml(ch);
-          i++;
-        }
-        continue;
-      }
-      out += escHtml(ch);
-      i++;
-    }
-    return out;
-  }).join('\n');
-}
-
-// Python tokenizer / highlighter
-const PY_KW = new Set(['def','if','elif','else','for','while','in','return','import','from','print','not','and','or','True','False','None','lambda','class','try','except','with','as','pass','break','continue','yield','del','raise','assert','global','nonlocal','is']);
-
-function highlightPy(src: string): string {
-  return src.split('\n').map(line => {
-    let out = '';
-    let i = 0;
-    while (i < line.length) {
-      const ch = line[i];
-      // comment
-      if (ch === '#') {
-        out += `<span class="syn-cm">${escHtml(line.slice(i))}</span>`;
-        break;
-      }
-      // string (single or double, simple)
-      if (ch === '"' || ch === "'") {
-        const q = ch;
-        // check triple
-        const triple = line[i+1] === q && line[i+2] === q;
-        if (triple) {
-          let j = i + 3;
-          while (j < line.length - 2 && !(line[j]===q && line[j+1]===q && line[j+2]===q)) j++;
-          out += `<span class="syn-s">${escHtml(line.slice(i, j + 3))}</span>`;
-          i = j + 3;
-        } else {
-          let j = i + 1;
-          while (j < line.length && line[j] !== q) { if (line[j] === '\\') j++; j++; }
-          out += `<span class="syn-s">${escHtml(line.slice(i, j + 1))}</span>`;
-          i = j + 1;
-        }
-        continue;
-      }
-      // number
-      if (/[0-9]/.test(ch)) {
-        let j = i + 1;
-        while (j < line.length && /[0-9._xXoObBa-fA-F]/.test(line[j])) j++;
-        out += `<span class="syn-p">${escHtml(line.slice(i, j))}</span>`;
-        i = j;
-        continue;
-      }
-      // identifier or keyword
-      if (/[a-zA-Z_]/.test(ch)) {
-        let j = i + 1;
-        while (j < line.length && /[a-zA-Z0-9_]/.test(line[j])) j++;
-        const word = line.slice(i, j);
-        if (PY_KW.has(word)) {
-          out += `<span class="syn-kw">${escHtml(word)}</span>`;
-        } else if (j < line.length && line[j] === '(') {
-          out += `<span class="syn-fn">${escHtml(word)}</span>`;
-        } else {
-          out += `<span class="syn-p">${escHtml(word)}</span>`;
-        }
-        i = j;
-        continue;
-      }
-      // operators
-      if (/[+\-*\/=<>!%&|^~@]/.test(ch)) {
-        let j = i + 1;
-        if (j < line.length && /[=+\-*\/]/.test(line[j])) j++;
-        out += `<span class="syn-op">${escHtml(line.slice(i, j))}</span>`;
-        i = j;
-        continue;
-      }
-      out += escHtml(ch);
-      i++;
-    }
-    return out;
-  }).join('\n');
-}
-
-const pyEl = document.getElementById('demo-python') as HTMLTextAreaElement;
-const pyHighlight = document.querySelector('#py-highlight code') as HTMLElement;
-const iloEl = document.getElementById('demo-ilo') as HTMLPreElement;
-const iloCode = document.getElementById('ilo-code') as HTMLElement;
-const pyTokensEl = document.getElementById('py-tokens')!;
-const pyCharsEl = document.getElementById('py-chars')!;
-const iloTokensEl = document.getElementById('ilo-tokens')!;
-const iloCharsEl = document.getElementById('ilo-chars')!;
-const diffEl = document.getElementById('sia-diff')!;
-const outputDiv = document.getElementById('demo-output')!;
-const outputText = document.getElementById('demo-output-text')!;
-const errorDiv = document.getElementById('sia-error')!;
-const convertBtn = document.getElementById('sia-convert-btn')!;
-const convertingOverlay = document.getElementById('sia-converting')!;
-const toggleBtn = document.getElementById('sia-toggle')!;
-const toggleLabel = document.getElementById('sia-toggle-label')!;
-
-// Track raw ilo text for stats
-let iloRawText = '';
-
-function getIloText(): string { return iloRawText; }
-
-function updateStats() {
-  const py = pyEl.value;
-  const ilo = getIloText();
-  const pyTok = countTokens(py);
-  const iloTok = countTokens(ilo);
-  const pyChar = py.length;
-  const iloChar = ilo.length;
-
-  animateCounter(pyTokensEl, prevPyTok, pyTok);
-  animateCounter(pyCharsEl, prevPyChar, pyChar);
-  animateCounter(iloTokensEl, prevIloTok, iloTok);
-  animateCounter(iloCharsEl, prevIloChar, iloChar);
-
-  prevPyTok = pyTok;
-  prevPyChar = pyChar;
-  prevIloTok = iloTok;
-  prevIloChar = iloChar;
-
-  if (pyTok > 0 && iloTok > 0) {
-    const pct = Math.round((1 - iloTok / pyTok) * 100);
-    diffEl.textContent = `-${pct}% tokens`;
-    diffEl.classList.remove('bounce');
-    void diffEl.offsetWidth; // reflow
-    diffEl.classList.add('bounce');
-  } else {
-    diffEl.textContent = '';
-  }
-}
-
-function setIloText(text: string, animate = true) {
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!animate || reduced) {
-    iloRawText = text;
-    iloCode.innerHTML = highlightIlo(text);
-    updateStats();
-    return;
-  }
-  iloEl.classList.add('is-fading');
-  setTimeout(() => {
-    iloRawText = text;
-    iloCode.innerHTML = highlightIlo(text);
-    iloEl.classList.remove('is-fading');
-    updateStats();
-  }, 150);
-}
-
-function loadPreset(idx: number, skipAutoCycle = false) {
-  if (!skipAutoCycle) resetAutoCycle();
-  activePreset = idx;
-  isApiResult = false;
-  const p = PRESETS[idx];
-
-  pyEl.value = p.python;
-  pyHighlight.innerHTML = highlightPy(p.python);
-  document.querySelectorAll('.sia-preset-chip').forEach((c, i) => {
-    c.classList.toggle('active', i === idx);
-  });
-
-  // ilo pane lags 150ms
-  setTimeout(() => {
-    const iloText = isMultiLine ? p.iloMulti : p.iloInline;
-    iloRawText = iloText;
-    iloCode.innerHTML = highlightIlo(iloText);
-    updateStats();
-  }, 150);
-
-  // Reset output/error
-  outputDiv.style.display = 'none';
-  errorDiv.style.display = 'none';
-  errorDiv.textContent = '';
-
-  updateStats();
-  toggleBtn.removeAttribute('disabled');
-}
-
-function toggleMode() {
-  if (isApiResult) return;
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  isMultiLine = !isMultiLine;
-  toggleLabel.textContent = isMultiLine ? 'multi-line' : 'compact';
-  const p = PRESETS[activePreset];
-  setIloText(isMultiLine ? p.iloMulti : p.iloInline, !reduced);
-}
-
-toggleBtn.addEventListener('click', toggleMode);
-
-// Auto-cycle every 8s, pause on hover
-function resetAutoCycle() {
-  if (autoCycleTimer) clearTimeout(autoCycleTimer);
-  autoCycleTimer = null;
-}
-
-function scheduleAutoCycle() {
-  resetAutoCycle();
-  autoCycleTimer = setTimeout(() => {
-    const next = (activePreset + 1) % PRESETS.length;
-    loadPreset(next, true);
-    scheduleAutoCycle();
-  }, 8000);
-}
-
-const siaCard = document.querySelector('.sia-card');
-siaCard?.addEventListener('mouseenter', resetAutoCycle);
-siaCard?.addEventListener('mouseleave', scheduleAutoCycle);
-
-// Editable Python — debounced stats update (500ms)
-pyEl.removeAttribute('readonly');
-pyEl.addEventListener('input', () => {
-  // Re-highlight on every keystroke (cheap)
-  pyHighlight.innerHTML = highlightPy(pyEl.value);
-  if (debounceTimer) clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => {
-    // update python stats; ilo stays as-is until Convert
-    const py = pyEl.value;
-    const pyTok = countTokens(py);
-    const pyChar = py.length;
-    animateCounter(pyTokensEl, prevPyTok, pyTok);
-    animateCounter(pyCharsEl, prevPyChar, pyChar);
-    prevPyTok = pyTok;
-    prevPyChar = pyChar;
-  }, 500);
-  resetAutoCycle();
-});
-
-// Convert button
-convertBtn.addEventListener('click', async () => {
-  const python = pyEl.value.trim();
-  if (!python) return;
-
-  resetAutoCycle();
-  (convertBtn as HTMLButtonElement).disabled = true;
-  convertingOverlay.style.display = 'flex';
-  errorDiv.style.display = 'none';
-  outputDiv.style.display = 'none';
-
-  try {
-    const resp = await fetch('https://convert.ilo-lang.ai/convert', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ python }),
-    });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
-    const iloResult = data.ilo || data.result || data.code || '';
-    if (!iloResult) throw new Error('Empty response');
-    isApiResult = true;
-    setIloText(iloResult);
-    toggleBtn.setAttribute('disabled', 'true');
-    isMultiLine = true;
-    toggleLabel.textContent = isMultiLine ? 'multi-line' : 'compact';
-  } catch (err) {
-    // Fallback: show last preset
-    const fallback = PRESETS[activePreset];
-    setIloText(isMultiLine ? fallback.iloMulti : fallback.iloInline);
-    errorDiv.textContent = `Conversion unavailable — showing preset. (${(err as Error).message})`;
-    errorDiv.style.display = 'block';
-  } finally {
-    (convertBtn as HTMLButtonElement).disabled = false;
-    convertingOverlay.style.display = 'none';
-  }
-});
-
-// Build preset chips
-const presetsContainer = document.getElementById('demo-presets')!;
-PRESETS.forEach((p, i) => {
-  const chip = document.createElement('button');
-  chip.className = 'sia-preset-chip' + (i === 0 ? ' active' : '');
-  chip.textContent = p.name;
-  chip.addEventListener('click', () => loadPreset(i));
-  presetsContainer.appendChild(chip);
-});
-
-// Init
-loadPreset(0, true);
-scheduleAutoCycle();
-</script>
-
