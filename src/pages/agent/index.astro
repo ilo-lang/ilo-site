@@ -70,7 +70,7 @@ const skills = [
 
   <nav>
     <div class="nav-inner">
-      <a href="/" class="nav-logo">ilo</a>
+      <a href="/" class="nav-logo">ilo lang</a>
       <div class="nav-links">
         <a href="https://github.com/ilo-lang/ilo" target="_blank" rel="noopener" class="nav-github">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
@@ -109,7 +109,7 @@ const skills = [
               <span class="code-label">skill discovery</span>
             </div>
             <pre><code>ilo skill list                 <span class="code-comment"># name + description per skill</span>
-ilo skill list --json          <span class="code-comment"># {schemaVersion:1, skills:[...]}</span>
+ilo skill list --json          <span class="code-comment"># {"{ schemaVersion: 1, skills: [...] }"}</span>
 ilo skill get ilo-agent        <span class="code-comment"># full content</span>
 ilo skill get ilo-errors       <span class="code-comment"># ILO-* codes with fixes</span></code></pre>
           </div>
@@ -253,10 +253,10 @@ ilo skill get ilo-errors       <span class="code-comment"># ILO-* codes with fix
             <p class="tools-block-text">Long-lived JSON request/response loop on stdin/stdout. Send one object per line, get one back. Zero process-spawn overhead.</p>
             <div class="code-block code-block-sm">
               <pre><code><span class="code-comment"># request</span>
-{"program":"fn p:n>n;*p 2","func":"fn","args":[21]}
+{`{"program":"fn p:n>n;*p 2","func":"fn","args":[21]}`}
 
 <span class="code-comment"># response</span>
-{"ok": 42}</code></pre>
+{`{"ok": 42}`}</code></pre>
             </div>
           </div>
 
