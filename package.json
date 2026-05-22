@@ -12,6 +12,7 @@
   "dependencies": {
     "@astrojs/starlight": "^0.37.7",
     "@fontsource/inter": "^5.2.8",
+    "@fontsource/space-grotesk": "^5.2.10",
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.2.1",
     "astro": "^5.6.1",
