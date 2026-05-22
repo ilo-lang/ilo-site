@@ -18,6 +18,12 @@ code, pre, .sl-markdown-content code, .sl-markdown-content pre {
   --sl-color-accent-high: #f5deb3;
   --sl-font: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
   --sl-font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+  /* Positive-delta semantic. Reserved for "fewer tokens" / "+x faster"
+     indicators. Not a second brand colour. */
+  --ilo-lime: #c8f04a;
+  --ilo-lime-low: rgba(200, 240, 74, 0.10);
+  --ilo-ok: var(--ilo-lime);
 }
 
 /* Dark theme: warm-tinted grays with readable contrast */
@@ -42,6 +48,8 @@ code, pre, .sl-markdown-content code, .sl-markdown-content pre {
   --sl-color-accent-low: #fdf1da;
   --sl-color-accent: #b87a14;
   --sl-color-accent-high: #3d2408;
+  --ilo-lime: #6fa61a;
+  --ilo-lime-low: rgba(111, 166, 26, 0.10);
 }
 
 /* Dim ilo comments */
