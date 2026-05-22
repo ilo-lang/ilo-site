@@ -99,7 +99,10 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
                 <span class="sia-pane-lang">Python</span>
                 <span class="sia-pane-file" id="py-filename">script.py</span>
               </div>
-              <textarea id="demo-python" class="sia-editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+              <div id="demo-python-wrap" style="position:relative">
+                <pre id="py-highlight" class="sia-editor sia-editor--highlight" aria-hidden="true"><code></code></pre>
+                <textarea id="demo-python" class="sia-editor sia-editor--overlay" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+              </div>
               <div class="sia-stats" id="stats-python">
                 <span class="sia-stat-tokens">Tokens: <b id="py-tokens">—</b></span>
                 <span class="sia-stat-sep">·</span>
@@ -126,7 +129,7 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
                 </button>
               </div>
               <div id="demo-ilo-wrap" style="position:relative">
-                <textarea id="demo-ilo" class="sia-editor sia-editor--ilo" spellcheck="false" readonly></textarea>
+                <pre id="demo-ilo" class="sia-editor sia-editor--ilo"><code id="ilo-code"></code></pre>
                 <div class="sia-converting" id="sia-converting" style="display:none">
                   <span class="sia-converting-dot"></span>converting…
                 </div>
@@ -1105,6 +1108,49 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
     box-shadow: 0 0 40px rgba(245,158,11,0.04);
     color: var(--accent-bright);
     cursor: default;
+    display: block;
+    margin: 0;
+  }
+
+  .sia-editor--ilo code {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    background: transparent;
+    display: block;
+  }
+
+  /* Python highlight overlay */
+  #demo-python-wrap {
+    position: relative;
+  }
+
+  .sia-editor--highlight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    z-index: 1;
+    margin: 0;
+    overflow: hidden;
+    white-space: pre;
+  }
+
+  .sia-editor--highlight code {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    background: transparent;
+    display: block;
+  }
+
+  .sia-editor--overlay {
+    position: relative;
+    z-index: 2;
+    background: transparent !important;
+    color: transparent !important;
+    caret-color: var(--text) !important;
   }
 
   .sia-editor.is-fading {
@@ -1762,80 +1808,6 @@ interface Preset {
 
 const PRESETS: Preset[] = [
   {
-    name: 'fib',
-    python: `def fib(n: int) -> int:
-    if n <= 1:
-        return n
-    return fib(n - 1) + fib(n - 2)
-
-print(fib(10))`,
-    iloMulti: `fib n:n>n
-  <=n 1 n
-  +fib -n 1 fib -n 2
-
-main>n;fib 10`,
-    iloInline: `fib n:n>n;<=n 1 n;+fib -n 1 fib -n 2\nmain>n;fib 10`,
-    output: '55',
-  },
-  {
-    name: 'fizzbuzz',
-    python: `for i in range(1, 16):
-    if i % 15 == 0:
-        print("FizzBuzz")
-    elif i % 3 == 0:
-        print("Fizz")
-    elif i % 5 == 0:
-        print("Buzz")
-    else:
-        print(i)`,
-    iloMulti: `fb i:n>t
-  =(mod i 15) 0 "FizzBuzz"
-  =(mod i 3) 0 "Fizz"
-  =(mod i 5) 0 "Buzz"
-  str i
-
-main>_
-  @i 1..16{prnt fb i}`,
-    iloInline: `fb i:n>t;=(mod i 15) 0 "FizzBuzz";=(mod i 3) 0 "Fizz";=(mod i 5) 0 "Buzz";str i\nmain>_;@i 1..16{prnt fb i}`,
-    output: '1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz',
-  },
-  {
-    name: 'parse-csv',
-    python: `def parse_csv(text: str) -> list:
-    rows = text.strip().split("\\n")
-    return [row.split(",") for row in rows]
-
-data = parse_csv("a,b,c\\n1,2,3\\n4,5,6")
-print(data[1][0])`,
-    iloMulti: `parse-csv s:t>L L t
-  rows=spl s "\\n"
-  map (r:t>L t;spl r ",") rows
-
-main>t
-  d=parse-csv "a,b,c\\n1,2,3\\n4,5,6"
-  at (at d 1) 0`,
-    iloInline: `parse-csv s:t>L L t;map (r:t>L t;spl r ",") spl s "\\n"\nmain>t;d=parse-csv "a,b,c\\n1,2,3\\n4,5,6";at (at d 1) 0`,
-    output: '1',
-  },
-  {
-    name: 'fold-sum',
-    python: `from functools import reduce
-
-def add(a: float, b: float) -> float:
-    return a + b
-
-nums = [1, 2, 3, 4, 5]
-total = reduce(add, nums, 0)
-print(total)`,
-    iloMulti: `add a:n b:n>n
-  +a b
-
-main>n
-  fld add [1,2,3,4,5] 0`,
-    iloInline: `add a:n b:n>n;+a b\nmain>n;fld add [1,2,3,4,5] 0`,
-    output: '15',
-  },
-  {
     name: 'pipes',
     python: `def double(x: int) -> int:
     return x * 2
@@ -1843,40 +1815,76 @@ main>n
 def increment(x: int) -> int:
     return x + 1
 
-def run(x: int) -> int:
-    return increment(double(x))
+print(increment(double(5)))`,
+    iloMulti: `dbl x:n>n
+  *x 2
 
-print(run(5))`,
-    iloMulti: `dbl x:n>n;*x 2
-inc x:n>n;+x 1
-rn x:n>n;x>>dbl>>inc
+inc x:n>n
+  +x 1
 
-main>n;rn 5`,
-    iloInline: `dbl x:n>n;*x 2\ninc x:n>n;+x 1\nrn x:n>n;x>>dbl>>inc\nmain>n;rn 5`,
+main>n
+  5>>dbl>>inc`,
+    iloInline: `dbl x:n>n;*x 2\ninc x:n>n;+x 1\nmain>n;5>>dbl>>inc`,
     output: '11',
   },
   {
-    name: 'classify',
-    python: `def classify(score: int) -> str:
-    if score >= 90:
-        return "A"
-    elif score >= 80:
-        return "B"
-    elif score >= 70:
-        return "C"
-    else:
-        return "F"
+    name: 'fold-sum',
+    python: `from functools import reduce
 
-print(classify(85))`,
-    iloMulti: `classify s:n>t
-  >=s 90 "A"
-  >=s 80 "B"
-  >=s 70 "C"
-  "F"
+nums = [1, 2, 3, 4, 5]
+total = reduce(lambda a, b: a + b, nums, 0)
+print(total)`,
+    iloMulti: `add a:n b:n>n
+  +a b
 
-main>t;classify 85`,
-    iloInline: `classify s:n>t;>=s 90 "A";>=s 80 "B";>=s 70 "C";"F"\nmain>t;classify 85`,
-    output: 'B',
+main>n
+  fld add [1,2,3,4,5] 0`,
+    iloInline: `main>n;fld (a:n b:n>n;+a b) [1,2,3,4,5] 0`,
+    output: '15',
+  },
+  {
+    name: 'map-double',
+    python: `nums = [1, 2, 3, 4, 5]
+result = list(map(lambda n: n * 2, nums))
+print(result)`,
+    iloMulti: `dbl n:n>n
+  *n 2
+
+main>L n
+  map dbl [1,2,3,4,5]`,
+    iloInline: `main>L n;map (n:n>n;*n 2) [1,2,3,4,5]`,
+    output: '[2, 4, 6, 8, 10]',
+  },
+  {
+    name: 'filter-even',
+    python: `nums = list(range(1, 11))
+result = list(filter(lambda n: n % 2 == 0, nums))
+print(result)`,
+    iloMulti: `even n:n>b
+  =(mod n 2) 0
+
+main>L n
+  flt even [1,2,3,4,5,6,7,8,9,10]`,
+    iloInline: `main>L n;flt (n:n>b;=(mod n 2) 0) [1,2,3,4,5,6,7,8,9,10]`,
+    output: '[2, 4, 6, 8, 10]',
+  },
+  {
+    name: 'text-upper',
+    python: `text = "hello world"
+print(text.upper())`,
+    iloMulti: `main>t
+  upr "hello world"`,
+    iloInline: `main>t;upr "hello world"`,
+    output: 'HELLO WORLD',
+  },
+  {
+    name: 'len-list',
+    python: `nums = [1, 2, 3, 4, 5]
+print(len(nums))`,
+    iloMulti: `main>n
+  len [1,2,3,4,5]`,
+    iloInline: `main>n;len [1,2,3,4,5]`,
+    output: '5',
   },
 ];
 
@@ -1890,8 +1898,184 @@ let prevPyChar = 0;
 let prevIloTok = 0;
 let prevIloChar = 0;
 
+// ===== SYNTAX HIGHLIGHTING =====
+
+function escHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ilo tokenizer / highlighter
+const ILO_KW = new Set(['wh','ret','brk','cnt','main','if','else']);
+const ILO_BUILTIN = new Set(['map','flt','fld','len','upr','lwr','str','int','mod','spl','cat','at','prnt','hd','tl','srt','rev','rng','fmt','flt','fld','hd','tl','lst','frq','flat','grp','has','ord','sum','min','max','avg','abs','ceil','flr','rnd','log','exp','sqt','sin','cos','tan','zip','unz','rpl','trm','prfx','sfx','sub','idx','inn','cnt','uni','srt','rsrt','dbl','inc','range','push','pop']);
+
+function highlightIlo(src: string): string {
+  // Tokenize line by line
+  return src.split('\n').map(line => {
+    let out = '';
+    let i = 0;
+    while (i < line.length) {
+      const ch = line[i];
+      // string literal
+      if (ch === '"') {
+        let j = i + 1;
+        while (j < line.length && !(line[j] === '"' && line[j-1] !== '\\')) j++;
+        out += `<span class="syn-s">${escHtml(line.slice(i, j + 1))}</span>`;
+        i = j + 1;
+        continue;
+      }
+      // comment
+      if (ch === '-' && line[i+1] === '-') {
+        out += `<span class="syn-cm">${escHtml(line.slice(i))}</span>`;
+        break;
+      }
+      // number
+      if (/[0-9]/.test(ch) || (ch === '-' && /[0-9]/.test(line[i+1] || ''))) {
+        let j = i + 1;
+        while (j < line.length && /[0-9.]/.test(line[j])) j++;
+        out += `<span class="syn-p">${escHtml(line.slice(i, j))}</span>`;
+        i = j;
+        continue;
+      }
+      // operators / sigils
+      if (/[+\-*\/=<>!|&^%@?~]/.test(ch) || ch === ';' || (ch === '>' && line[i+1] === '>')) {
+        let j = i + 1;
+        // multi-char ops: >>, >=, <=, !=, >>, >>
+        if ((ch === '>' && line[i+1] === '>') || (ch === '>' && line[i+1] === '=') ||
+            (ch === '<' && line[i+1] === '=') || (ch === '!' && line[i+1] === '=') ||
+            (ch === '+' && line[i+1] === '+') || (ch === '-' && line[i+1] === '>')) {
+          j = i + 2;
+        }
+        const op = line.slice(i, j);
+        if (op === ';') {
+          out += escHtml(op);
+        } else if (op === '>') {
+          // could be return type sigil or op — highlight as op
+          out += `<span class="syn-op">${escHtml(op)}</span>`;
+        } else {
+          out += `<span class="syn-op">${escHtml(op)}</span>`;
+        }
+        i = j;
+        continue;
+      }
+      // identifier or keyword
+      if (/[a-zA-Z_\-]/.test(ch)) {
+        let j = i + 1;
+        while (j < line.length && /[a-zA-Z0-9_\-]/.test(line[j])) j++;
+        const word = line.slice(i, j);
+        if (ILO_KW.has(word)) {
+          out += `<span class="syn-kw">${escHtml(word)}</span>`;
+        } else if (ILO_BUILTIN.has(word)) {
+          out += `<span class="syn-fn">${escHtml(word)}</span>`;
+        } else if (/^[a-z]/.test(word) && j < line.length && line[j] === ' ') {
+          // first word on expression that looks like a fn call
+          out += `<span class="syn-fn">${escHtml(word)}</span>`;
+        } else if (/:[ntbLM]/.test(line.slice(j, j+2))) {
+          // param name followed by type sigil
+          out += `<span class="syn-p">${escHtml(word)}</span>`;
+        } else {
+          out += `<span class="syn-p">${escHtml(word)}</span>`;
+        }
+        i = j;
+        continue;
+      }
+      // type sigil after colon
+      if (ch === ':') {
+        let j = i + 1;
+        const next = line[j];
+        if (next && /[ntbLMR]/.test(next)) {
+          // :n :t :b :L :M etc
+          let k = j + 1;
+          // collect e.g. L n, L t
+          if (line[k] === ' ' && /[ntbLMR]/.test(line[k+1] || '')) k += 2;
+          out += `<span class="syn-t">${escHtml(line.slice(i, k))}</span>`;
+          i = k;
+        } else {
+          out += escHtml(ch);
+          i++;
+        }
+        continue;
+      }
+      out += escHtml(ch);
+      i++;
+    }
+    return out;
+  }).join('\n');
+}
+
+// Python tokenizer / highlighter
+const PY_KW = new Set(['def','if','elif','else','for','while','in','return','import','from','print','not','and','or','True','False','None','lambda','class','try','except','with','as','pass','break','continue','yield','del','raise','assert','global','nonlocal','is']);
+
+function highlightPy(src: string): string {
+  return src.split('\n').map(line => {
+    let out = '';
+    let i = 0;
+    while (i < line.length) {
+      const ch = line[i];
+      // comment
+      if (ch === '#') {
+        out += `<span class="syn-cm">${escHtml(line.slice(i))}</span>`;
+        break;
+      }
+      // string (single or double, simple)
+      if (ch === '"' || ch === "'") {
+        const q = ch;
+        // check triple
+        const triple = line[i+1] === q && line[i+2] === q;
+        if (triple) {
+          let j = i + 3;
+          while (j < line.length - 2 && !(line[j]===q && line[j+1]===q && line[j+2]===q)) j++;
+          out += `<span class="syn-s">${escHtml(line.slice(i, j + 3))}</span>`;
+          i = j + 3;
+        } else {
+          let j = i + 1;
+          while (j < line.length && line[j] !== q) { if (line[j] === '\\') j++; j++; }
+          out += `<span class="syn-s">${escHtml(line.slice(i, j + 1))}</span>`;
+          i = j + 1;
+        }
+        continue;
+      }
+      // number
+      if (/[0-9]/.test(ch)) {
+        let j = i + 1;
+        while (j < line.length && /[0-9._xXoObBa-fA-F]/.test(line[j])) j++;
+        out += `<span class="syn-p">${escHtml(line.slice(i, j))}</span>`;
+        i = j;
+        continue;
+      }
+      // identifier or keyword
+      if (/[a-zA-Z_]/.test(ch)) {
+        let j = i + 1;
+        while (j < line.length && /[a-zA-Z0-9_]/.test(line[j])) j++;
+        const word = line.slice(i, j);
+        if (PY_KW.has(word)) {
+          out += `<span class="syn-kw">${escHtml(word)}</span>`;
+        } else if (j < line.length && line[j] === '(') {
+          out += `<span class="syn-fn">${escHtml(word)}</span>`;
+        } else {
+          out += `<span class="syn-p">${escHtml(word)}</span>`;
+        }
+        i = j;
+        continue;
+      }
+      // operators
+      if (/[+\-*\/=<>!%&|^~@]/.test(ch)) {
+        let j = i + 1;
+        if (j < line.length && /[=+\-*\/]/.test(line[j])) j++;
+        out += `<span class="syn-op">${escHtml(line.slice(i, j))}</span>`;
+        i = j;
+        continue;
+      }
+      out += escHtml(ch);
+      i++;
+    }
+    return out;
+  }).join('\n');
+}
+
 const pyEl = document.getElementById('demo-python') as HTMLTextAreaElement;
-const iloEl = document.getElementById('demo-ilo') as HTMLTextAreaElement;
+const pyHighlight = document.querySelector('#py-highlight code') as HTMLElement;
+const iloEl = document.getElementById('demo-ilo') as HTMLPreElement;
+const iloCode = document.getElementById('ilo-code') as HTMLElement;
 const pyTokensEl = document.getElementById('py-tokens')!;
 const pyCharsEl = document.getElementById('py-chars')!;
 const iloTokensEl = document.getElementById('ilo-tokens')!;
@@ -1905,9 +2089,14 @@ const convertingOverlay = document.getElementById('sia-converting')!;
 const toggleBtn = document.getElementById('sia-toggle')!;
 const toggleLabel = document.getElementById('sia-toggle-label')!;
 
+// Track raw ilo text for stats
+let iloRawText = '';
+
+function getIloText(): string { return iloRawText; }
+
 function updateStats() {
   const py = pyEl.value;
-  const ilo = iloEl.value;
+  const ilo = getIloText();
   const pyTok = countTokens(py);
   const iloTok = countTokens(ilo);
   const pyChar = py.length;
@@ -1937,13 +2126,15 @@ function updateStats() {
 function setIloText(text: string, animate = true) {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!animate || reduced) {
-    iloEl.value = text;
+    iloRawText = text;
+    iloCode.innerHTML = highlightIlo(text);
     updateStats();
     return;
   }
   iloEl.classList.add('is-fading');
   setTimeout(() => {
-    iloEl.value = text;
+    iloRawText = text;
+    iloCode.innerHTML = highlightIlo(text);
     iloEl.classList.remove('is-fading');
     updateStats();
   }, 150);
@@ -1956,13 +2147,16 @@ function loadPreset(idx: number, skipAutoCycle = false) {
   const p = PRESETS[idx];
 
   pyEl.value = p.python;
+  pyHighlight.innerHTML = highlightPy(p.python);
   document.querySelectorAll('.sia-preset-chip').forEach((c, i) => {
     c.classList.toggle('active', i === idx);
   });
 
   // ilo pane lags 150ms
   setTimeout(() => {
-    iloEl.value = isMultiLine ? p.iloMulti : p.iloInline;
+    const iloText = isMultiLine ? p.iloMulti : p.iloInline;
+    iloRawText = iloText;
+    iloCode.innerHTML = highlightIlo(iloText);
     updateStats();
   }, 150);
 
@@ -2008,9 +2202,11 @@ siaCard?.addEventListener('mouseleave', scheduleAutoCycle);
 // Editable Python — debounced stats update (500ms)
 pyEl.removeAttribute('readonly');
 pyEl.addEventListener('input', () => {
+  // Re-highlight on every keystroke (cheap)
+  pyHighlight.innerHTML = highlightPy(pyEl.value);
   if (debounceTimer) clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
-    // update python stats immediately; ilo stays as-is until Convert
+    // update python stats; ilo stays as-is until Convert
     const py = pyEl.value;
     const pyTok = countTokens(py);
     const pyChar = py.length;
@@ -2041,10 +2237,10 @@ convertBtn.addEventListener('click', async () => {
     });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
-    const iloCode = data.ilo || data.result || data.code || '';
-    if (!iloCode) throw new Error('Empty response');
+    const iloResult = data.ilo || data.result || data.code || '';
+    if (!iloResult) throw new Error('Empty response');
     isApiResult = true;
-    setIloText(iloCode);
+    setIloText(iloResult);
     toggleBtn.setAttribute('disabled', 'true');
     isMultiLine = true;
     toggleLabel.textContent = isMultiLine ? 'multi-line' : 'compact';
