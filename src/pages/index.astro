@@ -168,14 +168,14 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
     <!-- STATS -->
     <section class="stats" data-animate>
       <div class="container stats-grid">
-        <div class="stat">
-          <div class="stat-number">67%</div>
+        <div class="stat stat--positive">
+          <div class="stat-number">&minus;67%</div>
           <div class="stat-label">fewer tokens</div>
           <div class="stat-context">vs Python</div>
         </div>
         <div class="stat-divider"></div>
-        <div class="stat">
-          <div class="stat-number">78%</div>
+        <div class="stat stat--positive">
+          <div class="stat-number">&minus;78%</div>
           <div class="stat-label">fewer characters</div>
           <div class="stat-context">vs Python</div>
         </div>
@@ -311,6 +311,47 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
     </section>
 
     <!-- CTA -->
+    <!-- HONEST BENCHMARKS -->
+    <section class="benchmarks" data-animate>
+      <div class="container">
+        <div class="bench-head">
+          <div class="bench-kicker">Honest benchmarks</div>
+          <h2 class="section-title">Three engines. None of them is the fastest. That&apos;s not the metric.</h2>
+          <p class="section-subtitle">
+            ilo runs on a bytecode VM, a Cranelift JIT, and a Cranelift AOT compiler.
+            They sit in the middle of the runtime field&mdash;faster than Python or Ruby, slower than V8 or Go.
+            The number that matters is the one above the keyboard, not the one below it.
+          </p>
+        </div>
+
+        <div class="bench-card">
+          <div class="bench-meta">
+            <span>numeric &middot; sum 1..1000 &middot; median ns/call &middot; 10000 iterations</span>
+            <span>Darwin arm64</span>
+          </div>
+          <div class="bench-rows">
+            <div class="bench-row"><span class="bench-lang">Rust</span><span class="bench-tag">native</span><div class="bench-bar"><div class="bench-fill" style="width:2.2%"></div></div><span class="bench-ns">329ns</span></div>
+            <div class="bench-row"><span class="bench-lang">LuaJIT</span><span class="bench-tag">JIT</span><div class="bench-bar"><div class="bench-fill" style="width:3.0%"></div></div><span class="bench-ns">442ns</span></div>
+            <div class="bench-row"><span class="bench-lang">Node/V8</span><span class="bench-tag">JIT</span><div class="bench-bar"><div class="bench-fill" style="width:3.1%"></div></div><span class="bench-ns">451ns</span></div>
+            <div class="bench-row"><span class="bench-lang">Kotlin</span><span class="bench-tag">JVM</span><div class="bench-bar"><div class="bench-fill" style="width:3.6%"></div></div><span class="bench-ns">528ns</span></div>
+            <div class="bench-row"><span class="bench-lang">Go</span><span class="bench-tag">native</span><div class="bench-bar"><div class="bench-fill" style="width:4.5%"></div></div><span class="bench-ns">665ns</span></div>
+            <div class="bench-row"><span class="bench-lang">PyPy 3</span><span class="bench-tag">JIT</span><div class="bench-bar"><div class="bench-fill" style="width:10.2%"></div></div><span class="bench-ns">1.5&micro;s</span></div>
+            <div class="bench-row bench-row--ilo"><span class="bench-lang">ilo JIT</span><span class="bench-tag">Cranelift</span><div class="bench-bar"><div class="bench-fill bench-fill--ilo" style="width:28.5%"></div></div><span class="bench-ns">4.2&micro;s</span></div>
+            <div class="bench-row bench-row--ilo"><span class="bench-lang">ilo AOT</span><span class="bench-tag">Cranelift</span><div class="bench-bar"><div class="bench-fill bench-fill--ilo" style="width:36.0%"></div></div><span class="bench-ns">5.3&micro;s</span></div>
+            <div class="bench-row"><span class="bench-lang">PHP</span><span class="bench-tag">interp</span><div class="bench-bar"><div class="bench-fill" style="width:45.5%"></div></div><span class="bench-ns">6.7&micro;s</span></div>
+            <div class="bench-row bench-row--ilo"><span class="bench-lang">ilo VM</span><span class="bench-tag">bytecode</span><div class="bench-bar"><div class="bench-fill bench-fill--ilo" style="width:49.8%"></div></div><span class="bench-ns">14.7&micro;s</span></div>
+            <div class="bench-row"><span class="bench-lang">Python 3</span><span class="bench-tag">interp</span><div class="bench-bar"><div class="bench-fill" style="width:100%"></div></div><span class="bench-ns">29.5&micro;s</span></div>
+          </div>
+          <div class="bench-foot">
+            <span>7 more benchmarks in the full table&mdash;string, record, mixed, foreach, recurse&hellip;</span>
+            <a class="bench-link" href="/docs/reference/benchmarks/">All benchmarks
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="final-cta" data-animate>
       <div class="container">
         <p class="cta-statement">Make your agents more efficient.</p>
@@ -371,6 +412,10 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
     --accent: #f59e0b;
     --accent-bright: #fbbf24;
     --accent-dim: rgba(245, 158, 11, 0.08);
+    /* Positive-delta semantic — "fewer tokens" / "+x faster" only.
+       Not a second brand colour. See src/styles/global.css. */
+    --positive: #c8f04a;
+    --positive-dim: rgba(200, 240, 74, 0.10);
     --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
     --font-body: 'Bricolage Grotesque', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
@@ -725,6 +770,10 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
     line-height: 1;
   }
 
+  .stat--positive .stat-number {
+    color: var(--positive);
+  }
+
   .stat-label {
     font-size: 1rem;
     font-weight: 500;
@@ -836,8 +885,8 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
   }
 
   .code-badge--accent {
-    color: var(--accent);
-    background: var(--accent-dim);
+    color: var(--positive);
+    background: var(--positive-dim);
   }
 
   .code-body {
@@ -1458,6 +1507,142 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
   .principle:hover {
     border-color: var(--border-hover);
     color: var(--accent);
+  }
+
+  /* ===== HONEST BENCHMARKS ===== */
+  .benchmarks {
+    padding: 6rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .bench-head {
+    max-width: 760px;
+    margin: 0 auto 3rem;
+    text-align: center;
+  }
+
+  .bench-kicker {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+  }
+
+  .bench-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .bench-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+  }
+
+  .bench-rows {
+    padding: 18px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .bench-row {
+    display: grid;
+    grid-template-columns: 110px 78px 1fr 80px;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .bench-lang {
+    font-family: var(--font-display);
+    font-size: 0.92rem;
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .bench-row--ilo .bench-lang {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .bench-tag {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--text-dim);
+  }
+
+  .bench-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .bench-fill {
+    height: 100%;
+    background: var(--text-dim);
+    border-radius: 3px;
+  }
+
+  .bench-fill--ilo {
+    background: var(--accent);
+  }
+
+  .bench-ns {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    text-align: right;
+  }
+
+  .bench-row--ilo .bench-ns {
+    color: var(--accent);
+  }
+
+  .bench-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .bench-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .bench-link:hover {
+    color: var(--accent-bright);
+  }
+
+  @media (max-width: 640px) {
+    .bench-row {
+      grid-template-columns: 90px 1fr 70px;
+    }
+    .bench-tag {
+      display: none;
+    }
   }
 
   /* ===== FINAL CTA ===== */
