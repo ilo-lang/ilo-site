@@ -57,8 +57,8 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
           </div>
           <div class="hero-terminal" id="install-cmd">
             <span class="terminal-prompt">$</span>
-            <span class="terminal-text" data-cmd="mac">curl -fsSL https://raw.githubusercontent.com/ilo-lang/ilo/main/install.sh | sh</span>
-            <span class="terminal-text" data-cmd="windows" style="display:none">irm https://raw.githubusercontent.com/ilo-lang/ilo/main/install.ps1 | iex</span>
+            <span class="terminal-text" data-cmd="mac">curl -fsSL https://ilo-lang.ai/install.sh | sh</span>
+            <span class="terminal-text" data-cmd="windows" style="display:none">irm https://ilo-lang.ai/install.ps1 | iex</span>
             <span class="terminal-text" data-cmd="claude" style="display:none">/plugin marketplace add ilo-lang/ilo && /plugin install ilo-lang/ilo</span>
             <button class="terminal-copy" id="copy-btn" aria-label="Copy install command">
               <svg class="icon-copy" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -1630,8 +1630,8 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
 
   const prompts: Record<string, string> = { mac: '$', windows: '>', claude: '>' };
   const commands: Record<string, string> = {
-    mac: 'curl -fsSL https://raw.githubusercontent.com/ilo-lang/ilo/main/install.sh | sh',
-    windows: 'irm https://raw.githubusercontent.com/ilo-lang/ilo/main/install.ps1 | iex',
+    mac: 'curl -fsSL https://ilo-lang.ai/install.sh | sh',
+    windows: 'irm https://ilo-lang.ai/install.ps1 | iex',
     claude: '/plugin marketplace add ilo-lang/ilo && /plugin install ilo-lang/ilo',
   };
 
