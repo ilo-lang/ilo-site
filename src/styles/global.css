@@ -59,6 +59,15 @@ code, pre, .sl-markdown-content code, .sl-markdown-content pre {
   --ilo-ok:        var(--ilo-lime);
   --ilo-err:       #f87171;
 
+  /* Syntax highlighting — scoped to code blocks only */
+  --ilo-syn-kw:  var(--ilo-amber);  /* declarations, flags, keywords */
+  --ilo-syn-op:  #7aa2ff;           /* operators, pipes, types */
+  --ilo-syn-str: #a5d6ff;           /* string literals */
+  --ilo-syn-num: var(--ilo-fg-1);   /* numbers */
+  --ilo-syn-id:  var(--ilo-fg-1);   /* identifiers */
+  --ilo-syn-cmt: var(--ilo-fg-4);   /* comments */
+  --ilo-syn-err: var(--ilo-err);    /* error codes */
+
   /* Type */
   --ilo-font-sans: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
   --ilo-font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
