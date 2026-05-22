@@ -48,6 +48,39 @@ use "math-lib.ilo" [dbl sq]
 
 Now only `dbl` and `sq` are available. `half` is not imported. Requesting a name that does not exist in the file is an error (`ILO-P019`).
 
+## Re-exports
+
+A file can re-export names it imported, making them available to any file that imports it:
+
+```ilo
+-- utils.ilo
+use "math-lib.ilo" [dbl sq]
+pub dbl sq       -- re-export these names
+```
+
+Any file using `utils.ilo` automatically gets `dbl` and `sq` without needing to import `math-lib.ilo` directly.
+
+## Conditional imports
+
+Import a file only when a condition is met at parse time (useful for platform-specific or feature-gated code):
+
+```ilo
+use "web.ilo" if wasm
+use "native-http.ilo" if !wasm
+```
+
+The `if` condition is evaluated before type-checking; only the matching branch is resolved.
+
+## Lazy loading
+
+Prefix `lazy` to defer resolution until first call, reducing startup cost for large optional modules:
+
+```ilo
+lazy use "heavy-lib.ilo"
+```
+
+The module is loaded and type-checked on the first call to any of its functions, not at program start.
+
 ## Import rules
 
 - Paths are **relative to the importing file's directory**

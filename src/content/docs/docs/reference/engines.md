@@ -36,10 +36,21 @@ The CLI picks a sensible default per command. To force an engine, see `--vm` / `
 ### JIT (Cranelift)
 - Enabled with `--features cranelift` in a source build.
 - Best for hot loops and numeric kernels.
+- As of 0.13.0, supports tail-call optimisation via `return_call` — recursive tail calls compile to a loop without stack growth.
+- Dispatches `par-map` to the parallel scheduler and JIT-compiles the inner function before distributing work to threads.
 
 ### AOT
 - Produces a standalone native binary.
 - See `ilo build` in the [CLI Reference](/docs/reference/cli/).
+
+### WASM
+- Built with `--features wasm`. Targets the browser and Node.js via `--emit js` or direct WASM output.
+- As of 0.13.0, HTTP fetch (`$url`) is available inside WASM builds via `fetch` API bridging.
+- Most numeric, text, and list builtins are supported; filesystem builtins (`rd`, `wrt`, `rdl`) require a WASM filesystem shim.
+
+### Cross-platform
+
+As of 0.13.0, ilo has a cross-platform MVP: all four engines are tested on Linux x86-64, macOS arm64, and Windows x86-64 in CI. The install script (`curl -fsSL .../install.sh | sh`) auto-selects the right binary.
 
 ## Picking an engine
 

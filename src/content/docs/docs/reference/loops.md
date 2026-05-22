@@ -213,6 +213,29 @@ ilo 'first-big xs:L n>n;@x xs{>=x 10{ret x}};0' 3,7,12,5
 
 For simple list transforms, prefer [`map`](/docs/builtins/collections#higher-order-functions), [`flt`](/docs/builtins/collections#higher-order-functions), and [`fld`](/docs/builtins/collections#higher-order-functions). Loops are for when you need mutable state or early exit.
 
+## Parallel map: `par-map`
+
+`par-map` is a parallel version of `map` that distributes work across threads:
+
+```ilo
+double x:n>n;*x 2
+main>L n;par-map double (range 0 1000)
+```
+
+```bash
+ilo 'double x:n>n;*x 2 main>L n;par-map double (range 0 1000)' main
+```
+
+`par-map` accepts an optional chunk size to control granularity:
+
+```ilo
+par-map double xs 64     -- chunk every 64 elements
+```
+
+The chunk size tunes the work-stealing scheduler: smaller chunks improve load balancing at the cost of higher overhead; larger chunks reduce overhead but may leave threads idle. As of 0.13.0, `par-map` has a native VM opcode (`PAR_MAP`) and the Cranelift JIT can JIT the inner function before dispatching to threads.
+
+`par-map` is safe only for pure functions with no shared mutable state. The verifier does not enforce this automatically; use effect sets (see `World` capability) to annotate and restrict side-effectful code.
+
 ## Tail-call optimisation
 
 ilo deliberately has no `loop` keyword — every iteration shape that can't be written with `@` foreach should be expressed as a tail-recursive function. To make that safe, the runtime guarantees that **tail calls do not consume host-stack frames**: a function that recurses only in tail position can run to arbitrary depth, because the runtime rebinds parameters in place rather than pushing a frame.

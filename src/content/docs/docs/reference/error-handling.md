@@ -145,6 +145,29 @@ ilo 'f>O n;nil' f
 
 `??` chains: `a??b??99` returns the first non-nil value, or 99.
 
+## Defer and errdefer
+
+`defer` schedules a statement to run when the enclosing function exits, regardless of whether it exits normally or via `^`:
+
+```ilo
+open-and-read path:t>R t t
+  f = open! path
+  defer close f          -- always runs on exit
+  ~rdl! f
+```
+
+`errdefer` runs only when the function exits via `^` (error path):
+
+```ilo
+create-file path:t>R _ t
+  f = create! path
+  errdefer delete f      -- cleans up only on error
+  write! f "content"
+  ~_
+```
+
+`defer` and `errdefer` stack in LIFO order. They are especially useful for resource cleanup (file handles, network connections) without try/finally boilerplate.
+
 ## Compact error codes
 
 When type verification fails, ilo returns compact error codes:

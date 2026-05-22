@@ -123,6 +123,51 @@ tot p:n q:n r:n>n;s=*p q;t=*s r;+s t
 
 Same semantics. 0.33x the tokens, 0.22x the characters. For an AI agent paying per token, this adds up fast across thousands of tool calls.
 
+## Sum types
+
+Classify HTTP status codes using a discriminated union:
+
+```ilo
+type status S{ok:n; redirect:n t; err:n t}
+
+describe s:status>t
+  ?s{
+    ok code: fmt "OK {}" code
+    redirect code loc: fmt "→ {} {}" code loc
+    err code msg: fmt "error {}: {}" code msg
+  }
+```
+
+## Parallel processing
+
+Double 10 000 numbers in parallel:
+
+```bash
+ilo 'double x:n>n;*x 2 main>L n;par-map double (range 0 10000)' main
+```
+
+## defer for cleanup
+
+Read a file and guarantee close on exit:
+
+```ilo
+read-lines path:t>R L t t
+  f = open! path
+  defer close f
+  ~rdl! f
+```
+
+## use<- chain
+
+Chain operations without nesting:
+
+```ilo
+process path:t>R n t
+  use<- f=open! path
+  use<- rows=parse-csv! f
+  ~sum (map (r:L _>n;num! r.0) rows)
+```
+
 ## What's next
 
 - Run `ilo -ai` to get the compact spec for your AI agent

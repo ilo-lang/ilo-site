@@ -15,6 +15,21 @@ Use this when doing arithmetic, comparisons, aggregation, or numeric conversions
 | `/` | Divide | `/10 2` | `5` |
 | `%` | Modulo | `%10 3` | `1` |
 
+## Bitwise operators
+
+Work on `u32`, `u64`, and `i64` integer types.
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `band` | Bitwise AND | `band 0xF0u 0x0Fu` -> `0u` |
+| `bor` | Bitwise OR | `bor 0xF0u 0x0Fu` -> `0xFFu` |
+| `bxor` | Bitwise XOR | `bxor 0xFFu 0x0Fu` -> `0xF0u` |
+| `bnot` | Bitwise NOT (complement) | `bnot 0u` -> `0xFFFFFFFFu` |
+| `shl` | Left shift | `shl 1u 4` -> `16u` |
+| `shr` | Right shift (logical for u32/u64, arithmetic for i64) | `shr 16u 4` -> `1u` |
+
+64-bit variants (`band64`, `bor64`, `bxor64`, `bnot64`, `shl64`, `shr64`) operate on `u64` and `i64` values, allowing full 64-bit integer manipulation for crypto, binary codecs, and WASM interop.
+
 ## Comparison operators
 
 | Operator | Description | Example |
