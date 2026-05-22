@@ -1052,6 +1052,9 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
     font-size: 0.88rem;
     line-height: 1.8;
     color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
     resize: none;
     outline: none;
     white-space: pre;
@@ -1225,26 +1228,27 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
 
   .sia-preset-chip {
     font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     font-weight: 500;
     color: var(--text-muted);
-    background: rgba(255,255,255,0.03);
+    background: rgba(255,255,255,0.02);
     border: 1px solid var(--border);
-    padding: 6px 13px;
-    border-radius: 100px;
+    border-bottom-width: 2px;
+    padding: 8px 16px;
+    border-radius: 6px 6px 0 0;
     cursor: pointer;
     transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s;
+    margin-bottom: -1px;
   }
 
   .sia-preset-chip:hover {
     color: var(--accent);
-    border-color: rgba(245,158,11,0.3);
-    background: var(--accent-dim);
+    background: rgba(245,158,11,0.06);
   }
 
   .sia-preset-chip.active {
     color: var(--accent);
-    border-color: rgba(245,158,11,0.4);
+    border-bottom-color: var(--accent);
     background: var(--accent-dim);
   }
 
