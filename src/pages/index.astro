@@ -39,51 +39,86 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
   </nav>
 
   <main>
-    <!-- PYTHON → ILO DEMO (primary hero) -->
-    <section class="demo-section" data-animate>
+    <!-- SEE IT IN ACTION (merged interactive demo) -->
+    <section class="sia-section" data-animate>
       <div class="container">
-        <div class="demo-header">
-          <span class="demo-eyebrow">watch your code shrink</span>
-          <h2 class="demo-title">Same logic. Fewer tokens.</h2>
-        </div>
-        <div class="demo-box">
-          <div class="demo-panes">
-            <div class="demo-pane">
-              <div class="demo-pane-label">Python</div>
-              <textarea id="demo-python" class="demo-editor" readonly spellcheck="false"></textarea>
-              <div class="demo-stats" id="stats-python">
-                <span class="demo-stat-tokens">Tokens: —</span>
-                <span class="demo-stat-sep">·</span>
-                <span class="demo-stat-chars">Chars: —</span>
+        <h2 class="section-title">See it in action</h2>
+        <p class="section-subtitle">Real Python side-by-side with its ilo equivalent. Click a preset or edit the Python yourself.</p>
+
+        <div class="sia-card">
+          <!-- Panes row -->
+          <div class="sia-panes">
+            <!-- Python pane -->
+            <div class="sia-pane">
+              <div class="sia-pane-header">
+                <div class="window-dots">
+                  <span class="dot dot--red"></span>
+                  <span class="dot dot--yellow"></span>
+                  <span class="dot dot--green"></span>
+                </div>
+                <span class="sia-pane-lang">Python</span>
+                <span class="sia-pane-file" id="py-filename">script.py</span>
+              </div>
+              <textarea id="demo-python" class="sia-editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+              <div class="sia-stats" id="stats-python">
+                <span class="sia-stat-tokens">Tokens: <b id="py-tokens">—</b></span>
+                <span class="sia-stat-sep">·</span>
+                <span class="sia-stat-chars">Chars: <b id="py-chars">—</b></span>
               </div>
             </div>
-            <div class="demo-arrow">→</div>
-            <div class="demo-pane">
-              <div class="demo-pane-label">ilo</div>
-              <textarea id="demo-ilo" class="demo-editor demo-editor--ilo" readonly spellcheck="false"></textarea>
-              <div class="demo-stats demo-stats--ilo" id="stats-ilo">
-                <span class="demo-stat-tokens">Tokens: —</span>
-                <span class="demo-stat-sep">·</span>
-                <span class="demo-stat-chars">Chars: —</span>
-                <span class="demo-stat-saving" id="demo-saving"></span>
+
+            <!-- Arrow -->
+            <div class="sia-arrow" aria-hidden="true">→</div>
+
+            <!-- ilo pane -->
+            <div class="sia-pane sia-pane--ilo">
+              <div class="sia-pane-header">
+                <div class="window-dots">
+                  <span class="dot dot--red"></span>
+                  <span class="dot dot--yellow"></span>
+                  <span class="dot dot--green"></span>
+                </div>
+                <span class="sia-pane-lang sia-pane-lang--ilo">ilo</span>
+                <span class="sia-pane-file" id="ilo-filename">script.ilo</span>
+                <button class="sia-toggle" id="sia-toggle" title="Toggle multi-line ↔ inline">
+                  <span class="sia-toggle-label" id="sia-toggle-label">multi-line</span>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
+                </button>
+              </div>
+              <div id="demo-ilo-wrap" style="position:relative">
+                <textarea id="demo-ilo" class="sia-editor sia-editor--ilo" spellcheck="false" readonly></textarea>
+                <div class="sia-converting" id="sia-converting" style="display:none">
+                  <span class="sia-converting-dot"></span>converting…
+                </div>
+              </div>
+              <div class="sia-stats sia-stats--ilo" id="stats-ilo">
+                <span class="sia-stat-tokens">Tokens: <b id="ilo-tokens">—</b></span>
+                <span class="sia-stat-sep">·</span>
+                <span class="sia-stat-chars">Chars: <b id="ilo-chars">—</b></span>
+                <span class="sia-stat-diff" id="sia-diff"></span>
               </div>
             </div>
           </div>
 
-          <div class="demo-controls">
-            <div class="demo-presets" id="demo-presets">
-              <!-- preset buttons injected by JS -->
+          <!-- Controls: presets + convert -->
+          <div class="sia-controls">
+            <div class="sia-presets" id="demo-presets">
+              <!-- chips injected by JS -->
             </div>
-            <button class="demo-run-btn" id="demo-run-btn">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-              Run ilo
+            <button class="sia-convert-btn" id="sia-convert-btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 7l-7 7-7-7"/></svg>
+              Convert
             </button>
           </div>
 
-          <div class="demo-output" id="demo-output" style="display:none">
-            <div class="demo-output-label">output</div>
-            <pre class="demo-output-text" id="demo-output-text"></pre>
+          <!-- Output -->
+          <div class="sia-output" id="demo-output" style="display:none">
+            <div class="sia-output-label">output</div>
+            <pre class="sia-output-text" id="demo-output-text"></pre>
           </div>
+
+          <!-- Error -->
+          <div class="sia-error" id="sia-error" style="display:none"></div>
         </div>
       </div>
     </section>
@@ -254,153 +289,7 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
       </div>
     </section>
 
-    <!-- EXAMPLES -->
-    <section class="examples" data-animate>
-      <div class="container">
-        <h2 class="section-title">See it in action</h2>
-        <div class="examples-tabs">
-          <div class="examples-tab-buttons">
-            <button class="examples-tab-btn active" data-example="recursion">Recursion</button>
-            <button class="examples-tab-btn" data-example="classification">Classification</button>
-            <button class="examples-tab-btn" data-example="pipeline">Data Pipeline</button>
-            <button class="examples-tab-btn" data-example="pipes">Pipes</button>
-            <button class="examples-tab-btn" data-example="lists">Lists</button>
-            <button class="examples-tab-btn" data-example="errors">Error Handling</button>
-          </div>
-          <div class="examples-panel">
-            <div class="example-pane active" data-example-pane="recursion">
-              <div class="example-compare">
-                <div class="example-version">
-                  <div class="example-version-label">Inline</div>
-                  <pre class="example-code"><code><span class="syn-dim">$</span> ilo <span class="syn-s">'fac n:n>n;<=n 1 1;r=fac -n 1;*n r'</span> 5
-<span class="syn-result">120</span></code></pre>
-                </div>
-                <div class="example-version">
-                  <div class="example-version-label">File</div>
-                  <pre class="example-code"><code><span class="syn-fn">fac</span> <span class="syn-p">n</span><span class="syn-t">:number</span> <span class="syn-op">&gt;</span> <span class="syn-t">number</span>
-  <span class="syn-op">&lt;=</span> <span class="syn-p">n</span> 1 1
-  <span class="syn-p">r</span> = <span class="syn-fn">fac</span> (<span class="syn-op">-</span> <span class="syn-p">n</span> 1)
-  <span class="syn-op">*</span> <span class="syn-p">n</span> <span class="syn-p">r</span>
-</code></pre>
-                  <pre class="example-output"><code><span class="syn-dim">$</span> ilo fac.ilo fac 5
-<span class="syn-result">120</span></code></pre>
-                </div>
-              </div>
-              <div class="example-desc">Factorial. Guard as base case, then recurse.</div>
-            </div>
-            <div class="example-pane" data-example-pane="classification">
-              <div class="example-compare">
-                <div class="example-version">
-                  <div class="example-version-label">Inline</div>
-                  <pre class="example-code"><code><span class="syn-dim">$</span> ilo <span class="syn-s">'cls sp:n>t;>=sp 1000 "gold";>=sp 500 "silver";"bronze"'</span> 750
-<span class="syn-result">silver</span></code></pre>
-                </div>
-                <div class="example-version">
-                  <div class="example-version-label">File</div>
-                  <pre class="example-code"><code><span class="syn-fn">cls</span> <span class="syn-p">sp</span><span class="syn-t">:number</span> <span class="syn-op">&gt;</span> <span class="syn-t">text</span>
-  <span class="syn-op">&gt;=</span> <span class="syn-p">sp</span> 1000 <span class="syn-s">"gold"</span>
-  <span class="syn-op">&gt;=</span> <span class="syn-p">sp</span> 500  <span class="syn-s">"silver"</span>
-  <span class="syn-s">"bronze"</span>
-</code></pre>
-                  <pre class="example-output"><code><span class="syn-dim">$</span> ilo cls.ilo cls 750
-<span class="syn-result">silver</span></code></pre>
-                </div>
-              </div>
-              <div class="example-desc">Three-tier classifier. Guards fall through &mdash; no if/else needed.</div>
-            </div>
-            <div class="example-pane" data-example-pane="pipeline">
-              <div class="example-compare">
-                <div class="example-version">
-                  <div class="example-version-label">Inline</div>
-                  <pre class="example-code"><code><span class="syn-dim">$</span> ilo <span class="syn-s">'p r:L n>n;c=flt q r;s=sum c;+s 0 q x:n>b;>x 0'</span> p 10,-3,7,-1,4
-<span class="syn-result">21</span></code></pre>
-                </div>
-                <div class="example-version">
-                  <div class="example-version-label">File</div>
-                  <pre class="example-code"><code><span class="syn-fn">p</span> <span class="syn-p">r</span><span class="syn-t">:List number</span> <span class="syn-op">&gt;</span> <span class="syn-t">number</span>
-  <span class="syn-p">c</span> = <span class="syn-fn">filter</span> <span class="syn-fn">q</span> <span class="syn-p">r</span>
-  <span class="syn-fn">sum</span> <span class="syn-p">c</span>
-
-<span class="syn-fn">q</span> <span class="syn-p">x</span><span class="syn-t">:number</span> <span class="syn-op">&gt;</span> <span class="syn-t">bool</span>
-  <span class="syn-op">&gt;</span> <span class="syn-p">x</span> 0
-</code></pre>
-                  <pre class="example-output"><code><span class="syn-dim">$</span> ilo pipeline.ilo p [10,-3,7,-1,4]
-<span class="syn-result">21</span></code></pre>
-                </div>
-              </div>
-              <div class="example-desc">Filter positives and sum. Higher-order functions as first-class builtins.</div>
-            </div>
-            <div class="example-pane" data-example-pane="pipes">
-              <div class="example-compare">
-                <div class="example-version">
-                  <div class="example-version-label">Inline</div>
-                  <pre class="example-code"><code><span class="syn-dim">$</span> ilo <span class="syn-s">'dbl x:n>n;*x 2 inc x:n>n;+x 1 rn x:n>n;x>>dbl>>inc'</span> rn 5
-<span class="syn-result">11</span></code></pre>
-                </div>
-                <div class="example-version">
-                  <div class="example-version-label">File</div>
-                  <pre class="example-code"><code><span class="syn-fn">dbl</span> <span class="syn-p">x</span><span class="syn-t">:number</span> <span class="syn-op">&gt;</span> <span class="syn-t">number</span>
-  <span class="syn-op">*</span> <span class="syn-p">x</span> 2
-
-<span class="syn-fn">inc</span> <span class="syn-p">x</span><span class="syn-t">:number</span> <span class="syn-op">&gt;</span> <span class="syn-t">number</span>
-  <span class="syn-op">+</span> <span class="syn-p">x</span> 1
-
-<span class="syn-fn">run</span> <span class="syn-p">x</span><span class="syn-t">:number</span> <span class="syn-op">&gt;</span> <span class="syn-t">number</span>
-  <span class="syn-p">x</span> <span class="syn-op">&gt;&gt;</span> <span class="syn-fn">dbl</span> <span class="syn-op">&gt;&gt;</span> <span class="syn-fn">inc</span>
-</code></pre>
-                  <pre class="example-output"><code><span class="syn-dim">$</span> ilo pipes.ilo run 5
-<span class="syn-result">11</span></code></pre>
-                </div>
-              </div>
-              <div class="example-desc">Pipe chains compose functions left-to-right. No nesting to untangle.</div>
-            </div>
-            <div class="example-pane" data-example-pane="lists">
-              <div class="example-compare">
-                <div class="example-version">
-                  <div class="example-version-label">Inline</div>
-                  <pre class="example-code"><code><span class="syn-dim">$</span> ilo <span class="syn-s">'sq x:n>n;*x x big x:n>b;>x 10 kp xs:L n>L n;flt big (map sq xs)'</span> kp 1,2,3,4,5
-<span class="syn-result">16,25</span></code></pre>
-                </div>
-                <div class="example-version">
-                  <div class="example-version-label">File</div>
-                  <pre class="example-code"><code><span class="syn-fn">sq</span> <span class="syn-p">x</span><span class="syn-t">:number</span> <span class="syn-op">&gt;</span> <span class="syn-t">number</span>
-  <span class="syn-op">*</span> <span class="syn-p">x</span> <span class="syn-p">x</span>
-
-<span class="syn-fn">big</span> <span class="syn-p">x</span><span class="syn-t">:number</span> <span class="syn-op">&gt;</span> <span class="syn-t">bool</span>
-  <span class="syn-op">&gt;</span> <span class="syn-p">x</span> 10
-
-<span class="syn-fn">kp</span> <span class="syn-p">xs</span><span class="syn-t">:List number</span> <span class="syn-op">&gt;</span> <span class="syn-t">List number</span>
-  <span class="syn-fn">filter</span> <span class="syn-fn">big</span> (<span class="syn-fn">map</span> <span class="syn-fn">sq</span> <span class="syn-p">xs</span>)
-</code></pre>
-                  <pre class="example-output"><code><span class="syn-dim">$</span> ilo lists.ilo kp [1,2,3,4,5]
-<span class="syn-result">[16, 25]</span></code></pre>
-                </div>
-              </div>
-              <div class="example-desc">Square a list, keep values over 10. Higher-order functions as first-class builtins.</div>
-            </div>
-            <div class="example-pane" data-example-pane="errors">
-              <div class="example-compare">
-                <div class="example-version">
-                  <div class="example-version-label">Inline</div>
-                  <pre class="example-code"><code><span class="syn-dim">$</span> ilo <span class="syn-s">'sf url&#58;t&gt;t;r=get url;?r&#123;~v&#58;v;_&#58;"fallback"&#125;'</span> sf "https&#58;//api.example.com/data"
-<span class="syn-result">fallback</span></code></pre>
-                </div>
-                <div class="example-version">
-                  <div class="example-version-label">File</div>
-                  <pre class="example-code"><code><span class="syn-fn">sf</span> <span class="syn-p">url</span><span class="syn-t">:text</span> <span class="syn-op">&gt;</span> <span class="syn-t">text</span>
-  <span class="syn-p">r</span> = <span class="syn-fn">get</span> <span class="syn-p">url</span>
-  <span class="syn-op">?</span> <span class="syn-p">r</span> &#123; <span class="syn-op">~</span><span class="syn-p">v</span>&#58; <span class="syn-p">v</span>; <span class="syn-p">_</span>&#58; <span class="syn-s">"fallback"</span> &#125;
-</code></pre>
-                  <pre class="example-output"><code><span class="syn-dim">$</span> ilo sf.ilo sf "https://api.example.com/data"
-<span class="syn-result">fallback</span></code></pre>
-                </div>
-              </div>
-              <div class="example-desc">HTTP GET with Result match fallback. Errors are values, not exceptions.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- examples section removed — merged into sia-section above -->
 
     <!-- PHILOSOPHY -->
     <section class="philosophy" data-animate>
@@ -1090,163 +979,326 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
     color: #f87171;
   }
 
-  /* ===== EXAMPLES ===== */
-  .examples {
-    padding: 6rem 0;
-  }
-
-  .examples-tabs {
-    max-width: 1060px;
-    margin: 0 auto;
-    display: flex;
-    gap: 0;
-  }
-
-  .examples-tab-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex-shrink: 0;
-    border-right: 1px solid var(--border);
-    padding-right: 0;
-  }
-
-  .examples-tab-btn {
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    background: none;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-right: 2px solid transparent;
-    margin-right: -1px;
-    transition: color 0.2s, border-color 0.2s;
-    letter-spacing: 0.02em;
-    text-align: left;
-    white-space: nowrap;
-  }
-
-  .examples-tab-btn:hover {
-    color: var(--text);
-  }
-
-  .examples-tab-btn.active {
-    color: var(--accent);
-    border-right-color: var(--accent);
-  }
-
-  .examples-panel {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-left: none;
-    border-radius: 0 12px 12px 0;
-    padding: 28px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .example-pane {
-    display: none;
-  }
-
-  .example-pane.active {
-    display: block;
-  }
-
-  .example-compare {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin-bottom: 16px;
-  }
-
-  .example-version {
-    position: relative;
-  }
-
-  .example-version-label {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-bottom: none;
-    padding: 4px 12px;
-    border-radius: 6px 6px 0 0;
-    margin-bottom: 0;
-  }
-
-  .example-code {
-    font-family: var(--font-mono);
-    font-size: 0.95rem;
-    line-height: 1.7;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    padding: 16px;
-    border-radius: 0 6px 6px 6px;
-    overflow-x: auto;
-    white-space: pre-wrap;
-    word-break: break-all;
-    margin-bottom: 0;
-  }
-
-  .example-code code {
-    font-family: inherit;
-  }
-
-  .example-output {
-    font-family: var(--font-mono);
-    font-size: 0.88rem;
-    line-height: 1.6;
-    background: rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    border-top: 1px dashed rgba(255, 255, 255, 0.08);
-    padding: 12px 16px;
-    border-radius: 0 0 6px 6px;
-    margin-top: -1px;
-    margin-bottom: 0;
-    overflow-x: auto;
-  }
-
-  .example-output code {
-    font-family: inherit;
-  }
-
   .syn-dim { color: var(--text-dim); }
   .syn-result { color: var(--accent); font-weight: 500; }
 
-  .example-readable {
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: var(--text-dim);
-    padding: 12px 18px;
-    border-radius: 6px;
-    border: 1px dashed var(--border);
-    margin-bottom: 12px;
-    white-space: pre;
-    overflow-x: auto;
+  /* ===== SEE IT IN ACTION (merged demo) ===== */
+  .sia-section {
+    padding: 6rem 0;
+    border-top: 1px solid var(--border);
   }
 
-  .example-readable-label {
+  .sia-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 1000px;
+    margin: 0 auto;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .sia-card:hover {
+    border-color: rgba(245, 158, 11, 0.12);
+    box-shadow: 0 4px 40px rgba(0,0,0,0.3);
+  }
+
+  /* Panes layout */
+  .sia-panes {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 14px;
+    align-items: start;
+    margin-bottom: 18px;
+  }
+
+  .sia-pane {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .sia-pane-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.015);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    padding: 9px 14px;
+  }
+
+  .sia-pane-lang {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: 6px;
+    flex: 1;
   }
 
-  .example-desc {
-    font-size: 0.95rem;
+  .sia-pane-lang--ilo {
+    color: var(--accent);
+  }
+
+  .sia-pane-file {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
     color: var(--text-dim);
-    line-height: 1.5;
+  }
+
+  .sia-toggle {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+  }
+
+  .sia-toggle:hover {
+    color: var(--accent);
+    border-color: rgba(245,158,11,0.3);
+  }
+
+  .sia-toggle-label {
+    pointer-events: none;
+  }
+
+  .sia-editor {
+    width: 100%;
+    min-height: 155px;
+    background: rgba(0,0,0,0.28);
+    border: 1px solid var(--border);
+    border-radius: 0 0 8px 8px;
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.65;
+    color: var(--text);
+    resize: none;
+    outline: none;
+    white-space: pre;
+    overflow-x: auto;
+    overflow-y: hidden;
+    transition: border-color 0.2s, opacity 0.15s;
+    field-sizing: content;
+  }
+
+  .sia-editor:focus {
+    border-color: rgba(245,158,11,0.2);
+  }
+
+  .sia-editor--ilo {
+    border-color: rgba(245,158,11,0.15);
+    color: var(--accent-bright);
+    cursor: default;
+  }
+
+  .sia-editor.is-fading {
+    opacity: 0;
+  }
+
+  .sia-converting {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    gap: 8px;
+  }
+
+  @keyframes dotPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  .sia-converting-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: dotPulse 1s ease-in-out infinite;
+  }
+
+  /* Stats row */
+  .sia-stats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    flex-wrap: wrap;
+  }
+
+  .sia-stats--ilo {
+    color: var(--text-muted);
+  }
+
+  .sia-stat-sep {
+    opacity: 0.4;
+  }
+
+  .sia-stat-diff {
+    font-weight: 700;
+    color: #4ade80;
+    transition: transform 0.2s;
+  }
+
+  .sia-stat-diff.bounce {
+    animation: diffBounce 0.4s ease;
+  }
+
+  @keyframes diffBounce {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  /* Arrow */
+  .sia-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 40px;
+    font-size: 1.5rem;
+    color: var(--accent);
+    opacity: 0.45;
+    user-select: none;
+  }
+
+  /* Controls */
+  .sia-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .sia-presets {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+
+  .sia-preset-chip {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    padding: 6px 13px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s;
+  }
+
+  .sia-preset-chip:hover {
+    color: var(--accent);
+    border-color: rgba(245,158,11,0.3);
+    background: var(--accent-dim);
+  }
+
+  .sia-preset-chip.active {
+    color: var(--accent);
+    border-color: rgba(245,158,11,0.4);
+    background: var(--accent-dim);
+  }
+
+  .sia-convert-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #000;
+    background: var(--accent);
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: filter 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .sia-convert-btn:hover {
+    filter: brightness(1.1);
+  }
+
+  .sia-convert-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: none;
+  }
+
+  /* Output */
+  .sia-output {
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    margin-top: 4px;
+  }
+
+  .sia-output-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .sia-output-text {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--accent);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .sia-error {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: #f87171;
+    background: rgba(248,113,113,0.06);
+    border: 1px solid rgba(248,113,113,0.15);
+    border-radius: 6px;
+    padding: 10px 14px;
+  }
+
+  @media (max-width: 700px) {
+    .sia-panes {
+      grid-template-columns: 1fr;
+    }
+    .sia-arrow {
+      display: none;
+    }
+    .sia-card {
+      padding: 18px;
+    }
   }
 
   /* ===== SIX PRINCIPLES ===== */
@@ -1587,215 +1639,9 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
     }
   }
 
-  /* ===== PYTHON→ILO DEMO ===== */
-  .demo-section {
-    padding: 6rem 0;
-    border-top: 1px solid var(--border);
-  }
 
-  .demo-header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-  }
 
-  .demo-eyebrow {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    background: var(--accent-dim);
-    border: 1px solid rgba(245, 158, 11, 0.15);
-    padding: 4px 14px;
-    border-radius: 100px;
-    margin-bottom: 1rem;
-  }
 
-  .demo-title {
-    font-family: var(--font-display);
-    font-size: clamp(1.8rem, 4vw, 2.6rem);
-    font-weight: 700;
-    letter-spacing: -0.025em;
-  }
-
-  .demo-box {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px;
-    max-width: 980px;
-    margin: 0 auto;
-  }
-
-  .demo-panes {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 16px;
-    align-items: start;
-    margin-bottom: 20px;
-  }
-
-  .demo-pane-label {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 8px;
-  }
-
-  .demo-editor {
-    width: 100%;
-    min-height: 160px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
-    font-family: var(--font-mono);
-    font-size: 0.82rem;
-    line-height: 1.65;
-    color: var(--text);
-    resize: none;
-    outline: none;
-    white-space: pre;
-    overflow-x: auto;
-    overflow-y: hidden;
-    transition: border-color 0.2s;
-    field-sizing: content;
-  }
-
-  .demo-editor--ilo {
-    border-color: rgba(245, 158, 11, 0.15);
-    color: var(--accent-bright);
-  }
-
-  .demo-stats {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--text-dim);
-  }
-
-  .demo-stats--ilo {
-    color: var(--text-muted);
-  }
-
-  .demo-stat-saving {
-    font-weight: 600;
-    color: #4ade80;
-  }
-
-  .demo-arrow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-top: 30px;
-    font-size: 1.4rem;
-    color: var(--accent);
-    opacity: 0.5;
-    user-select: none;
-  }
-
-  .demo-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-  }
-
-  .demo-presets {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    flex: 1;
-  }
-
-  .demo-preset-btn {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border);
-    padding: 6px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: color 0.2s, border-color 0.2s, background 0.2s;
-  }
-
-  .demo-preset-btn:hover,
-  .demo-preset-btn.active {
-    color: var(--accent);
-    border-color: rgba(245, 158, 11, 0.3);
-    background: var(--accent-dim);
-  }
-
-  .demo-run-btn {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #000;
-    background: var(--accent);
-    border: none;
-    padding: 8px 18px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: filter 0.2s;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .demo-run-btn:hover {
-    filter: brightness(1.1);
-  }
-
-  .demo-output {
-    border-top: 1px solid var(--border);
-    padding-top: 16px;
-    margin-top: 4px;
-  }
-
-  .demo-output-label {
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 8px;
-  }
-
-  .demo-output-text {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    color: var(--accent);
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-
-  @media (max-width: 700px) {
-    .demo-panes {
-      grid-template-columns: 1fr;
-    }
-
-    .demo-arrow {
-      display: none;
-    }
-
-    .demo-box {
-      padding: 20px;
-    }
-  }
 </style>
 
 <script>
@@ -1849,17 +1695,7 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
   });
   terminal?.addEventListener('click', handleCopy);
 
-  // Examples tab switching
-  document.querySelectorAll('.examples-tab-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const example = (btn as HTMLElement).dataset.example!;
-      document.querySelectorAll('.examples-tab-btn').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelectorAll('.example-pane').forEach((p) => {
-        p.classList.toggle('active', (p as HTMLElement).dataset.examplePane === example);
-      });
-    });
-  });
+  // (examples tab switching removed — section merged)
 
   // Scroll animations: enable only after JS is ready
   document.documentElement.classList.add('animate-ready');
@@ -1878,19 +1714,38 @@ import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schem
 </script>
 
 <script>
-// ===== PYTHON → ILO DEMO =====
+// ===== SEE IT IN ACTION — merged interactive demo =====
 
-// Simple cl100k_base approximation: whitespace/punctuation split gives
-// a good proxy without shipping a full tokenizer. Each "word" ≈ 1 token
-// for code; punctuation and operators are typically single tokens.
+// Token approximation (cl100k_base proxy)
 function countTokens(text: string): number {
   if (!text.trim()) return 0;
-  // Split on whitespace + common operator chars, counting non-empty pieces
-  const pieces = text.split(/([^\w])/u).filter(p => p.trim().length > 0);
-  return pieces.length;
+  return text.split(/([^\w])/u).filter(p => p.trim().length > 0).length;
 }
 
-const PRESETS = [
+// Animated counter roll (~400ms ease-out)
+function animateCounter(el: HTMLElement, from: number, to: number) {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced || from === to) { el.textContent = String(to); return; }
+  const dur = 400;
+  const start = performance.now();
+  function step(now: number) {
+    const t = Math.min((now - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - t, 3); // ease-out cubic
+    el.textContent = String(Math.round(from + (to - from) * ease));
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+interface Preset {
+  name: string;
+  python: string;
+  iloMulti: string;    // multi-line form
+  iloInline: string;   // one-liner semicolon form
+  output: string;
+}
+
+const PRESETS: Preset[] = [
   {
     name: 'fib',
     python: `def fib(n: int) -> int:
@@ -1899,11 +1754,12 @@ const PRESETS = [
     return fib(n - 1) + fib(n - 2)
 
 print(fib(10))`,
-    ilo: `fib n:n>n
+    iloMulti: `fib n:n>n
   <=n 1 n
   +fib -n 1 fib -n 2
 
-fib 10`,
+main>n;fib 10`,
+    iloInline: `fib n:n>n;<=n 1 n;+fib -n 1 fib -n 2\nmain>n;fib 10`,
     output: '55',
   },
   {
@@ -1917,15 +1773,15 @@ fib 10`,
         print("Buzz")
     else:
         print(i)`,
-    ilo: `fb i:n>t
-  =mod i 15 0 "FizzBuzz"
-  =mod i 3 0 "Fizz"
-  =mod i 5 0 "Buzz"
+    iloMulti: `fb i:n>t
+  =(mod i 15) 0 "FizzBuzz"
+  =(mod i 3) 0 "Fizz"
+  =(mod i 5) 0 "Buzz"
   str i
 
-out=[]
-@i 1..16{out=+=out fb i}
-out`,
+main>_
+  @i 1..16{prnt fb i}`,
+    iloInline: `fb i:n>t;=(mod i 15) 0 "FizzBuzz";=(mod i 3) 0 "Fizz";=(mod i 5) 0 "Buzz";str i\nmain>_;@i 1..16{prnt fb i}`,
     output: '1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz',
   },
   {
@@ -1936,30 +1792,15 @@ out`,
 
 data = parse_csv("a,b,c\\n1,2,3\\n4,5,6")
 print(data[1][0])`,
-    ilo: `parse-csv s:t>L L t
-  map (\\r:t>L t;spl r ",") spl s "\\n"
+    iloMulti: `parse-csv s:t>L L t
+  rows=spl s "\\n"
+  map (r:t>L t;spl r ",") rows
 
-d=parse-csv "a,b,c\\n1,2,3\\n4,5,6"
-at d 1 .0`,
+main>t
+  d=parse-csv "a,b,c\\n1,2,3\\n4,5,6"
+  at (at d 1) 0`,
+    iloInline: `parse-csv s:t>L L t;map (r:t>L t;spl r ",") spl s "\\n"\nmain>t;d=parse-csv "a,b,c\\n1,2,3\\n4,5,6";at (at d 1) 0`,
     output: '1',
-  },
-  {
-    name: 'http-fetch',
-    python: `import requests
-
-def fetch(url: str) -> str:
-    r = requests.get(url)
-    if r.status_code == 200:
-        return r.text
-    return "error"
-
-print(fetch("https://api.example.com"))`,
-    ilo: `fetch url:t>t
-  r=get url
-  ?r{~v:v;^_:"error"}
-
-fetch "https://api.example.com"`,
-    output: 'error',
   },
   {
     name: 'fold-sum',
@@ -1971,10 +1812,33 @@ def add(a: float, b: float) -> float:
 nums = [1, 2, 3, 4, 5]
 total = reduce(add, nums, 0)
 print(total)`,
-    ilo: `add a:n b:n>n;+a b
+    iloMulti: `add a:n b:n>n
+  +a b
 
-fld add [1,2,3,4,5] 0`,
+main>n
+  fld add [1,2,3,4,5] 0`,
+    iloInline: `add a:n b:n>n;+a b\nmain>n;fld add [1,2,3,4,5] 0`,
     output: '15',
+  },
+  {
+    name: 'pipes',
+    python: `def double(x: int) -> int:
+    return x * 2
+
+def increment(x: int) -> int:
+    return x + 1
+
+def run(x: int) -> int:
+    return increment(double(x))
+
+print(run(5))`,
+    iloMulti: `dbl x:n>n;*x 2
+inc x:n>n;+x 1
+rn x:n>n;x>>dbl>>inc
+
+main>n;rn 5`,
+    iloInline: `dbl x:n>n;*x 2\ninc x:n>n;+x 1\nrn x:n>n;x>>dbl>>inc\nmain>n;rn 5`,
+    output: '11',
   },
   {
     name: 'classify',
@@ -1989,78 +1853,210 @@ fld add [1,2,3,4,5] 0`,
         return "F"
 
 print(classify(85))`,
-    ilo: `classify s:n>t
+    iloMulti: `classify s:n>t
   >=s 90 "A"
   >=s 80 "B"
   >=s 70 "C"
   "F"
 
-classify 85`,
+main>t;classify 85`,
+    iloInline: `classify s:n>t;>=s 90 "A";>=s 80 "B";>=s 70 "C";"F"\nmain>t;classify 85`,
     output: 'B',
   },
 ];
 
 let activePreset = 0;
+let isMultiLine = true;
+let isApiResult = false;
+let autoCycleTimer: ReturnType<typeof setTimeout> | null = null;
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+let prevPyTok = 0;
+let prevPyChar = 0;
+let prevIloTok = 0;
+let prevIloChar = 0;
 
-function renderStats() {
-  const py = (document.getElementById('demo-python') as HTMLTextAreaElement).value;
-  const il = (document.getElementById('demo-ilo') as HTMLTextAreaElement).value;
+const pyEl = document.getElementById('demo-python') as HTMLTextAreaElement;
+const iloEl = document.getElementById('demo-ilo') as HTMLTextAreaElement;
+const pyTokensEl = document.getElementById('py-tokens')!;
+const pyCharsEl = document.getElementById('py-chars')!;
+const iloTokensEl = document.getElementById('ilo-tokens')!;
+const iloCharsEl = document.getElementById('ilo-chars')!;
+const diffEl = document.getElementById('sia-diff')!;
+const outputDiv = document.getElementById('demo-output')!;
+const outputText = document.getElementById('demo-output-text')!;
+const errorDiv = document.getElementById('sia-error')!;
+const convertBtn = document.getElementById('sia-convert-btn')!;
+const convertingOverlay = document.getElementById('sia-converting')!;
+const toggleBtn = document.getElementById('sia-toggle')!;
+const toggleLabel = document.getElementById('sia-toggle-label')!;
 
+function updateStats() {
+  const py = pyEl.value;
+  const ilo = iloEl.value;
   const pyTok = countTokens(py);
-  const ilTok = countTokens(il);
+  const iloTok = countTokens(ilo);
   const pyChar = py.length;
-  const ilChar = il.length;
+  const iloChar = ilo.length;
 
-  const statsPy = document.getElementById('stats-python')!;
-  statsPy.innerHTML = `<span class="demo-stat-tokens">Tokens: <b>${pyTok}</b></span><span class="demo-stat-sep">·</span><span class="demo-stat-chars">Chars: ${pyChar}</span>`;
+  animateCounter(pyTokensEl, prevPyTok, pyTok);
+  animateCounter(pyCharsEl, prevPyChar, pyChar);
+  animateCounter(iloTokensEl, prevIloTok, iloTok);
+  animateCounter(iloCharsEl, prevIloChar, iloChar);
 
-  const statsIl = document.getElementById('stats-ilo')!;
-  let saving = '';
-  if (pyTok > 0) {
-    const pct = Math.round((1 - ilTok / pyTok) * 100);
-    saving = `<span class="demo-stat-saving">-${pct}% tokens</span>`;
+  prevPyTok = pyTok;
+  prevPyChar = pyChar;
+  prevIloTok = iloTok;
+  prevIloChar = iloChar;
+
+  if (pyTok > 0 && iloTok > 0) {
+    const pct = Math.round((1 - iloTok / pyTok) * 100);
+    diffEl.textContent = `-${pct}% tokens`;
+    diffEl.classList.remove('bounce');
+    void diffEl.offsetWidth; // reflow
+    diffEl.classList.add('bounce');
+  } else {
+    diffEl.textContent = '';
   }
-  statsIl.innerHTML = `<span class="demo-stat-tokens">Tokens: <b>${ilTok}</b></span><span class="demo-stat-sep">·</span><span class="demo-stat-chars">Chars: ${ilChar}</span>${saving}`;
 }
 
-function loadPreset(idx: number) {
+function setIloText(text: string, animate = true) {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!animate || reduced) {
+    iloEl.value = text;
+    updateStats();
+    return;
+  }
+  iloEl.classList.add('is-fading');
+  setTimeout(() => {
+    iloEl.value = text;
+    iloEl.classList.remove('is-fading');
+    updateStats();
+  }, 150);
+}
+
+function loadPreset(idx: number, skipAutoCycle = false) {
+  if (!skipAutoCycle) resetAutoCycle();
   activePreset = idx;
+  isApiResult = false;
   const p = PRESETS[idx];
 
-  (document.getElementById('demo-python') as HTMLTextAreaElement).value = p.python;
-  (document.getElementById('demo-ilo') as HTMLTextAreaElement).value = p.ilo;
-
-  document.querySelectorAll('.demo-preset-btn').forEach((btn, i) => {
-    btn.classList.toggle('active', i === idx);
+  pyEl.value = p.python;
+  document.querySelectorAll('.sia-preset-chip').forEach((c, i) => {
+    c.classList.toggle('active', i === idx);
   });
 
-  // Hide output on preset change
-  const out = document.getElementById('demo-output')!;
-  out.style.display = 'none';
+  // ilo pane lags 150ms
+  setTimeout(() => {
+    iloEl.value = isMultiLine ? p.iloMulti : p.iloInline;
+    updateStats();
+  }, 150);
 
-  renderStats();
+  // Reset output/error
+  outputDiv.style.display = 'none';
+  errorDiv.style.display = 'none';
+  errorDiv.textContent = '';
+
+  updateStats();
+  toggleBtn.removeAttribute('disabled');
 }
 
-// Build preset buttons
-const presetsContainer = document.getElementById('demo-presets')!;
-PRESETS.forEach((p, i) => {
-  const btn = document.createElement('button');
-  btn.className = 'demo-preset-btn' + (i === 0 ? ' active' : '');
-  btn.textContent = p.name;
-  btn.addEventListener('click', () => loadPreset(i));
-  presetsContainer.appendChild(btn);
+function toggleMode() {
+  if (isApiResult) return;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  isMultiLine = !isMultiLine;
+  toggleLabel.textContent = isMultiLine ? 'multi-line' : 'inline';
+  const p = PRESETS[activePreset];
+  setIloText(isMultiLine ? p.iloMulti : p.iloInline, !reduced);
+}
+
+toggleBtn.addEventListener('click', toggleMode);
+
+// Auto-cycle every 8s, pause on hover
+function resetAutoCycle() {
+  if (autoCycleTimer) clearTimeout(autoCycleTimer);
+  autoCycleTimer = null;
+}
+
+function scheduleAutoCycle() {
+  resetAutoCycle();
+  autoCycleTimer = setTimeout(() => {
+    const next = (activePreset + 1) % PRESETS.length;
+    loadPreset(next, true);
+    scheduleAutoCycle();
+  }, 8000);
+}
+
+const siaCard = document.querySelector('.sia-card');
+siaCard?.addEventListener('mouseenter', resetAutoCycle);
+siaCard?.addEventListener('mouseleave', scheduleAutoCycle);
+
+// Editable Python — debounced stats update (500ms)
+pyEl.removeAttribute('readonly');
+pyEl.addEventListener('input', () => {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    // update python stats immediately; ilo stays as-is until Convert
+    const py = pyEl.value;
+    const pyTok = countTokens(py);
+    const pyChar = py.length;
+    animateCounter(pyTokensEl, prevPyTok, pyTok);
+    animateCounter(pyCharsEl, prevPyChar, pyChar);
+    prevPyTok = pyTok;
+    prevPyChar = pyChar;
+  }, 500);
+  resetAutoCycle();
 });
 
-// Run button
-document.getElementById('demo-run-btn')!.addEventListener('click', () => {
-  const p = PRESETS[activePreset];
-  const out = document.getElementById('demo-output')!;
-  const txt = document.getElementById('demo-output-text')!;
-  txt.textContent = p.output;
-  out.style.display = 'block';
+// Convert button
+convertBtn.addEventListener('click', async () => {
+  const python = pyEl.value.trim();
+  if (!python) return;
+
+  resetAutoCycle();
+  (convertBtn as HTMLButtonElement).disabled = true;
+  convertingOverlay.style.display = 'flex';
+  errorDiv.style.display = 'none';
+  outputDiv.style.display = 'none';
+
+  try {
+    const resp = await fetch('https://convert.ilo-lang.ai/convert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ python }),
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const iloCode = data.ilo || data.result || data.code || '';
+    if (!iloCode) throw new Error('Empty response');
+    isApiResult = true;
+    setIloText(iloCode);
+    toggleBtn.setAttribute('disabled', 'true');
+    isMultiLine = true;
+    toggleLabel.textContent = 'multi-line';
+  } catch (err) {
+    // Fallback: show last preset
+    const fallback = PRESETS[activePreset];
+    setIloText(isMultiLine ? fallback.iloMulti : fallback.iloInline);
+    errorDiv.textContent = `Conversion unavailable — showing preset. (${(err as Error).message})`;
+    errorDiv.style.display = 'block';
+  } finally {
+    (convertBtn as HTMLButtonElement).disabled = false;
+    convertingOverlay.style.display = 'none';
+  }
+});
+
+// Build preset chips
+const presetsContainer = document.getElementById('demo-presets')!;
+PRESETS.forEach((p, i) => {
+  const chip = document.createElement('button');
+  chip.className = 'sia-preset-chip' + (i === 0 ? ' active' : '');
+  chip.textContent = p.name;
+  chip.addEventListener('click', () => loadPreset(i));
+  presetsContainer.appendChild(chip);
 });
 
 // Init
-loadPreset(0);
+loadPreset(0, true);
+scheduleAutoCycle();
 </script>
 
