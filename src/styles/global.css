@@ -25,9 +25,9 @@ code, pre, .sl-markdown-content code, .sl-markdown-content pre {
   --ilo-amber-high:      #f5deb3;
   --ilo-amber-high-light:#3d2408;
 
-  /* Color: lime (positive-delta only) */
-  --ilo-lime:     #c8f04a;
-  --ilo-lime-low: rgba(200, 240, 74, 0.10);
+  /* Color: lime (positive-delta only) — softer emerald, not acid chartreuse */
+  --ilo-lime:     #4ade80;
+  --ilo-lime-low: rgba(74, 222, 128, 0.12);
 
   /* Color: ink */
   --ilo-ink-0:   #0a0a10;
