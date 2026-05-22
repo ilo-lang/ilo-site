@@ -259,4 +259,4 @@ Calls inside `@` foreach, `@..` range, or `wh` loops are **not** in tail positio
 
 The peephole only fires when the callee is a direct user-defined function name (not a `FnRef` in scope, not a closure, not a builtin, not a tool) and the call has no auto-unwrap (`!` / `!!`). These constraints cover the common recursive-accumulator and state-machine shapes.
 
-The shared runtime module (`src/runtime/`) trampolines tail calls today. The bytecode VM (`--vm`) and Cranelift backends (`--jit`, AOT) gain matching support in subsequent releases; until then, deep recursion on those engines is bounded by each engine's stack model.
+Tail-call optimisation is supported across all engines. The bytecode VM (`--vm`) emits `OP_TAILCALL` and reuses the current call frame; the Cranelift JIT and AOT backends lower tail calls to `return_call` (shipped in 0.13.0, ILO-15 + ILO-45). The tree-walker interpreter has been removed from the public CLI. All three backends guarantee bounded stack depth for tail-recursive programs.

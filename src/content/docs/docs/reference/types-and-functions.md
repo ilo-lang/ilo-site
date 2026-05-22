@@ -54,6 +54,17 @@ ilo 'calc a:n b:n>n;s=+a b;p=*a b;+s p' 3 4
 
 Each statement binds a variable or returns a value. The last expression is the return value.
 
+## Discarding a value (`_=expr`)
+
+Use `_=expr` to explicitly discard a value and suppress the `ILO-T033` warning for mutation-shaped builtins (`mset`, `mdel`, `+=`) used for their side effects:
+
+```ilo
+_=mset m "visited" true   -- discard the new map; side-effect only
+_=prnt debug-value        -- discard return, keep the print
+```
+
+The `_` sigil tells the verifier the discard is intentional. Without it, `mset m k v` as a bare statement silently drops the returned map and fires ILO-T033. For most cases you *do* want the assignment form (`m=mset m k v`) — `_=` is reserved for genuine fire-and-forget calls.
+
 Newlines inside `[...]` or `(...)` are treated as whitespace, not statement separators, so list literals and parenthesised expressions can span multiple lines without problems. Windows CRLF (`\r\n`) is normalised to LF before parsing, so files edited on Windows work identically.
 
 ## Sum types (discriminated unions)

@@ -168,6 +168,39 @@ process path:t>R n t
   ~sum (map (r:L _>n;num! r.0) rows)
 ```
 
+## Pagination (tail-recursive accumulator)
+
+Canonical pattern for iterating paged APIs: tail-recursive accumulator + empty-token termination + Result chain (`!` propagation). No stack growth regardless of page count.
+
+```ilo
+-- fetch-page: one HTTP call; returns ~[items next-token] or Err.
+fetch-page url:t token:t>R (L _) t
+  b=get! fmt "{}&cursor={}" url token
+  items=jpar-list! b
+  nxt=default-on-err (jpth b "next_cursor") ""
+  ~[items nxt]
+
+-- fetch-all: tail-recursive; empty token signals end-of-pages.
+fetch-all url:t token:t acc:L n>R (L n) t
+  =token "" ~acc
+  r=fetch-page! url token
+  page=at r 0
+  nxt=at r 1
+  fetch-all url nxt +acc page
+
+-- Entry: seed with empty token and empty accumulator.
+all-items>R (L n) t
+  fetch-all "https://api.example.com/items" "" []
+```
+
+The `fld` builtin threads a numeric accumulator if you want a running total instead of collecting all items:
+
+```ilo
+sum-all>R n t
+  xs=fetch-all! "https://api.example.com/items" "" []
+  ~fld (a:n x:n>n;+a x) xs 0
+```
+
 ## What's next
 
 - Run `ilo -ai` to get the compact spec for your AI agent
