@@ -10,9 +10,14 @@ Use this when you need to look up an ilo type sigil or scalar/literal form.
 | Sigil | Meaning | Literal example |
 |-------|---------|-----------------|
 | `n` | number (f64) | `42`, `3.14`, `-7` |
+| `u32` | unsigned 32-bit integer | `42u`, `0u` |
+| `u64` | unsigned 64-bit integer | `42U`, `0U` |
+| `i64` | signed 64-bit integer | `42L`, `-7L` |
 | `t` | text (string) | `"hello"`, `"line\n"` |
 | `b` | bool | `true`, `false` |
 | `_` | nil / wildcard | `nil` |
+
+`u32`/`u64`/`i64` are native integer types with wrapping semantics and dedicated bitwise operators. Use them when you need exact integer widths (crypto, binary protocols, WASM interop).
 
 ## Container types
 
@@ -22,7 +27,7 @@ Use this when you need to look up an ilo type sigil or scalar/literal form.
 | `M K V` | map from `K` to `V` | `M t n` |
 | `R T E` | result, ok=`T`, err=`E` | `R n t` |
 | `O T` | optional `T` | `O n` |
-| `S a b c` | sum type (enum) | `S red green blue` |
+| `S a b c` | sum type / discriminated union | `S red green blue` |
 | `F A R` | function type | `F n t` (takes `n`, returns `t`) |
 
 ## Result and option literals

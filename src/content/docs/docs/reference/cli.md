@@ -22,6 +22,10 @@ For consistency with `cargo`, `go`, and similar toolchains, ilo also exposes ver
 ilo run file.ilo arg1 arg2              # run (alias for the bare positional)
 ilo check file.ilo                      # verify without running (exit 0 if clean)
 ilo build file.ilo -o ./bin             # AOT compile (alias for `ilo compile`)
+ilo add package-name                    # install a package from the registry
+ilo apply fix.json                      # apply a structured repair plan
+ilo trace file.ilo funcname args        # execution trace with per-step timing
+ilo httpd file.ilo --port 8080          # serve ilo functions over HTTP
 ```
 
 The bare positional forms (`ilo file.ilo`, `ilo compile ...`) remain fully supported; the verbs are aliases, not replacements. Use whichever shape you prefer.
@@ -132,6 +136,7 @@ Tokens with `=` (`--key=val`), trailing or doubled dashes (`--foo-`, `--foo--bar
 | `--bench` | Benchmark a function |
 | `--verify` | Type-check without executing |
 | `--emit python` | Transpile to Python |
+| `--emit js` | Transpile to JavaScript (Node.js/browser) |
 | `--tools tools.json` | Load HTTP tool declarations |
 | `--mcp mcp.json` | Connect MCP servers |
 | `--no-hints`, `-nh` | Suppress idiomatic hints |
@@ -216,6 +221,62 @@ cls sp:n > t
 
 Dense format is canonical: `dense(parse(dense(parse(src)))) == dense(parse(src))`.
 
+## Package registry: `ilo add`
+
+Install packages from the ilo package registry:
+
+```bash
+ilo add http-client           # add latest version
+ilo add http-client@1.2.0    # pin a version
+ilo add --list               # list installed packages
+```
+
+Packages are resolved into a local `ilo.lock` file and imported with `use "pkg:http-client"`.
+
+## Fix plans: `ilo apply`
+
+`ilo apply` consumes a structured repair plan (JSON) produced by `ilo check --json` and applies the mechanical edits:
+
+```bash
+ilo check file.ilo --json 2>fixes.json
+ilo apply fixes.json file.ilo
+```
+
+Only `fixSafety: "safe"` edits are applied automatically. `likely` edits are applied with a confirmation prompt unless `--yes` is passed. `risky` and `manual` edits are reported but not touched.
+
+## Trace: `ilo trace`
+
+`ilo trace` records execution with per-step timing and a call tree:
+
+```bash
+ilo trace program.ilo funcname args
+ilo trace program.ilo funcname args --json   # machine-readable NDJSON
+```
+
+Output shows each function call, its arguments, return value, and wall-clock duration. Useful for finding hot paths without running a full benchmark harness.
+
+## HTTP server: `ilo httpd`
+
+`ilo httpd` exposes ilo functions as HTTP endpoints:
+
+```bash
+ilo httpd program.ilo --port 8080
+```
+
+Each function in `program.ilo` becomes a `POST /funcname` endpoint. Request body is JSON-encoded arguments; response is JSON-encoded return value. CORS headers are included by default. Useful for deploying ilo programs as lightweight API services.
+
+## Token count: `tokcount`
+
+`tokcount` reports the token count of ilo source using the `tiktoken-rs` tokeniser (cl100k_base by default):
+
+```bash
+ilo tokcount program.ilo            # token count of file
+ilo tokcount 'f x:n>n;*x 2'        # token count of inline source
+ilo tokcount program.ilo --model gpt-4o  # use a specific tokeniser
+```
+
+Useful for comparing ilo programs against equivalent Python or JavaScript to measure token savings.
+
 ## Transpile to Python
 
 Generate standalone Python from ilo source:
@@ -225,6 +286,16 @@ ilo 'fac n:n>n;<=n 1 1;r=fac -n 1;*n r' --emit python
 ```
 
 Output is valid Python that can be saved and run directly. Useful for interop or when deploying to environments without the ilo runtime.
+
+## Transpile to JavaScript
+
+Generate JavaScript (Node.js/browser) from ilo source:
+
+```bash
+ilo 'fac n:n>n;<=n 1 1;r=fac -n 1;*n r' --emit js
+```
+
+Emits ES module syntax. Builtins map to idiomatic JS equivalents. The JS target is the MVP backend added in 0.13.0; coverage matches the VM for numeric, text, and list operations.
 
 ## Benchmark
 
