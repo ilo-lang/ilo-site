@@ -954,7 +954,9 @@ function updateStats() {
 
   if (pyTok > 0 && iloTok > 0) {
     const pct = Math.round((1 - iloTok / pyTok) * 100);
-    diffEl.textContent = `-${pct}% tokens`;
+    diffEl.textContent = pct === 0
+      ? `0% tokens`
+      : `${pct > 0 ? '−' : '+'}${Math.abs(pct)}% tokens`;
     diffEl.classList.remove('bounce');
     void diffEl.offsetWidth; // reflow
     diffEl.classList.add('bounce');
@@ -1046,7 +1048,7 @@ pyEl.addEventListener('input', () => {
   pyHighlight.innerHTML = highlightPy(pyEl.value);
   if (debounceTimer) clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
-    // update python stats; ilo stays as-is until Convert
+    // Update python stats then auto-convert
     const py = pyEl.value;
     const pyTok = countTokens(py);
     const pyChar = py.length;
@@ -1054,14 +1056,18 @@ pyEl.addEventListener('input', () => {
     animateCounter(pyCharsEl, prevPyChar, pyChar);
     prevPyTok = pyTok;
     prevPyChar = pyChar;
-  }, 500);
+    runConvert();
+  }, 700);
   resetAutoCycle();
 });
 
-// Convert button
-convertBtn.addEventListener('click', async () => {
+// Shared convert routine — manual button and debounced input both call this.
+// Sequence counter lets a newer keystroke supersede a slow in-flight request.
+let convertSeq = 0;
+async function runConvert() {
   const python = pyEl.value.trim();
   if (!python) return;
+  const seq = ++convertSeq;
 
   resetAutoCycle();
   (convertBtn as HTMLButtonElement).disabled = true;
@@ -1075,6 +1081,7 @@ convertBtn.addEventListener('click', async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ python }),
     });
+    if (seq !== convertSeq) return;
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     const iloResult = data.ilo || data.result || data.code || '';
@@ -1085,16 +1092,20 @@ convertBtn.addEventListener('click', async () => {
     isMultiLine = true;
     toggleLabel.textContent = isMultiLine ? 'multi-line' : 'compact';
   } catch (err) {
-    // Fallback: show last preset
+    if (seq !== convertSeq) return;
     const fallback = PRESETS[activePreset];
     setIloText(isMultiLine ? fallback.iloMulti : fallback.iloInline);
     errorDiv.textContent = `Conversion unavailable — showing preset. (${(err as Error).message})`;
     errorDiv.style.display = 'block';
   } finally {
-    (convertBtn as HTMLButtonElement).disabled = false;
-    convertingOverlay.style.display = 'none';
+    if (seq === convertSeq) {
+      (convertBtn as HTMLButtonElement).disabled = false;
+      convertingOverlay.style.display = 'none';
+    }
   }
-});
+}
+
+convertBtn.addEventListener('click', runConvert);
 
 // Build preset chips
 const presetsContainer = document.getElementById('demo-presets')!;
