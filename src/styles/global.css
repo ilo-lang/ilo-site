@@ -1,47 +1,172 @@
+/* Load matching fonts for docs */
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 /* Tailwind: theme + utilities only. No preflight, which clobbers Starlight's text colors */
 @layer tw;
 @import "tailwindcss/theme" layer(tw);
 @import "tailwindcss/utilities" layer(tw);
-
-/* Load matching fonts for docs */
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* Disable JetBrains Mono ligatures, keep operators as separate chars */
 code, pre, .sl-markdown-content code, .sl-markdown-content pre {
   font-variant-ligatures: none;
 }
 
-/* ilo brand: warm amber on deep ink, softened palette */
+/* ============================================================
+   ilo brand tokens — single chromatic accent (amber) on deep ink.
+   Lime is reserved for positive-delta indicators; red for errors.
+   ============================================================ */
 :root {
-  --sl-color-accent-low: #2c1a0a;
-  --sl-color-accent: #e09422;
-  --sl-color-accent-high: #f5deb3;
-  --sl-font: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
-  --sl-font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  /* Color: amber accent */
+  --ilo-amber:           #e09422;
+  --ilo-amber-hot:       #f59e0b;
+  --ilo-amber-deep:      #b87a14;
+  --ilo-amber-low:       #2c1a0a;
+  --ilo-amber-low-light: #fdf1da;
+  --ilo-amber-high:      #f5deb3;
+  --ilo-amber-high-light:#3d2408;
+
+  /* Color: lime (positive-delta only) — softer emerald, not acid chartreuse */
+  --ilo-lime:     #4ade80;
+  --ilo-lime-low: rgba(74, 222, 128, 0.12);
+
+  /* Color: ink */
+  --ilo-ink-0:   #0a0a10;
+  --ilo-ink-1:   #0e0e15;
+  --ilo-ink-2:   #13131b;
+  --ilo-ink-3:   #1e1e2a;
+  --ilo-ink-nav: rgba(10, 10, 16, 0.9);
+
+  /* Color: text */
+  --ilo-fg-1: #e8e8ee;
+  --ilo-fg-2: #c8c8d8;
+  --ilo-fg-3: #9e9eb4;
+  --ilo-fg-4: #6b6b82;
+
+  /* Hairlines */
+  --ilo-hairline:        rgba(255, 255, 255, 0.07);
+  --ilo-hairline-strong: rgba(255, 255, 255, 0.10);
+  --ilo-inline-code-bg:  rgba(255, 255, 255, 0.07);
+
+  /* Semantic */
+  --ilo-accent:    var(--ilo-amber);
+  --ilo-accent-hi: var(--ilo-amber-high);
+  --ilo-accent-lo: var(--ilo-amber-low);
+  --ilo-fg:        var(--ilo-fg-1);
+  --ilo-fg-muted:  var(--ilo-fg-3);
+  --ilo-bg:        var(--ilo-ink-0);
+  --ilo-surface:   var(--ilo-ink-2);
+  --ilo-border:    var(--ilo-hairline);
+  --ilo-ok:        var(--ilo-lime);
+  --ilo-err:       #f87171;
+
+  /* Syntax highlighting — scoped to code blocks only */
+  --ilo-syn-kw:  var(--ilo-amber);  /* declarations, flags, keywords */
+  --ilo-syn-op:  #7aa2ff;           /* operators, pipes, types */
+  --ilo-syn-str: #a5d6ff;           /* string literals */
+  --ilo-syn-num: var(--ilo-fg-1);   /* numbers */
+  --ilo-syn-id:  var(--ilo-fg-1);   /* identifiers */
+  --ilo-syn-cmt: var(--ilo-fg-4);   /* comments */
+  --ilo-syn-err: var(--ilo-err);    /* error codes */
+
+  /* Type */
+  --ilo-font-sans: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+  --ilo-font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+  /* Spacing (4px base) */
+  --ilo-sp-1: 0.25rem;
+  --ilo-sp-2: 0.5rem;
+  --ilo-sp-3: 0.75rem;
+  --ilo-sp-4: 1rem;
+  --ilo-sp-5: 1.5rem;
+  --ilo-sp-6: 2rem;
+  --ilo-sp-7: 3rem;
+  --ilo-sp-8: 4rem;
+  --ilo-sp-9: 6rem;
+  --ilo-sp-10: 8rem;
+
+  /* Radii */
+  --ilo-radius-xs:  4px;
+  --ilo-radius-sm:  6px;
+  --ilo-radius-md:  8px;
+  --ilo-radius-lg:  12px;
+  --ilo-radius-full: 999px;
+
+  /* Shadows — restrained; brand prefers hairlines */
+  --ilo-shadow-amber-glow:
+    0 0 0 1px rgba(224, 148, 34, 0.25),
+    0 8px 32px rgba(224, 148, 34, 0.12);
+
+  /* Layout */
+  --ilo-container:      1100px;
+  --ilo-container-wide: 1280px;
+
+  /* Motion */
+  --ilo-ease:       cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ilo-duration-1: 120ms;
+  --ilo-duration-2: 220ms;
+
+  /* Legacy aliases — keep the previous --bg/--text/--accent names mapping
+     onto the new ilo tokens so older sections (SIA demo, features grid,
+     philosophy block) keep rendering without a rewrite. */
+  --bg:           var(--ilo-ink-0);
+  --bg-raised:    var(--ilo-ink-1);
+  --bg-card:      var(--ilo-ink-2);
+  --bg-card-hover:var(--ilo-ink-3);
+  --border:       var(--ilo-hairline);
+  --border-hover: rgba(224, 148, 34, 0.25);
+  --text:         var(--ilo-fg-1);
+  --text-muted:   var(--ilo-fg-3);
+  --text-dim:     var(--ilo-fg-4);
+  --accent:       var(--ilo-accent);
+  --accent-bright: var(--ilo-amber-high);
+  --accent-dim:    rgba(224, 148, 34, 0.08);
+  --font-display: var(--ilo-font-sans);
+  --font-body:    var(--ilo-font-sans);
+  --font-mono:    var(--ilo-font-mono);
+  --font-serif:   'Instrument Serif', Georgia, serif;
+  --container:    var(--ilo-container);
+
+  /* Starlight bridges */
+  --sl-color-accent-low: var(--ilo-amber-low);
+  --sl-color-accent:     var(--ilo-amber);
+  --sl-color-accent-high: var(--ilo-amber-high);
+  --sl-font: var(--ilo-font-sans);
+  --sl-font-mono: var(--ilo-font-mono);
 }
 
 /* Dark theme: warm-tinted grays with readable contrast */
 :root[data-theme='dark'] {
-  --sl-color-bg: #0a0a10;
-  --sl-color-bg-nav: rgba(10, 10, 16, 0.9);
-  --sl-color-bg-sidebar: #0e0e15;
-  --sl-color-bg-inline-code: rgba(255, 255, 255, 0.07);
-  --sl-color-hairline-light: rgba(255, 255, 255, 0.07);
-  --sl-color-hairline: rgba(255, 255, 255, 0.1);
-  --sl-color-gray-6: #13131b;
-  --sl-color-gray-5: #1e1e2a;
-  --sl-color-gray-4: #6b6b82;
-  --sl-color-gray-3: #9e9eb4;
-  --sl-color-gray-2: #c8c8d8;
-  --sl-color-gray-1: #e8e8ee;
-  --sl-color-white: #e8e8ee;
-  --sl-color-black: #0a0a10;
+  --sl-color-bg: var(--ilo-ink-0);
+  --sl-color-bg-nav: var(--ilo-ink-nav);
+  --sl-color-bg-sidebar: var(--ilo-ink-1);
+  --sl-color-bg-inline-code: var(--ilo-inline-code-bg);
+  --sl-color-hairline-light: var(--ilo-hairline);
+  --sl-color-hairline: var(--ilo-hairline-strong);
+  --sl-color-gray-6: var(--ilo-ink-2);
+  --sl-color-gray-5: var(--ilo-ink-3);
+  --sl-color-gray-4: var(--ilo-fg-4);
+  --sl-color-gray-3: var(--ilo-fg-3);
+  --sl-color-gray-2: var(--ilo-fg-2);
+  --sl-color-gray-1: var(--ilo-fg-1);
+  --sl-color-white: var(--ilo-fg-1);
+  --sl-color-black: var(--ilo-ink-0);
 }
 
 :root[data-theme='light'] {
-  --sl-color-accent-low: #fdf1da;
-  --sl-color-accent: #b87a14;
-  --sl-color-accent-high: #3d2408;
+  --ilo-accent:    var(--ilo-amber-deep);
+  --ilo-accent-hi: var(--ilo-amber-high-light);
+  --ilo-accent-lo: var(--ilo-amber-low-light);
+  --ilo-bg:        #fbfaf7;
+  --ilo-surface:   #ffffff;
+  --ilo-fg:        #1b1a18;
+  --ilo-fg-muted:  #5e5a55;
+  --ilo-border:    rgba(0, 0, 0, 0.08);
+  --ilo-hairline:  rgba(0, 0, 0, 0.08);
+  --ilo-inline-code-bg: rgba(0, 0, 0, 0.05);
+
+  --sl-color-accent-low: var(--ilo-amber-low-light);
+  --sl-color-accent:     var(--ilo-amber-deep);
+  --sl-color-accent-high: var(--ilo-amber-high-light);
 }
 
 /* Dim ilo comments */
