@@ -1,0 +1,624 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import JsonLd from '../components/JsonLd.astro';
+import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schema';
+
+type Example = {
+  key: string;
+  group: string;
+  name: string;
+  pyName: string;
+  iloName: string;
+  py: string;
+  ilo: string;
+  iloTok: number;
+  note: string;
+};
+
+const examples: Example[] = [
+  {
+    key: 'fold-sum', group: 'list ops', name: 'fold-sum',
+    pyName: 'fold-sum.py', iloName: 'fold-sum.@',
+    py: `from functools import reduce
+
+nums = [1, 2, 3, 4, 5]
+total = reduce(lambda a, b: a + b, nums, 0)
+print(total)`,
+    ilo: '<span class="kw">fld</span> <span class="op">+</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>] <span class="num">0</span>',
+    iloTok: 9,
+    note: 'reduce becomes <code>fld</code> with the operator passed directly, no lambda boilerplate.',
+  },
+  {
+    key: 'map-double', group: 'list ops', name: 'map-double',
+    pyName: 'map-double.py', iloName: 'map-double.@',
+    py: `nums = [1, 2, 3, 4, 5]
+doubled = [n * 2 for n in nums]
+print(doubled)`,
+    ilo: '<span class="kw">map</span> <span class="op">*</span><span class="num">2</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>]',
+    iloTok: 9,
+    note: 'List comp becomes <code>map</code> with a curried <code>*2</code>. No <code>for</code>, no temporary binding.',
+  },
+  {
+    key: 'filter-even', group: 'list ops', name: 'filter-even',
+    pyName: 'filter-even.py', iloName: 'filter-even.@',
+    py: `nums = [1, 2, 3, 4, 5, 6]
+evens = [n for n in nums if n % 2 == 0]
+print(evens)`,
+    ilo: '<span class="kw">flt</span> <span class="op">=</span><span class="num">0</span><span class="op">%</span><span class="num">2</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>]',
+    iloTok: 14,
+    note: 'Predicate is a one-shot prefix expression: <code>=0 %x 2</code>.',
+  },
+  {
+    key: 'pipes', group: 'list ops', name: 'pipes',
+    pyName: 'pipes.py', iloName: 'pipes.@',
+    py: `nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+total = sum(n * 2 for n in nums if n > 5)
+print(total)`,
+    ilo: '[<span class="num">1</span>..<span class="num">10</span>] <span class="op">&gt;&gt;</span> <span class="kw">flt</span> <span class="op">&gt;</span><span class="num">5</span> <span class="op">&gt;&gt;</span> <span class="kw">map</span> <span class="op">*</span><span class="num">2</span> <span class="op">&gt;&gt;</span> <span class="kw">sum</span>',
+    iloTok: 17,
+    note: 'Pipe operator <code>&gt;&gt;</code> threads the list through each stage left to right.',
+  },
+  {
+    key: 'guards', group: 'control flow', name: 'guards',
+    pyName: 'guards.py', iloName: 'guards.@',
+    py: `def grade(score):
+    if score >= 90:
+        return "A"
+    elif score >= 80:
+        return "B"
+    elif score >= 70:
+        return "C"
+    else:
+        return "F"`,
+    ilo: '<span class="kw">grade</span> s<span class="op">:n</span><span class="op">&gt;t</span>\n  <span class="op">&gt;=</span>s <span class="num">90</span> <span class="str">"A"</span>\n  <span class="op">&gt;=</span>s <span class="num">80</span> <span class="str">"B"</span>\n  <span class="op">&gt;=</span>s <span class="num">70</span> <span class="str">"C"</span>\n  <span class="str">"F"</span>',
+    iloTok: 28,
+    note: 'Flat guard clauses, no <code>if</code>/<code>elif</code>/<code>else</code> ceremony, no braces.',
+  },
+  {
+    key: 'match', group: 'control flow', name: 'pattern match',
+    pyName: 'pattern-match.py', iloName: 'pattern-match.@',
+    py: `def describe(shape):
+    match shape:
+        case ("circle", r):
+            return 3.14 * r * r
+        case ("rect", w, h):
+            return w * h
+        case ("tri", b, h):
+            return 0.5 * b * h`,
+    ilo: '<span class="kw">area</span> s<span class="op">:</span>shape<span class="op">&gt;n</span>\n  <span class="op">?</span>s\n    [<span class="str">"circle"</span> r]  <span class="op">**</span><span class="num">3.14</span> r r\n    [<span class="str">"rect"</span> w h] <span class="op">*</span>w h\n    [<span class="str">"tri"</span> b h]  <span class="op">**</span><span class="num">0.5</span> b h',
+    iloTok: 38,
+    note: 'Pattern match with <code>?</code>; arms are flat, pattern then expression.',
+  },
+  {
+    key: 'fetch', group: 'i/o & errors', name: 'http fetch',
+    pyName: 'http-fetch.py', iloName: 'http-fetch.@',
+    py: `import requests
+
+r = requests.get("https://api.example.com/users")
+if r.status_code == 200:
+    print(r.json())
+else:
+    print("error", r.status_code)`,
+    ilo: '<span class="kw">fetch</span> u<span class="op">:s</span><span class="op">&gt;</span>j <span class="op">!</span>net\n  r <span class="op">&lt;-</span> get<span class="op">!</span> u\n  <span class="op">?</span>r.ok r.json [<span class="str">"err"</span> r.code]',
+    iloTok: 28,
+    note: 'Effect annotation <code>!net</code> on the signature. Error path is a tuple, not a string.',
+  },
+  {
+    key: 'parse', group: 'i/o & errors', name: 'json parse',
+    pyName: 'json-parse.py', iloName: 'json-parse.@',
+    py: `import json
+
+data = json.loads(raw)
+if "users" in data:
+    for u in data["users"]:
+        print(u["name"])`,
+    ilo: '<span class="kw">main</span> raw<span class="op">:s</span>\n  d <span class="op">&lt;-</span> json<span class="op">!</span> raw\n  <span class="kw">each</span> d.users.<span class="op">*</span>.name <span class="kw">prn</span>',
+    iloTok: 19,
+    note: 'Path expression <code>d.users.*.name</code> walks the list inline.',
+  },
+];
+
+const groups = Array.from(new Set(examples.map(e => e.group)));
+const exampleJson = JSON.stringify(
+  Object.fromEntries(examples.map(e => [e.key, e])),
+);
+---
+<html lang="en">
+<head>
+  <BaseHead
+    title="ilo playground"
+    description="Compare Python and ilo side by side. See the token cost of the same program in both languages."
+  />
+  <link rel="canonical" href={`${SITE_URL}/playground/`} />
+  <JsonLd data={softwareApplicationSchema} />
+  <JsonLd data={websiteSchema} />
+  <style>
+    :root {
+      --ilo-green:        #a3d977;
+      --ilo-green-low:    rgba(163, 217, 119, 0.12);
+      --ilo-green-border: rgba(163, 217, 119, 0.30);
+    }
+    html, body { margin: 0; padding: 0; background: var(--ilo-ink-0); color: var(--ilo-fg-1); }
+    body {
+      font-family: var(--ilo-font-sans);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    main.pl-main { flex: 1; }
+    a { color: inherit; }
+
+    .pl-nav {
+      border-bottom: 1px solid var(--ilo-hairline);
+      background: var(--ilo-ink-nav);
+      backdrop-filter: blur(10px);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .pl-nav-inner {
+      max-width: 1380px; margin: 0 auto;
+      display: flex; align-items: center; gap: 18px;
+      height: 60px; padding: 0 28px;
+    }
+    .pl-wordmark {
+      font-family: var(--ilo-font-sans);
+      font-weight: 800; font-size: 20px; line-height: 1;
+      letter-spacing: -0.04em; color: var(--ilo-amber);
+      text-decoration: none;
+    }
+    .pl-sep { color: var(--ilo-fg-4); font-family: var(--ilo-font-mono); font-size: 12px; }
+    .pl-page-name {
+      font-family: var(--ilo-font-mono); font-size: 12px;
+      color: var(--ilo-fg-2); letter-spacing: 0.04em;
+    }
+    .pl-status {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--ilo-font-mono); font-size: 11px;
+      color: var(--ilo-amber); letter-spacing: 0.02em;
+      padding: 4px 10px; border-radius: var(--ilo-radius-full);
+      border: 1px solid rgba(224, 148, 34, 0.28);
+      background: rgba(224, 148, 34, 0.05);
+    }
+    .pl-status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--ilo-amber);
+      box-shadow: 0 0 0 3px rgba(224, 148, 34, 0.18);
+    }
+    .pl-nav-right { margin-left: auto; display: flex; align-items: center; gap: 18px; }
+    .pl-nav-link {
+      font-family: var(--ilo-font-sans); font-size: 13px; font-weight: 500;
+      color: var(--ilo-fg-2); text-decoration: none;
+    }
+    .pl-nav-link:hover { color: var(--ilo-fg-1); }
+    .pl-nav-btn {
+      font-family: var(--ilo-font-sans); font-size: 12.5px; font-weight: 600;
+      padding: 7px 14px; border-radius: var(--ilo-radius-sm);
+      background: var(--ilo-amber); color: #1a0e02;
+      text-decoration: none;
+    }
+    .pl-nav-btn:hover { background: var(--ilo-amber-hot); }
+
+    .pl-main {
+      max-width: 1380px; width: 100%;
+      margin: 0 auto;
+      padding: 24px 28px 40px;
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .pl-side {
+      position: sticky; top: 84px;
+      border: 1px solid var(--ilo-hairline);
+      border-radius: var(--ilo-radius-md);
+      background: linear-gradient(180deg, rgba(255,255,255,0.012), transparent);
+      padding: 14px;
+    }
+    .pl-side-h {
+      font-family: var(--ilo-font-mono);
+      font-size: 10.5px; font-weight: 500;
+      letter-spacing: 0.10em; text-transform: uppercase;
+      color: var(--ilo-fg-4);
+      padding: 4px 10px 10px;
+      border-bottom: 1px solid var(--ilo-hairline);
+      margin: -4px -4px 10px;
+    }
+    .pl-group {
+      font-family: var(--ilo-font-mono);
+      font-size: 10px; font-weight: 500;
+      letter-spacing: 0.10em; text-transform: uppercase;
+      color: var(--ilo-fg-4); opacity: 0.7;
+      padding: 14px 8px 6px;
+    }
+    .pl-group:first-of-type { padding-top: 4px; }
+    .pl-ex {
+      display: flex; align-items: baseline; gap: 10px;
+      width: 100%; text-align: left;
+      background: transparent; border: 0;
+      padding: 7px 10px; border-radius: 5px;
+      font-family: var(--ilo-font-sans);
+      font-size: 13px; color: var(--ilo-fg-2);
+      cursor: pointer;
+      transition: background var(--ilo-duration-2) var(--ilo-ease),
+                  color var(--ilo-duration-2) var(--ilo-ease);
+    }
+    .pl-ex:hover { background: rgba(255,255,255,0.03); color: var(--ilo-fg-1); }
+    .pl-ex.is-active {
+      background: rgba(224, 148, 34, 0.07);
+      color: var(--ilo-amber);
+    }
+    .pl-ex-name { flex: 1; }
+    .pl-ex-tok {
+      font-family: var(--ilo-font-mono); font-size: 10.5px;
+      color: var(--ilo-fg-4);
+    }
+    .pl-ex.is-active .pl-ex-tok { color: var(--ilo-amber); opacity: 0.7; }
+
+    .pl-stage {
+      display: flex; flex-direction: column; gap: 14px;
+      min-width: 0;
+    }
+    .pl-pair {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 14px;
+    }
+    .pl-pane {
+      background: var(--ilo-ink-1);
+      border: 1px solid var(--ilo-hairline);
+      border-radius: var(--ilo-radius-md);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      min-height: 360px;
+    }
+    .pl-pane-head {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--ilo-hairline);
+      font-family: var(--ilo-font-mono);
+      font-size: 11px; color: var(--ilo-fg-4);
+      letter-spacing: 0.04em;
+    }
+    .pl-pane-head .lang {
+      color: var(--ilo-fg-2); text-transform: uppercase;
+      letter-spacing: 0.08em; font-weight: 500;
+    }
+    .pl-pane-head .name { color: var(--ilo-fg-3); margin-left: auto; }
+    .pl-pane-head .tag {
+      margin-left: 8px;
+      padding: 2px 6px; border-radius: 4px;
+      border: 1px solid var(--ilo-hairline);
+      color: var(--ilo-fg-4); font-size: 10px;
+      letter-spacing: 0.06em;
+    }
+    .pl-pane-head .tag.amber {
+      color: var(--ilo-amber);
+      border-color: rgba(224, 148, 34, 0.28);
+      background: rgba(224, 148, 34, 0.05);
+    }
+    .pl-edit, .pl-out {
+      flex: 1;
+      margin: 0;
+      padding: 18px 22px;
+      background: transparent; color: var(--ilo-fg-1);
+      font-family: var(--ilo-font-mono);
+      font-variant-ligatures: none;
+      font-size: 14px; line-height: 1.65;
+      border: 0; outline: 0;
+      resize: none;
+      overflow: auto;
+      white-space: pre;
+      tab-size: 4;
+    }
+    .pl-edit::placeholder { color: var(--ilo-fg-4); }
+    .pl-out { white-space: pre-wrap; }
+    .pl-out .kw  { color: var(--ilo-syn-kw); }
+    .pl-out .op  { color: var(--ilo-syn-op); }
+    .pl-out .str { color: var(--ilo-syn-str); }
+    .pl-out .num { color: var(--ilo-syn-num); }
+    .pl-out .cmt { color: var(--ilo-syn-cmt); font-style: italic; }
+    .pl-out .err { color: var(--ilo-syn-err); }
+
+    .pl-receipt {
+      border: 1px solid var(--ilo-hairline);
+      border-radius: var(--ilo-radius-md);
+      padding: 16px 20px;
+      background: rgba(255,255,255,0.014);
+      display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    }
+    .pl-r-label {
+      font-family: var(--ilo-font-mono);
+      font-size: 10.5px; font-weight: 500;
+      letter-spacing: 0.10em; text-transform: uppercase;
+      color: var(--ilo-fg-4);
+    }
+    .pl-r-num {
+      font-family: var(--ilo-font-sans);
+      font-size: 26px; font-weight: 700;
+      color: var(--ilo-fg-1);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .pl-r-num .lang {
+      font-family: var(--ilo-font-mono); font-size: 11px;
+      color: var(--ilo-fg-4);
+      margin-right: 6px;
+      font-weight: 400;
+    }
+    .pl-r-num .unit {
+      font-family: var(--ilo-font-mono); font-size: 12px;
+      color: var(--ilo-fg-3);
+      margin-left: 4px;
+      font-weight: 400;
+    }
+    .pl-r-arrow {
+      color: var(--ilo-fg-4); font-family: var(--ilo-font-mono); font-size: 18px;
+    }
+    .pl-r-delta {
+      font-family: var(--ilo-font-mono); font-size: 13px; font-weight: 600;
+      padding: 5px 12px; border-radius: var(--ilo-radius-full);
+      background: var(--ilo-green-low);
+      color: var(--ilo-green);
+      border: 1px solid var(--ilo-green-border);
+    }
+    .pl-r-note {
+      margin-left: auto;
+      font-family: var(--ilo-font-mono); font-size: 11px;
+      color: var(--ilo-fg-4);
+      text-wrap: pretty;
+      max-width: 320px;
+      text-align: right;
+    }
+    .pl-r-note code {
+      font-family: var(--ilo-font-mono); font-size: 11px;
+      background: rgba(255,255,255,0.05); color: var(--ilo-fg-2);
+      padding: 1px 5px; border-radius: 3px;
+    }
+
+    .pl-actions {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0 0;
+      flex-wrap: wrap;
+    }
+    .pl-btn {
+      font-family: var(--ilo-font-sans); font-size: 12.5px; font-weight: 500;
+      padding: 7px 14px; border-radius: var(--ilo-radius-sm);
+      border: 1px solid var(--ilo-hairline);
+      background: transparent; color: var(--ilo-fg-2);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: color var(--ilo-duration-2) var(--ilo-ease),
+                  border-color var(--ilo-duration-2) var(--ilo-ease);
+    }
+    .pl-btn:hover { color: var(--ilo-fg-1); border-color: var(--ilo-hairline-strong); }
+    .pl-btn.is-copied { color: var(--ilo-green); border-color: var(--ilo-green-border); }
+    .pl-btn-primary {
+      background: var(--ilo-amber); color: #1a0e02;
+      border-color: var(--ilo-amber);
+    }
+    .pl-btn-primary:hover { background: var(--ilo-amber-hot); color: #1a0e02; }
+    .pl-actions-right { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .pl-foot-note {
+      margin-top: 18px;
+      padding: 12px 16px;
+      border-left: 2px solid var(--ilo-amber);
+      background: rgba(224, 148, 34, 0.03);
+      border-radius: 0 4px 4px 0;
+      font-family: var(--ilo-font-sans);
+      font-size: 12.5px; line-height: 1.6;
+      color: var(--ilo-fg-3);
+    }
+    .pl-foot-note b {
+      font-family: var(--ilo-font-mono); font-size: 10.5px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--ilo-amber); font-weight: 500;
+      margin-right: 8px;
+    }
+    .pl-foot-note a { color: var(--ilo-amber); text-decoration: none; font-weight: 500; }
+    .pl-foot-note a:hover { color: var(--ilo-amber-high); }
+
+    @media (max-width: 900px) {
+      .pl-main { grid-template-columns: 1fr; }
+      .pl-side { position: static; top: auto; }
+      .pl-pair { grid-template-columns: 1fr; }
+      .pl-r-note { margin-left: 0; text-align: left; max-width: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="pl-nav">
+    <div class="pl-nav-inner">
+      <a class="pl-wordmark" href="/">ilo</a>
+      <span class="pl-sep">/</span>
+      <span class="pl-page-name">playground</span>
+      <span class="pl-status">
+        <span class="pl-status-dot"></span>
+        static · live conversion soon
+      </span>
+      <div class="pl-nav-right">
+        <a class="pl-nav-link" href="/#manifesto">Manifesto</a>
+        <a class="pl-nav-link" href="/docs/introduction/">Docs</a>
+        <a class="pl-nav-btn" href="/#install">Install ilo</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="pl-main">
+
+    <aside class="pl-side" id="pl-side">
+      <div class="pl-side-h">Examples</div>
+      {groups.map(group => (
+        <>
+          <div class="pl-group">{group}</div>
+          {examples.filter(e => e.group === group).map((e, i) => (
+            <button class={`pl-ex${group === groups[0] && i === 0 ? ' is-active' : ''}`} data-key={e.key}>
+              <span class="pl-ex-name">{e.name}</span>
+              <span class="pl-ex-tok">{e.iloTok} tok</span>
+            </button>
+          ))}
+        </>
+      ))}
+    </aside>
+
+    <section class="pl-stage">
+
+      <div class="pl-pair">
+        <div class="pl-pane">
+          <div class="pl-pane-head">
+            <span class="lang">python</span>
+            <span class="tag">editable</span>
+            <span class="name" id="pl-py-name">{examples[0].pyName}</span>
+          </div>
+          <textarea
+            class="pl-edit"
+            id="pl-py-edit"
+            spellcheck="false"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off">{examples[0].py}</textarea>
+        </div>
+
+        <div class="pl-pane">
+          <div class="pl-pane-head">
+            <span class="lang">ilo</span>
+            <span class="tag amber">converted</span>
+            <span class="name" id="pl-ilo-name">{examples[0].iloName}</span>
+          </div>
+          <pre class="pl-out" id="pl-ilo-out" set:html={examples[0].ilo} />
+        </div>
+      </div>
+
+      <div class="pl-receipt">
+        <span class="pl-r-label">tokens</span>
+        <div class="pl-r-num"><span class="lang">py</span><span id="pl-py-tok">—</span><span class="unit">tok</span></div>
+        <span class="pl-r-arrow">→</span>
+        <div class="pl-r-num"><span class="lang">ilo</span><span id="pl-ilo-tok">{examples[0].iloTok}</span><span class="unit">tok</span></div>
+        <span class="pl-r-delta" id="pl-delta">—</span>
+        <span class="pl-r-note" id="pl-note" set:html={examples[0].note} />
+      </div>
+
+      <div class="pl-actions">
+        <button class="pl-btn" data-action="reset">Reset to example</button>
+        <button class="pl-btn" data-action="copy-ilo" data-target="pl-ilo-out">Copy ilo</button>
+        <div class="pl-actions-right">
+          <button class="pl-btn" data-action="copy-share" id="pl-share-btn">Copy share link</button>
+          <a class="pl-btn pl-btn-primary" href="/#install">Install ilo →</a>
+        </div>
+      </div>
+
+      <div class="pl-foot-note">
+        <b>static demo</b>The ilo side is a hard-coded conversion of each example. Editing the Python is allowed (so you can tweak the input or paste your own to compare visually), but the ilo side doesn't yet auto-convert. Live conversion is in progress. Until then, browse the examples or <a href="/#install">install ilo</a> to run real conversions locally.
+      </div>
+
+    </section>
+
+  </main>
+
+<script is:inline define:vars={{ exampleJson }}>
+  const EXAMPLES = JSON.parse(exampleJson);
+  const ORDER = Object.keys(EXAMPLES);
+
+  function countTokens(text) {
+    if (!text || !text.trim()) return 0;
+    return text.split(/([^\w])/u).filter(p => p.trim().length > 0).length;
+  }
+
+  function replaceHtml(el, html) {
+    while (el.firstChild) el.removeChild(el.firstChild);
+    el.insertAdjacentHTML('afterbegin', html);
+  }
+
+  const els = {
+    sideButtons: () => document.querySelectorAll('.pl-ex'),
+    pyName:  document.getElementById('pl-py-name'),
+    pyEdit:  document.getElementById('pl-py-edit'),
+    iloName: document.getElementById('pl-ilo-name'),
+    iloOut:  document.getElementById('pl-ilo-out'),
+    pyTok:   document.getElementById('pl-py-tok'),
+    iloTok:  document.getElementById('pl-ilo-tok'),
+    delta:   document.getElementById('pl-delta'),
+    note:    document.getElementById('pl-note'),
+  };
+
+  let currentKey = ORDER[0];
+
+  function updatePyTokens() {
+    const py = els.pyEdit.value;
+    const pyTok = countTokens(py);
+    const iloTok = parseInt(els.iloTok.textContent, 10) || 0;
+    els.pyTok.textContent = pyTok;
+    if (pyTok > 0 && iloTok > 0) {
+      const delta = Math.round((1 - iloTok / pyTok) * 100);
+      els.delta.textContent = '−' + delta + '%';
+    } else {
+      els.delta.textContent = '—';
+    }
+  }
+
+  function apply(key) {
+    const ex = EXAMPLES[key];
+    if (!ex) return;
+    els.pyName.textContent = ex.pyName;
+    els.iloName.textContent = ex.iloName;
+    els.pyEdit.value = ex.py;
+    replaceHtml(els.iloOut, ex.ilo);
+    els.iloTok.textContent = ex.iloTok;
+    replaceHtml(els.note, ex.note);
+    els.sideButtons().forEach((b) => b.classList.toggle('is-active', b.getAttribute('data-key') === key));
+    if (history.replaceState) {
+      const u = new URL(window.location);
+      u.searchParams.set('ex', key);
+      history.replaceState({}, '', u);
+    }
+    currentKey = key;
+    updatePyTokens();
+  }
+
+  els.sideButtons().forEach((btn) => {
+    btn.addEventListener('click', () => apply(btn.getAttribute('data-key')));
+  });
+
+  els.pyEdit.addEventListener('input', updatePyTokens);
+
+  document.body.addEventListener('click', (e) => {
+    const btn = e.target.closest('button.pl-btn, a.pl-btn');
+    if (!btn) return;
+    const action = btn.getAttribute('data-action');
+    if (action === 'reset') {
+      apply(currentKey);
+    } else if (action === 'copy-ilo') {
+      const target = document.getElementById(btn.getAttribute('data-target'));
+      const text = target ? target.innerText.trim() : '';
+      copy(text); flash(btn, 'copied ilo ✓');
+    } else if (action === 'copy-share') {
+      copy(window.location.href);
+      flash(btn, 'copied link ✓');
+    }
+  });
+
+  function copy(text) {
+    try { navigator.clipboard && navigator.clipboard.writeText(text); } catch (_) {}
+  }
+  function flash(btn, msg) {
+    const original = btn.textContent;
+    btn.textContent = msg;
+    btn.classList.add('is-copied');
+    setTimeout(() => { btn.textContent = original; btn.classList.remove('is-copied'); }, 1800);
+  }
+
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    const key = params.get('ex');
+    if (key && EXAMPLES[key]) {
+      apply(key);
+    } else {
+      updatePyTokens();
+    }
+  })();
+</script>
+
+</body>
+</html>
