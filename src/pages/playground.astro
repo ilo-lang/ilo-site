@@ -288,23 +288,39 @@ const exampleJson = JSON.stringify(
     }
     .pl-pane.is-ilo-multi { min-height: 200px; }
     .pl-pane.is-ilo-compact { min-height: 80px; }
-    .pl-pane-stats {
-      margin-left: 10px;
+    .pl-pane-foot {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px;
+      border-top: 1px solid var(--ilo-hairline);
       font-family: var(--ilo-font-mono);
-      font-size: 10.5px;
+      font-size: 11px;
       color: var(--ilo-fg-3);
       letter-spacing: 0.04em;
     }
-    .pl-pane-stats .unit {
-      font-family: var(--ilo-font-mono); font-size: 10.5px;
+    .pl-pane-foot .unit {
+      font-family: var(--ilo-font-mono); font-size: 11px;
       color: var(--ilo-fg-4);
       margin-left: 3px;
       margin-right: 2px;
     }
-    .pl-pane-stats .pl-r-dot {
-      font-family: var(--ilo-font-mono); font-size: 11px;
+    .pl-pane-foot .pl-r-dot {
+      font-family: var(--ilo-font-mono); font-size: 12px;
       color: var(--ilo-fg-4);
-      margin: 0 3px;
+      margin: 0 4px;
+    }
+    .pl-pane-foot .pl-r-delta {
+      margin-left: auto;
+      font-family: var(--ilo-font-mono); font-size: 11px; font-weight: 600;
+      padding: 3px 9px; border-radius: var(--ilo-radius-full);
+      background: var(--ilo-green-low);
+      color: var(--ilo-green);
+      border: 1px solid var(--ilo-green-border);
+    }
+    .pl-pane-foot .pl-r-delta.is-empty {
+      background: transparent;
+      color: var(--ilo-fg-4);
+      border-color: transparent;
+      padding: 3px 0;
     }
     .pl-pane-head {
       display: flex; align-items: center; gap: 10px;
@@ -354,64 +370,14 @@ const exampleJson = JSON.stringify(
     .pl-out .cmt { color: var(--ilo-syn-cmt); font-style: italic; }
     .pl-out .err { color: var(--ilo-syn-err); }
 
-    .pl-receipt {
-      border: 1px solid var(--ilo-hairline);
-      border-radius: var(--ilo-radius-md);
-      padding: 16px 20px;
-      background: rgba(255,255,255,0.014);
-      display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
-    }
-    .pl-r-label {
+    .pl-note-row {
       font-family: var(--ilo-font-mono);
-      font-size: 10.5px; font-weight: 500;
-      letter-spacing: 0.10em; text-transform: uppercase;
+      font-size: 11.5px; line-height: 1.55;
       color: var(--ilo-fg-4);
+      margin: 0 0 4px;
+      padding: 0 4px;
     }
-    .pl-r-num {
-      font-family: var(--ilo-font-sans);
-      font-size: 26px; font-weight: 700;
-      color: var(--ilo-fg-1);
-      letter-spacing: -0.02em;
-      line-height: 1;
-    }
-    .pl-r-num .lang {
-      font-family: var(--ilo-font-mono); font-size: 11px;
-      color: var(--ilo-fg-4);
-      margin-right: 6px;
-      font-weight: 400;
-    }
-    .pl-r-num .unit {
-      font-family: var(--ilo-font-mono); font-size: 12px;
-      color: var(--ilo-fg-3);
-      margin-left: 4px;
-      font-weight: 400;
-    }
-    .pl-r-arrow {
-      color: var(--ilo-fg-4); font-family: var(--ilo-font-mono); font-size: 18px;
-    }
-    .pl-r-dot {
-      font-family: var(--ilo-font-mono);
-      font-size: 14px;
-      color: var(--ilo-fg-4);
-      margin: 0 4px 0 6px;
-      font-weight: 400;
-    }
-    .pl-r-delta {
-      font-family: var(--ilo-font-mono); font-size: 13px; font-weight: 600;
-      padding: 5px 12px; border-radius: var(--ilo-radius-full);
-      background: var(--ilo-green-low);
-      color: var(--ilo-green);
-      border: 1px solid var(--ilo-green-border);
-    }
-    .pl-r-note {
-      margin-left: auto;
-      font-family: var(--ilo-font-mono); font-size: 11px;
-      color: var(--ilo-fg-4);
-      text-wrap: pretty;
-      max-width: 320px;
-      text-align: right;
-    }
-    .pl-r-note code {
+    .pl-note-row code {
       font-family: var(--ilo-font-mono); font-size: 11px;
       background: rgba(255,255,255,0.05); color: var(--ilo-fg-2);
       padding: 1px 5px; border-radius: 3px;
@@ -517,7 +483,6 @@ const exampleJson = JSON.stringify(
       .pl-main { grid-template-columns: 1fr; }
       .pl-side { position: static; top: auto; }
       .pl-pair { grid-template-columns: 1fr; }
-      .pl-r-note { margin-left: 0; text-align: left; max-width: none; }
     }
   </style>
 </head>
@@ -579,6 +544,11 @@ const exampleJson = JSON.stringify(
               autocorrect="off"
               autocapitalize="off">{examples[0].py}</textarea>
           </div>
+          <div class="pl-pane-foot">
+            <span id="pl-py-tok">—</span><span class="unit">tok</span>
+            <span class="pl-r-dot">·</span>
+            <span id="pl-py-ch">—</span><span class="unit">ch</span>
+          </div>
         </div>
 
         <div class="pl-ilo-stack">
@@ -586,42 +556,35 @@ const exampleJson = JSON.stringify(
             <div class="pl-pane-head">
               <span class="lang">ilo</span>
               <span class="tag amber">multi-line</span>
-              <span class="pl-pane-stats"><span id="pl-ilo-multi-tok">—</span><span class="unit">tok</span><span class="pl-r-dot">·</span><span id="pl-ilo-multi-ch">—</span><span class="unit">ch</span></span>
               <span class="name" id="pl-ilo-name">{examples[0].iloName}</span>
             </div>
             <pre class="pl-out" id="pl-ilo-multi"></pre>
+            <div class="pl-pane-foot">
+              <span id="pl-ilo-multi-tok">—</span><span class="unit">tok</span>
+              <span class="pl-r-dot">·</span>
+              <span id="pl-ilo-multi-ch">—</span><span class="unit">ch</span>
+              <span class="pl-r-delta is-empty" id="pl-delta-multi">—</span>
+            </div>
           </div>
 
           <div class="pl-pane is-ilo-compact">
             <div class="pl-pane-head">
               <span class="lang">ilo</span>
               <span class="tag amber">compact</span>
-              <span class="pl-pane-stats"><span id="pl-ilo-compact-tok">—</span><span class="unit">tok</span><span class="pl-r-dot">·</span><span id="pl-ilo-compact-ch">—</span><span class="unit">ch</span></span>
               <span class="name" id="pl-ilo-name-compact">{examples[0].iloName}</span>
             </div>
             <pre class="pl-out" id="pl-ilo-compact"></pre>
+            <div class="pl-pane-foot">
+              <span id="pl-ilo-compact-tok">—</span><span class="unit">tok</span>
+              <span class="pl-r-dot">·</span>
+              <span id="pl-ilo-compact-ch">—</span><span class="unit">ch</span>
+              <span class="pl-r-delta is-empty" id="pl-delta-compact">—</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="pl-receipt">
-        <span class="pl-r-label">tokens</span>
-        <div class="pl-r-num">
-          <span class="lang">py</span>
-          <span id="pl-py-tok">—</span><span class="unit">tok</span>
-          <span class="pl-r-dot">·</span>
-          <span id="pl-py-ch">—</span><span class="unit">ch</span>
-        </div>
-        <span class="pl-r-arrow">→</span>
-        <div class="pl-r-num">
-          <span class="lang">ilo</span>
-          <span id="pl-ilo-tok">{examples[0].iloTok}</span><span class="unit">tok</span>
-          <span class="pl-r-dot">·</span>
-          <span id="pl-ilo-ch">—</span><span class="unit">ch</span>
-        </div>
-        <span class="pl-r-delta" id="pl-delta">—</span>
-        <span class="pl-r-note" id="pl-note" set:html={examples[0].note} />
-      </div>
+      <p class="pl-note-row" id="pl-note" set:html={examples[0].note}></p>
 
       <div class="pl-actions">
         <button class="pl-btn" data-action="reset">Reset to example</button>
@@ -668,10 +631,9 @@ const exampleJson = JSON.stringify(
     iloCompactTok: document.getElementById('pl-ilo-compact-tok'),
     iloCompactCh:  document.getElementById('pl-ilo-compact-ch'),
     pyTok:   document.getElementById('pl-py-tok'),
-    iloTok:  document.getElementById('pl-ilo-tok'),
     pyCh:    document.getElementById('pl-py-ch'),
-    iloCh:   document.getElementById('pl-ilo-ch'),
-    delta:   document.getElementById('pl-delta'),
+    deltaMulti:   document.getElementById('pl-delta-multi'),
+    deltaCompact: document.getElementById('pl-delta-compact'),
     note:    document.getElementById('pl-note'),
     status:  document.getElementById('pl-status'),
     statusText: document.getElementById('pl-status-text'),
@@ -882,13 +844,16 @@ const exampleJson = JSON.stringify(
     }
   }
 
-  function setIloTokens(n) {
-    els.iloTok.textContent = n;
-    updateDelta();
+  function setDeltaPill(el, iloTok, pyTok) {
+    if (pyTok > 0 && iloTok > 0 && iloTok < pyTok) {
+      const delta = Math.round((1 - iloTok / pyTok) * 100);
+      el.textContent = '−' + delta + '%';
+      el.classList.remove('is-empty');
+    } else {
+      el.textContent = '—';
+      el.classList.add('is-empty');
+    }
   }
-
-  function setIloChars(n) { els.iloCh.textContent = n; }
-  function setPyChars(n)  { els.pyCh.textContent = n; }
 
   function renderIlo() {
     const multi = currentIloText;
@@ -901,27 +866,20 @@ const exampleJson = JSON.stringify(
     els.iloMultiCh.textContent = multi.length;
     els.iloCompactTok.textContent = cTok;
     els.iloCompactCh.textContent = compact.length;
-    // Receipt reflects the canonical (multi-line) numbers.
-    setIloTokens(mTok);
-    setIloChars(multi.length);
-  }
-
-  function updateDelta() {
-    const pyTok = parseInt(els.pyTok.textContent, 10) || 0;
-    const iloTok = parseInt(els.iloTok.textContent, 10) || 0;
-    if (pyTok > 0 && iloTok > 0 && iloTok < pyTok) {
-      const delta = Math.round((1 - iloTok / pyTok) * 100);
-      els.delta.textContent = '−' + delta + '%';
-    } else {
-      els.delta.textContent = '—';
-    }
+    const pyTok = countTokens(els.pyEdit.value);
+    setDeltaPill(els.deltaMulti, mTok, pyTok);
+    setDeltaPill(els.deltaCompact, cTok, pyTok);
   }
 
   function updatePyTokens() {
     const py = els.pyEdit.value;
-    els.pyTok.textContent = countTokens(py);
-    setPyChars(py.length);
-    updateDelta();
+    const pyTok = countTokens(py);
+    els.pyTok.textContent = pyTok;
+    els.pyCh.textContent = py.length;
+    const mTok = parseInt(els.iloMultiTok.textContent, 10) || 0;
+    const cTok = parseInt(els.iloCompactTok.textContent, 10) || 0;
+    setDeltaPill(els.deltaMulti, mTok, pyTok);
+    setDeltaPill(els.deltaCompact, cTok, pyTok);
   }
 
   function apply(key) {
