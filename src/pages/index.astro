@@ -718,22 +718,13 @@ interface Preset {
 
 const PRESETS: Preset[] = [
   {
-    name: 'text-upper',
-    python: `text = "hello world"
-print(text.upper())`,
+    name: 'text',
+    python: `text = "  hello world  "
+print(len(text.strip().upper()))`,
     iloMulti: `main>_
-  prnt upr "hello world"`,
-    iloInline: `main>_;prnt upr "hello world"`,
-    output: 'HELLO WORLD',
-  },
-  {
-    name: 'chain',
-    python: `text = "  Hello, World  "
-print(len(text.strip()))`,
-    iloMulti: `main>_
-  prnt len trim "  Hello, World  "`,
-    iloInline: `main>_;prnt len trim "  Hello, World  "`,
-    output: '12',
+  prnt len upr trim "  hello world  "`,
+    iloInline: `main>_;prnt len upr trim "  hello world  "`,
+    output: '11',
   },
   {
     name: 'pipes',
