@@ -684,15 +684,37 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
       </div>
     </section>
     <!-- STILL EVOLVING -->
-    <section class="section-evolving">
+    <section class="section-evolving" data-animate>
       <div class="container-wide">
         <div class="evolving-inner">
-          <h2>An ongoing experiment</h2>
-          <p>ilo is a research project. APIs are not contracts; the manifesto is. Breaking changes ship under semver until the experiment has converged on what works best for agents.</p>
+          <div class="evolving-head">
+            <svg class="evolving-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 8h18l-2 3 2 3H3"/>
+              <path d="M9 14v6"/>
+              <path d="M5 20h8"/>
+            </svg>
+            <h2>An ongoing experiment</h2>
+          </div>
+          <p>ilo is a research project — an exploration of what programming languages can look like when AI agents are the primary author. The manifesto is the stable contract. Everything else (syntax, builtins, tooling) is under active investigation; expect breaking changes while we converge on what works best.</p>
+
+          <p class="evolving-cta">
+            <strong>Help shape it.</strong> The rules and optimisations that make ilo best for agents are still being discovered. Try it, find where it fails, file an issue, send a PR, or write about it.
+          </p>
+
+          <div class="evolving-actions">
+            <a class="btn btn-ghost" href="https://github.com/ilo-lang/ilo/issues" target="_blank" rel="noopener">
+              File an issue
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/ilo-lang/ilo/discussions" target="_blank" rel="noopener">
+              Join discussion
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+          </div>
 
           {posts.length > 0 && (
             <>
-              <h3>Recent writing</h3>
+              <h3 class="evolving-writing-head">Recent writing</h3>
               <ul class="posts-list">
                 {posts.map(p => (
                   <li>
@@ -1798,6 +1820,12 @@ scheduleAutoCycle();
     font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
     color: var(--ilo-fg-4); margin: 0 0 14px;
   }
+    .evolving-head { display: flex; align-items: center; gap: 12px; }
+  .evolving-icon { color: var(--ilo-accent); flex-shrink: 0; }
+  .evolving-cta { margin-top: 18px; }
+  .evolving-cta strong { color: var(--ilo-fg-1); }
+  .evolving-actions { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+  .evolving-writing-head { margin-top: 28px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ilo-fg-4); }
   .posts-list {
     list-style: none; padding: 0; margin: 0;
     display: flex; flex-direction: column; gap: 10px;
