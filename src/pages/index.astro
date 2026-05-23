@@ -42,7 +42,7 @@ const posts: Post[] = await fetch('https://danieljohnmorris.com/rss.xml')
         return needle.includes('ilo') ? { title, url: link, date: pubDate ? new Date(pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : '' } : null;
       })
       .filter(Boolean)
-      .slice(0, 5) as Post[];
+      .slice(0, 10) as Post[];
   })
   .catch(() => [] as Post[]);
 
@@ -725,26 +725,37 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
             </div>
             <div class="evolving-col evolving-col--side">
               {posts.length > 0 && (
-            <>
-              <h3 class="evolving-writing-head">Recent writing</h3>
-              <ul class="writing-list">
-                {posts.map(p => (
-                  <li class="writing-card">
-                    <a class="writing-link" href={p.url} target="_blank" rel="noopener">
-                      <span class="writing-title">{p.title}</span>
-                      {p.date && <time class="writing-date mono">{p.date}</time>}
+                <>
+                  <div class="writing-browser-head">
+                    <h3 class="evolving-writing-head">Recent writing</h3>
+                    <div class="writing-nav">
+                      <button class="writing-nav-btn" id="writing-prev" aria-label="Previous post">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                      </button>
+                      <span class="writing-nav-count mono" id="writing-nav-count">1 / {posts.length}</span>
+                      <button class="writing-nav-btn" id="writing-next" aria-label="Next post">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <ul class="writing-list writing-list--browser" id="writing-browser">
+                    {posts.map((p, i) => (
+                      <li class={'writing-card' + (i === 0 ? ' is-active' : '')} data-writing-idx={i}>
+                        <a class="writing-link" href={p.url} target="_blank" rel="noopener">
+                          <span class="writing-title">{p.title}</span>
+                          {p.date && <time class="writing-date mono">{p.date}</time>}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                  <div class="principles-cta">
+                    <a class="btn-text" href="https://danieljohnmorris.com/writing/" target="_blank" rel="noopener">
+                      Read all writing
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </a>
-                  </li>
-                ))}
-              </ul>
-              <div class="principles-cta">
-                <a class="btn-text" href="https://danieljohnmorris.com/writing/" target="_blank" rel="noopener">
-                  Read all writing
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </a>
-              </div>
-            </>
-          )}
+                  </div>
+                </>
+              )}
         
             </div>
           </div>
@@ -1413,6 +1424,24 @@ scheduleAutoCycle();
   );
   obs.observe(section);
 })();
+
+// ===== writing-browser prev/next =====
+{
+  const cards = document.querySelectorAll<HTMLLIElement>('#writing-browser .writing-card');
+  const counter = document.getElementById('writing-nav-count');
+  const prev = document.getElementById('writing-prev');
+  const next = document.getElementById('writing-next');
+  if (cards.length && counter && prev && next) {
+    let idx = 0;
+    const total = cards.length;
+    const render = () => {
+      cards.forEach((c, i) => c.classList.toggle('is-active', i === idx));
+      counter.textContent = `${idx + 1} / ${total}`;
+    };
+    prev.addEventListener('click', () => { idx = (idx - 1 + total) % total; render(); });
+    next.addEventListener('click', () => { idx = (idx + 1) % total; render(); });
+  }
+}
 </script>
 
 <style>
@@ -1852,7 +1881,15 @@ scheduleAutoCycle();
   .open-questions li:last-child { border-bottom: 0; }
   .open-questions li::before { content: "?"; color: var(--ilo-accent); font-weight: 700; margin-right: 10px; }
     .evolving-writing-head { margin-top: 28px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ilo-fg-4); }
-  .writing-list { list-style: none; padding: 0; margin: 0 0 16px; display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .writing-browser-head { display: flex; align-items: center; justify-content: space-between; margin: 0 0 14px; gap: 12px; }
+  .writing-browser-head .evolving-writing-head { margin: 0; }
+  .writing-nav { display: inline-flex; align-items: center; gap: 10px; }
+  .writing-nav-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--ilo-hairline); background: transparent; color: var(--ilo-fg-3); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+  .writing-nav-btn:hover { color: var(--ilo-accent); border-color: var(--ilo-accent); }
+  .writing-nav-count { font-size: 12px; color: var(--ilo-fg-4); min-width: 48px; text-align: center; }
+  .writing-list--browser .writing-card { display: none; }
+  .writing-list--browser .writing-card.is-active { display: block; }
+    .writing-list { list-style: none; padding: 0; margin: 0 0 16px; display: grid; grid-template-columns: 1fr; gap: 8px; }
   .writing-card { border: 1px solid var(--ilo-hairline); border-radius: 8px; background: var(--ilo-ink-1); transition: border-color 0.15s, background 0.15s; }
   .writing-card:hover { border-color: var(--ilo-accent); background: rgba(224, 148, 34, 0.04); }
   .writing-link { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 14px 18px; text-decoration: none; color: var(--ilo-fg-1); }
