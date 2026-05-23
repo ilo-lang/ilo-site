@@ -47,7 +47,7 @@ const installGroups: InstallGroup[] = [
     verify: 'tool: ilo',
     verifyNote: 'type-checked at load',
     subs: [
-      { id: 'claude', label: 'Claude Code',  file: 'mcp.json', cmd: 'claude mcp add ilo --scope user npx -y @ilo-lang/mcp' },
+      { id: 'claude', label: 'Claude Code',  file: 'plugin.json', cmd: '/plugin marketplace add ilo-lang/ilo && /plugin install ilo-lang/ilo' },
       { id: 'pi',     label: 'Pi',           file: 'pi.json',  cmd: 'pi install ilo-lang/ilo' },
       { id: 'other',  label: 'Other agents', file: 'skills.json', cmd: 'npx skills add ilo-lang/ilo' },
     ],
@@ -108,7 +108,8 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
         <span>GitHub</span>
       </a>
-      <a class="btn btn-primary nav-cta" href="/docs/introduction/">Get started</a>
+      <a class="btn btn-ghost nav-cta" href="#install">Install</a>
+      <a class="btn btn-primary nav-cta" href="#see-it-in-action">Try it yourself</a>
     </div>
   </header>
 
@@ -126,13 +127,6 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
             The first programming language designed from the ground up for LLM agents. The audience is not human. The vocabulary is small. The verifier runs before the program does. Errors arrive as JSON with fix plans attached. The metric is <em>total tokens spent</em>. Everything else is negotiable.
           </p>
 
-          <div class="hero-actions">
-            <a href="/docs/introduction/" class="btn btn-primary">
-              Get started
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            </a>
-            <a href="/docs/learn/manifesto/" class="btn btn-ghost">Read the manifesto</a>
-          </div>
         </div>
 
         <div class="hero-right">
