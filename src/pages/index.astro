@@ -6,6 +6,46 @@ import JsonLd from '../components/JsonLd.astro';
 import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schema';
 import '../styles/global.css';
 
+// ── Dynamic changelog: last 3 GitHub releases ──────────────────────────────
+type GhRelease = { tag_name: string; name: string; published_at: string; html_url: string; body: string };
+const releases: GhRelease[] = await fetch('https://api.github.com/repos/ilo-lang/ilo/releases?per_page=3', {
+  headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
+})
+  .then(r => r.ok ? r.json() as Promise<GhRelease[]> : ([] as GhRelease[]))
+  .catch(() => [] as GhRelease[]);
+
+function releaseExcerpt(body: string): string {
+  const lines = body.split('\n').map(l => l.trim()).filter(Boolean);
+  const meaningful = lines.filter(l => !l.startsWith('#') && l.length > 10);
+  return meaningful.slice(0, 5).join(' ').slice(0, 300) + (meaningful.join(' ').length > 300 ? '…' : '');
+}
+
+function fmtDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+// ── Writing feed: filter ilo posts from personal RSS ──────────────────────
+type Post = { title: string; url: string; date: string };
+const posts: Post[] = await fetch('https://danieljohnmorris.com/rss.xml')
+  .then(r => r.ok ? r.text() : '')
+  .then(xml => {
+    if (!xml) return [] as Post[];
+    const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(m => m[1]);
+    return items
+      .map(item => {
+        const title = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/)?.[1] ?? item.match(/<title>(.*?)<\/title>/)?.[1] ?? '';
+        const link  = item.match(/<link>(.*?)<\/link>/)?.[1] ?? '';
+        const desc  = item.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>|<description>([\s\S]*?)<\/description>/)?.[1] ?? '';
+        const cat   = [...item.matchAll(/<category[^>]*>(.*?)<\/category>/g)].map(m => m[1]).join(' ');
+        const pubDate = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] ?? '';
+        const needle = (title + desc + cat).toLowerCase();
+        return needle.includes('ilo') ? { title, url: link, date: pubDate ? new Date(pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : '' } : null;
+      })
+      .filter(Boolean)
+      .slice(0, 5) as Post[];
+  })
+  .catch(() => [] as Post[]);
+
 const principles = [
   { n: '01', name: 'Token-Conservative', body: 'Every choice evaluated against total token cost — generation, errors, retries, context loading. Prefix notation. Single-char names. Guards instead of nested if/else.', href: '/docs/learn/manifesto/#1-token-conservative' },
   { n: '02', name: 'Constrained',         body: 'Small vocabulary, closed world. Every callable function is known ahead of time. The agent cannot hallucinate an API. Fewer valid next-tokens means fewer retries.', href: '/docs/learn/manifesto/#2-constrained' },
@@ -531,41 +571,76 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
     <!-- CHANGELOG -->
     <section id="shipped" class="shipped">
       <div class="container-wide">
-        <div class="section-head">
-          <div class="kicker">v26.5 · latest release</div>
-          <h2>Sum types, generics, package registry, Cranelift TCO.</h2>
-          <p class="sub">A focused release closing the gap on language expressivity while keeping the token cost flat.</p>
-        </div>
+        {releases.length > 0 ? (
+          <>
+            <div class="section-head">
+              <div class="kicker">{releases[0].tag_name} · latest release</div>
+              <h2>{releases[0].name || releases[0].tag_name}</h2>
+              <p class="sub">{releaseExcerpt(releases[0].body)}</p>
+            </div>
 
-        <ul class="changelog-list">
-          <li>
-            <span class="cl-tag mono">language</span>
-            <span class="cl-name">Sum types</span>
-            <span class="cl-body">Discriminated unions with generics, recursive variants, exhaustive match.</span>
-          </li>
-          <li>
-            <span class="cl-tag mono">language</span>
-            <span class="cl-name">Generics</span>
-            <span class="cl-body">Bounded and multi-bound type variables across functions and types.</span>
-          </li>
-          <li>
-            <span class="cl-tag mono">ecosystem</span>
-            <span class="cl-name">Package registry</span>
-            <span class="cl-body"><code>ilo add</code> installs from a reproducible registry. Lockfile by default.</span>
-          </li>
-          <li>
-            <span class="cl-tag mono">compiler</span>
-            <span class="cl-name">Cranelift TCO</span>
-            <span class="cl-body"><code>return_call</code> in the JIT. Recursion is now free.</span>
-          </li>
-        </ul>
+            <div class="release-feed">
+              {releases.map(r => (
+                <div class="release-card">
+                  <div class="release-meta">
+                    <span class="mono release-tag">{r.tag_name}</span>
+                    <time class="release-date" datetime={r.published_at}>{fmtDate(r.published_at)}</time>
+                  </div>
+                  <p class="release-excerpt">{releaseExcerpt(r.body)}</p>
+                  <a class="btn-text release-link" href={r.html_url} target="_blank" rel="noopener">
+                    Full release notes
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  </a>
+                </div>
+              ))}
+            </div>
 
-        <div class="principles-cta">
-          <a class="btn-text" href="https://github.com/ilo-lang/ilo/releases" target="_blank" rel="noopener">
-            Read the full v26.5 release notes
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </a>
-        </div>
+            <div class="principles-cta">
+              <a class="btn-text" href="https://github.com/ilo-lang/ilo/releases" target="_blank" rel="noopener">
+                All releases on GitHub
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+            </div>
+          </>
+        ) : (
+          <>
+            <div class="section-head">
+              <div class="kicker">v26.5 · latest release</div>
+              <h2>Sum types, generics, package registry, Cranelift TCO.</h2>
+              <p class="sub">A focused release closing the gap on language expressivity while keeping the token cost flat.</p>
+            </div>
+
+            <ul class="changelog-list">
+              <li>
+                <span class="cl-tag mono">language</span>
+                <span class="cl-name">Sum types</span>
+                <span class="cl-body">Discriminated unions with generics, recursive variants, exhaustive match.</span>
+              </li>
+              <li>
+                <span class="cl-tag mono">language</span>
+                <span class="cl-name">Generics</span>
+                <span class="cl-body">Bounded and multi-bound type variables across functions and types.</span>
+              </li>
+              <li>
+                <span class="cl-tag mono">ecosystem</span>
+                <span class="cl-name">Package registry</span>
+                <span class="cl-body"><code>ilo add</code> installs from a reproducible registry. Lockfile by default.</span>
+              </li>
+              <li>
+                <span class="cl-tag mono">compiler</span>
+                <span class="cl-name">Cranelift TCO</span>
+                <span class="cl-body"><code>return_call</code> in the JIT. Recursion is now free.</span>
+              </li>
+            </ul>
+
+            <div class="principles-cta">
+              <a class="btn-text" href="https://github.com/ilo-lang/ilo/releases" target="_blank" rel="noopener">
+                Read the full v26.5 release notes
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+            </div>
+          </>
+        )}
       </div>
     </section>
 
@@ -608,6 +683,30 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
         </div>
       </div>
     </section>
+    <!-- STILL EVOLVING -->
+    <section class="section-evolving">
+      <div class="container-wide">
+        <div class="evolving-inner">
+          <h2>An ongoing experiment</h2>
+          <p>ilo is a research project. APIs are not contracts; the manifesto is. Breaking changes ship under semver until the experiment has converged on what works best for agents.</p>
+
+          {posts.length > 0 && (
+            <>
+              <h3>Recent writing</h3>
+              <ul class="posts-list">
+                {posts.map(p => (
+                  <li>
+                    <a href={p.url} target="_blank" rel="noopener">{p.title}</a>
+                    {p.date && <time class="post-date">{p.date}</time>}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      </div>
+    </section>
+
     <!-- FINAL CTA -->
     <section class="final-cta">
       <div class="container-wide">
@@ -1648,6 +1747,75 @@ scheduleAutoCycle();
   .footer-col a:hover { color: var(--ilo-fg-1); }
   .footer-bottom { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--ilo-hairline); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--ilo-fg-4); }
 
+  /* ===== release feed ===== */
+  .release-feed {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 0 0 20px;
+  }
+  .release-card {
+    background: var(--ilo-ink-2);
+    border: 1px solid var(--ilo-hairline);
+    border-radius: var(--ilo-radius-md);
+    padding: 20px 22px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .release-meta {
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .release-tag {
+    font-size: 12px; letter-spacing: 0.04em; color: var(--ilo-accent); font-weight: 600; text-transform: uppercase;
+  }
+  .release-date {
+    font-size: 12px; color: var(--ilo-fg-4);
+  }
+  .release-excerpt {
+    font-size: 13.5px; line-height: 1.6; color: var(--ilo-fg-3); flex: 1;
+  }
+  .release-link {
+    font-size: 12.5px; margin-top: auto; align-self: flex-start;
+  }
+
+  /* ===== still-evolving section ===== */
+  .section-evolving {
+    border-top: 1px solid var(--ilo-hairline);
+    padding: 80px 0;
+  }
+  .evolving-inner {
+    max-width: 680px;
+  }
+  .evolving-inner h2 {
+    font-family: var(--ilo-font-sans);
+    font-size: 28px; font-weight: 700; letter-spacing: -0.02em;
+    color: var(--ilo-fg-1); margin: 0 0 12px;
+  }
+  .evolving-inner > p {
+    font-size: 15px; line-height: 1.65; color: var(--ilo-fg-3); margin: 0 0 32px;
+  }
+  .evolving-inner h3 {
+    font-family: var(--ilo-font-sans);
+    font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ilo-fg-4); margin: 0 0 14px;
+  }
+  .posts-list {
+    list-style: none; padding: 0; margin: 0;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .posts-list li {
+    display: flex; align-items: baseline; gap: 12px;
+    border-top: 1px solid var(--ilo-hairline); padding-top: 10px;
+  }
+  .posts-list li:first-child { border-top: 0; padding-top: 0; }
+  .posts-list a {
+    font-size: 14.5px; color: var(--ilo-fg-2); flex: 1;
+    text-decoration: none;
+  }
+  .posts-list a:hover { color: var(--ilo-accent); }
+  .post-date {
+    font-size: 12px; color: var(--ilo-fg-4); white-space: nowrap; font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+  }
+
   /* ===== responsive ===== */
   @media (max-width: 980px) {
     .hero-grid { grid-template-columns: 1fr; gap: 40px; }
@@ -1655,6 +1823,7 @@ scheduleAutoCycle();
     .principles-grid { grid-template-columns: repeat(2, 1fr); }
     .shipped-grid { grid-template-columns: 1fr; }
     .footer-grid { grid-template-columns: 1fr 1fr; }
+    .release-feed { grid-template-columns: 1fr; }
   }
   @media (max-width: 640px) {
     .topnav-inner { gap: 16px; height: 56px; }
