@@ -413,6 +413,14 @@ const exampleJson = JSON.stringify(
       pointer-events: none;
     }
     .pl-btn-convert.is-clean:hover { background: transparent; color: var(--ilo-fg-4); }
+    .pl-btn-convert.is-converting {
+      background: transparent;
+      color: var(--ilo-fg-3);
+      border-color: var(--ilo-hairline);
+      cursor: default;
+      pointer-events: none;
+    }
+    .pl-btn-convert.is-converting:hover { background: transparent; color: var(--ilo-fg-3); }
     [hidden] { display: none !important; }
     .pl-actions-right { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; }
 
@@ -743,10 +751,13 @@ const exampleJson = JSON.stringify(
   function updateConvertBtn() {
     if (!els.convertBtn) return;
     if (isConverting) {
-      els.convertBtn.setAttribute('hidden', '');
+      els.convertBtn.textContent = 'Converting…';
+      els.convertBtn.classList.add('is-converting');
+      els.convertBtn.classList.remove('is-clean');
       return;
     }
-    els.convertBtn.removeAttribute('hidden');
+    els.convertBtn.classList.remove('is-converting');
+    els.convertBtn.textContent = 'Convert';
     const clean = els.pyEdit.value === lastConvertedPy;
     els.convertBtn.classList.toggle('is-clean', clean);
   }
