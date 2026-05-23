@@ -730,9 +730,9 @@ print(increment(double(5)))`,
 inc x:n>n
   +x 1
 
-main>n
-  5>>dbl>>inc`,
-    iloInline: `dbl x:n>n;*x 2\ninc x:n>n;+x 1\nmain>n;5>>dbl>>inc`,
+main>_
+  prnt 5>>dbl>>inc`,
+    iloInline: `dbl x:n>n;*x 2\ninc x:n>n;+x 1\nmain>_;prnt 5>>dbl>>inc`,
     output: '11',
   },
   {
@@ -745,9 +745,9 @@ print(total)`,
     iloMulti: `add a:n b:n>n
   +a b
 
-main>n
-  fld add [1,2,3,4,5] 0`,
-    iloInline: `main>n;fld (a:n b:n>n;+a b) [1,2,3,4,5] 0`,
+main>_
+  prnt fld add [1,2,3,4,5] 0`,
+    iloInline: `main>_;prnt fld (a:n b:n>n;+a b) [1,2,3,4,5] 0`,
     output: '15',
   },
   {
@@ -758,9 +758,9 @@ print(result)`,
     iloMulti: `dbl n:n>n
   *n 2
 
-main>L n
-  map dbl [1,2,3,4,5]`,
-    iloInline: `main>L n;map (n:n>n;*n 2) [1,2,3,4,5]`,
+main>_
+  prnt map dbl [1,2,3,4,5]`,
+    iloInline: `main>_;prnt map (n:n>n;*n 2) [1,2,3,4,5]`,
     output: '[2, 4, 6, 8, 10]',
   },
   {
@@ -771,18 +771,18 @@ print(result)`,
     iloMulti: `even n:n>b
   =(mod n 2) 0
 
-main>L n
-  flt even [1,2,3,4,5,6,7,8,9,10]`,
-    iloInline: `main>L n;flt (n:n>b;=(mod n 2) 0) [1,2,3,4,5,6,7,8,9,10]`,
+main>_
+  prnt flt even [1,2,3,4,5,6,7,8,9,10]`,
+    iloInline: `main>_;prnt flt (n:n>b;=(mod n 2) 0) [1,2,3,4,5,6,7,8,9,10]`,
     output: '[2, 4, 6, 8, 10]',
   },
   {
     name: 'text-upper',
     python: `text = "hello world"
 print(text.upper())`,
-    iloMulti: `main>t
-  upr "hello world"`,
-    iloInline: `main>t;upr "hello world"`,
+    iloMulti: `main>_
+  prnt upr "hello world"`,
+    iloInline: `main>_;prnt upr "hello world"`,
     output: 'HELLO WORLD',
   },
   {
