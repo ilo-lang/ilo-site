@@ -750,7 +750,7 @@ inc x:n>n
 
 main>_
   prnt 5>>dbl>>inc`,
-    iloInline: `dbl x:n>n;*x 2\ninc x:n>n;+x 1\nmain>_;prnt 5>>dbl>>inc`,
+    iloInline: `dbl x:n>n;*x 2;inc x:n>n;+x 1;main>_;5>>dbl>>inc>>prnt`,
     output: '11',
   },
   {
