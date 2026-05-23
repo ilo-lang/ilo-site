@@ -118,13 +118,13 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
       <div class="hero-glow" aria-hidden="true"></div>
       <div class="container-wide hero-grid">
         <div class="hero-left">
-          <div class="kicker">Programming language · for AI agents</div>
           <h1 class="hero-title">
-            The fewest tokens from intent to <span class="accent">working code.</span>
+            The programming language for <span class="accent">AI agents.</span>
           </h1>
+          <p class="hero-sub">The fewest tokens from intent to working code.</p>
           <p class="hero-lede">
-            Its intended author is an LLM, not a human. Prefix notation, single-character names, type-verified before execution, structured JSON out by default.
-            One metric: <em>total token cost from intent to working code.</em>
+            Its intended author is an LLM, not a human. Prefix notation. Single-character names. Type-verified before execution. JSON out by default.
+            One metric, evaluated against every design decision: <em>total token cost from intent to working code.</em>
           </p>
 
           <div class="hero-actions">
@@ -1257,6 +1257,13 @@ scheduleAutoCycle();
   }
   .hero-title { font-family: var(--ilo-font-sans); font-weight: 700; font-size: 68px; line-height: 1.02; letter-spacing: -0.035em; color: var(--ilo-fg-1); }
   .hero-title .accent { color: var(--ilo-accent); }
+  .hero-sub {
+    font-family: var(--ilo-font-sans);
+    font-size: 22px; font-weight: 500;
+    line-height: 1.3; letter-spacing: -0.015em;
+    color: var(--ilo-fg-2);
+    margin-top: -4px;
+  }
   .hero-lede { font-size: 18px; line-height: 1.55; color: var(--ilo-fg-3); max-width: 520px; }
 
 
