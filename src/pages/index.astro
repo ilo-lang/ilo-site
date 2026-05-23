@@ -1383,9 +1383,12 @@ print(total)</pre>
   footer { padding: 56px 32px 36px; background: var(--ilo-ink-1); }
   .foot-grid {
     max-width: 1180px; margin: 0 auto;
-    display: flex; align-items: flex-start; gap: 32px; flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr;
+    gap: 40px;
+    align-items: start;
   }
-  .foot-brand { display: flex; flex-direction: column; gap: 8px; min-width: 240px; }
+  .foot-brand { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
   .foot-brand .mark {
     font-family: var(--ilo-font-sans); font-weight: 800;
     font-size: 24px; letter-spacing: -0.04em; color: var(--ilo-amber);
@@ -1448,7 +1451,8 @@ print(total)</pre>
     .final-cta { padding: 56px 20px; }
     .cta-statement { font-size: 28px; }
     footer { padding: 40px 20px 28px; }
-    .foot-grid { flex-direction: column; gap: 24px; }
+    .foot-grid { grid-template-columns: 1fr 1fr; gap: 24px 32px; }
+    .foot-brand { grid-column: 1 / -1; }
   }
 </style>
 
