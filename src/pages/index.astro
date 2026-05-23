@@ -94,7 +94,7 @@ const posts: Post[] = await fetch('https://danieljohnmorris.com/rss.xml')
     <div class="hero-grid">
       <div class="hero-left">
         <span class="pill">programming language for AI agents</span>
-        <h1>Built for AI agents, <span class="accent">not humans.</span></h1>
+        <h1>Built for <span class="ai-only">AI </span>agents, <span class="accent">not humans.</span></h1>
         <p class="subtitle">The fewest tokens from intent to working code.</p>
         <p class="lede">
           The intended author is an LLM, not a human. Prefix notation. Single-character names. Type-verified before execution. JSON out by default. Every design decision evaluated against <b>total token cost.</b>
@@ -684,6 +684,10 @@ print(total)</pre>
     text-wrap: balance;
   }
   .hero h1 .accent { color: var(--ilo-amber); }
+  .hero h1 .ai-only { display: none; }
+  @media (min-width: 1280px) {
+    .hero h1 .ai-only { display: inline; }
+  }
   .hero .subtitle {
     font-family: var(--ilo-font-sans);
     font-size: 22px; color: var(--ilo-fg-1);
