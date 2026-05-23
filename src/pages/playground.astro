@@ -185,6 +185,23 @@ const exampleJson = JSON.stringify(
       background: var(--ilo-amber);
       box-shadow: 0 0 0 3px rgba(224, 148, 34, 0.18);
     }
+    .pl-cached {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--ilo-font-mono); font-size: 11px;
+      color: var(--ilo-fg-3); letter-spacing: 0.02em;
+      padding: 4px 10px; border-radius: var(--ilo-radius-full);
+      border: 1px solid rgba(224, 148, 34, 0.18);
+      background: rgba(224, 148, 34, 0.04);
+      opacity: 0;
+      transition: opacity var(--ilo-duration-2) var(--ilo-ease);
+    }
+    .pl-cached[hidden] { display: none; }
+    .pl-cached.is-visible { opacity: 1; }
+    .pl-cached-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--ilo-fg-3);
+      box-shadow: 0 0 0 3px rgba(224, 148, 34, 0.10);
+    }
     .pl-nav-right { margin-left: auto; display: flex; align-items: center; gap: 18px; }
     .pl-nav-link {
       font-family: var(--ilo-font-sans); font-size: 13px; font-weight: 500;
@@ -500,6 +517,10 @@ const exampleJson = JSON.stringify(
         <span class="pl-status-dot"></span>
         <span id="pl-status-text">converting…</span>
       </span>
+      <span class="pl-cached" id="pl-cached" hidden aria-live="polite">
+        <span class="pl-cached-dot"></span>
+        <span>cached</span>
+      </span>
       <div class="pl-nav-right">
         <a class="pl-nav-link" href="/#manifesto">Manifesto</a>
         <a class="pl-nav-link" href="/docs/introduction/">Docs</a>
@@ -647,6 +668,7 @@ const exampleJson = JSON.stringify(
     note:    document.getElementById('pl-note'),
     status:  document.getElementById('pl-status'),
     statusText: document.getElementById('pl-status-text'),
+    cached:  document.getElementById('pl-cached'),
     footNote: document.getElementById('pl-foot-note'),
     footText: document.getElementById('pl-foot-text'),
     convertBtn: document.getElementById('pl-convert-btn'),
@@ -959,9 +981,103 @@ const exampleJson = JSON.stringify(
   }
 
   // ===== Live conversion via convert.ilo-lang.ai =====
+  // Session-level in-memory cache (fast path within a single page session).
   const convertCache = new Map();
   let convertSeq = 0;
   let convertTimer = null;
+  let editRestoreTimer = null;
+
+  // ===== Client-side localStorage cache (ILO-437) =====
+  // Key:   `sia-cache-v1:` + sha256(python.trim())  (prefix kept for back-compat)
+  // Value: { version: 1, ilo, tokens_in, tokens_out, ts }
+  // Limit: 50 entries, LRU eviction by oldest `ts`.
+  // TTL:   7 days; expired entries treated as miss and removed on read.
+  const LS_CACHE_PREFIX = 'sia-cache-v1:';
+  const LS_CACHE_MAX = 50;
+  const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+  const CACHE_VERSION = 1;
+  const CACHED_BADGE_MS = 1200;
+  let cachedBadgeTimer = null;
+
+  function lsAvailable() {
+    try {
+      return typeof window !== 'undefined' && !!window.localStorage;
+    } catch (_) { return false; }
+  }
+
+  function lsReadCache(hash) {
+    if (!lsAvailable()) return null;
+    try {
+      const raw = window.localStorage.getItem(LS_CACHE_PREFIX + hash);
+      if (!raw) return null;
+      const entry = JSON.parse(raw);
+      if (!entry || typeof entry !== 'object' || typeof entry.ilo !== 'string') {
+        window.localStorage.removeItem(LS_CACHE_PREFIX + hash);
+        return null;
+      }
+      if (typeof entry.ts !== 'number' || (Date.now() - entry.ts) > CACHE_TTL_MS) {
+        try { window.localStorage.removeItem(LS_CACHE_PREFIX + hash); } catch (_) {}
+        return null;
+      }
+      return entry;
+    } catch (_) { return null; }
+  }
+
+  function lsEvictIfNeeded() {
+    if (!lsAvailable()) return;
+    try {
+      const keys = [];
+      for (let i = 0; i < window.localStorage.length; i++) {
+        const k = window.localStorage.key(i);
+        if (k && k.indexOf(LS_CACHE_PREFIX) === 0) keys.push(k);
+      }
+      if (keys.length < LS_CACHE_MAX) return;
+      // Find oldest by ts (parse failures -> evict first).
+      let oldestKey = null;
+      let oldestTs = Infinity;
+      for (const k of keys) {
+        let ts = -Infinity;
+        try {
+          const v = JSON.parse(window.localStorage.getItem(k) || '');
+          ts = (v && typeof v.ts === 'number') ? v.ts : -Infinity;
+        } catch (_) { ts = -Infinity; }
+        if (ts < oldestTs) { oldestTs = ts; oldestKey = k; }
+      }
+      if (oldestKey) window.localStorage.removeItem(oldestKey);
+    } catch (_) { /* ignore */ }
+  }
+
+  function lsWriteCache(hash, ilo, tokens_in, tokens_out) {
+    if (!lsAvailable()) return;
+    const entry = {
+      version: CACHE_VERSION,
+      ilo,
+      tokens_in: (typeof tokens_in === 'number') ? tokens_in : null,
+      tokens_out: (typeof tokens_out === 'number') ? tokens_out : null,
+      ts: Date.now(),
+    };
+    try {
+      lsEvictIfNeeded();
+      window.localStorage.setItem(LS_CACHE_PREFIX + hash, JSON.stringify(entry));
+    } catch (err) {
+      // QuotaExceededError or similar — degrade silently.
+      try { console.warn('[sia-cache] write skipped:', err && err.name || err); } catch (_) {}
+    }
+  }
+
+  function showCachedBadge() {
+    if (!els.cached) return;
+    els.cached.removeAttribute('hidden');
+    // Force a reflow so the opacity transition runs even on rapid hits.
+    void els.cached.offsetWidth;
+    els.cached.classList.add('is-visible');
+    if (cachedBadgeTimer) clearTimeout(cachedBadgeTimer);
+    cachedBadgeTimer = setTimeout(() => {
+      if (!els.cached) return;
+      els.cached.classList.remove('is-visible');
+      setTimeout(() => { if (els.cached) els.cached.setAttribute('hidden', ''); }, 260);
+    }, CACHED_BADGE_MS);
+  }
 
   async function sha256hex(text) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
@@ -977,6 +1093,7 @@ const exampleJson = JSON.stringify(
     try {
       const hash = await sha256hex(python);
 
+      // 1) Session in-memory cache.
       if (convertCache.has(hash)) {
         const cached = convertCache.get(hash);
         currentIloText = cached;
@@ -985,6 +1102,22 @@ const exampleJson = JSON.stringify(
         lastConvertedPy = pythonRaw;
         setStatus('');
         setFoot('');
+        showCachedBadge();
+        return;
+      }
+
+      // 2) Persistent localStorage cache.
+      const lsEntry = lsReadCache(hash);
+      if (lsEntry) {
+        const ilo = lsEntry.ilo;
+        convertCache.set(hash, ilo);
+        currentIloText = ilo;
+        renderIlo();
+        isExampleResult = false;
+        lastConvertedPy = pythonRaw;
+        setStatus('');
+        setFoot('');
+        showCachedBadge();
         return;
       }
 
@@ -1004,6 +1137,7 @@ const exampleJson = JSON.stringify(
         ilo = stripMainWrapper(ilo);
         if (!ilo) throw new Error('Empty response');
         convertCache.set(hash, ilo);
+        lsWriteCache(hash, ilo, data.tokens_in, data.tokens_out);
         currentIloText = ilo;
         renderIlo();
         isExampleResult = false;
@@ -1019,6 +1153,38 @@ const exampleJson = JSON.stringify(
       isConverting = false;
       updateConvertBtn();
     }
+  }
+
+  // Edit-time restore: when the user edits python, debounce 500ms then check
+  // both caches by hash. If we have a cached ilo for the new content, restore
+  // it. Never fires a network fetch.
+  async function maybeRestoreFromCache() {
+    try {
+      const pythonRaw = els.pyEdit.value;
+      const python = pythonRaw.trim();
+      if (!python) return;
+      if (pythonRaw === lastConvertedPy) return;
+      const hash = await sha256hex(python);
+      let ilo = null;
+      if (convertCache.has(hash)) {
+        ilo = convertCache.get(hash);
+      } else {
+        const entry = lsReadCache(hash);
+        if (entry) {
+          ilo = entry.ilo;
+          convertCache.set(hash, ilo);
+        }
+      }
+      if (!ilo) return;
+      // Only restore if the editor content hasn't changed since we hashed.
+      if (els.pyEdit.value !== pythonRaw) return;
+      currentIloText = ilo;
+      renderIlo();
+      isExampleResult = false;
+      lastConvertedPy = pythonRaw;
+      updateConvertBtn();
+      showCachedBadge();
+    } catch (_) { /* ignore */ }
   }
 
   function syncActiveExample() {
@@ -1062,8 +1228,10 @@ const exampleJson = JSON.stringify(
     updateResetBtn();
     updateNote();
     updateShareUrl();
-    if (convertTimer) clearTimeout(convertTimer);
-    convertTimer = setTimeout(convertNow, 500);
+    // Edit-time: debounced restore-from-cache only. Never auto-fires a fetch;
+    // the user must click Convert to round-trip on a cache miss (ILO-437).
+    if (editRestoreTimer) clearTimeout(editRestoreTimer);
+    editRestoreTimer = setTimeout(maybeRestoreFromCache, 500);
   }
 
   els.sideButtons().forEach((btn) => {
