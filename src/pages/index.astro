@@ -724,14 +724,22 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
           {posts.length > 0 && (
             <>
               <h3 class="evolving-writing-head">Recent writing</h3>
-              <ul class="posts-list">
+              <ul class="writing-list">
                 {posts.map(p => (
-                  <li>
-                    <a href={p.url} target="_blank" rel="noopener">{p.title}</a>
-                    {p.date && <time class="post-date">{p.date}</time>}
+                  <li class="writing-card">
+                    <a class="writing-link" href={p.url} target="_blank" rel="noopener">
+                      <span class="writing-title">{p.title}</span>
+                      {p.date && <time class="writing-date mono">{p.date}</time>}
+                    </a>
                   </li>
                 ))}
               </ul>
+              <div class="principles-cta">
+                <a class="btn-text" href="https://danieljohnmorris.com/writing/" target="_blank" rel="noopener">
+                  Read all writing
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
+              </div>
             </>
           )}
         </div>
@@ -1835,7 +1843,13 @@ scheduleAutoCycle();
   .open-questions li:last-child { border-bottom: 0; }
   .open-questions li::before { content: "?"; color: var(--ilo-accent); font-weight: 700; margin-right: 10px; }
     .evolving-writing-head { margin-top: 28px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ilo-fg-4); }
-  .posts-list {
+  .writing-list { list-style: none; padding: 0; margin: 0 0 16px; display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .writing-card { border: 1px solid var(--ilo-hairline); border-radius: 8px; background: var(--ilo-ink-1); transition: border-color 0.15s, background 0.15s; }
+  .writing-card:hover { border-color: var(--ilo-accent); background: rgba(224, 148, 34, 0.04); }
+  .writing-link { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 14px 18px; text-decoration: none; color: var(--ilo-fg-1); }
+  .writing-title { font-size: 15px; font-weight: 500; line-height: 1.4; }
+  .writing-date { font-size: 12px; color: var(--ilo-fg-4); flex-shrink: 0; }
+    .posts-list {
     list-style: none; padding: 0; margin: 0;
     display: flex; flex-direction: column; gap: 10px;
   }
