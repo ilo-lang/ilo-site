@@ -303,10 +303,12 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
 
           <div class="sia-controls">
             <div class="sia-presets" id="demo-presets"></div>
-            <button class="sia-convert-btn" id="sia-convert-btn">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 7l-7 7-7-7"/></svg>
-              Convert
-            </button>
+          </div>
+          <div class="sia-seemore">
+            <a class="btn-text btn-text--sm" href="/docs/learn/examples/">
+              See more examples
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
           </div>
 
           <div class="sia-output" id="demo-output" style="display:none">
@@ -1001,7 +1003,6 @@ const diffEl = document.getElementById('sia-diff')!;
 const outputDiv = document.getElementById('demo-output')!;
 const outputText = document.getElementById('demo-output-text')!;
 const errorDiv = document.getElementById('sia-error')!;
-const convertBtn = document.getElementById('sia-convert-btn')!;
 const convertingOverlay = document.getElementById('sia-converting')!;
 const toggleBtn = document.getElementById('sia-toggle')!;
 const toggleLabel = document.getElementById('sia-toggle-label')!;
@@ -1134,20 +1135,44 @@ pyEl.addEventListener('input', () => {
     prevPyTok = pyTok;
     prevPyChar = pyChar;
     runConvert();
-  }, 700);
+  }, 800);
   resetAutoCycle();
 });
 
-// Shared convert routine — manual button and debounced input both call this.
+// In-memory cache: sha256(python) → ilo result string
+const convertCache = new Map<string, string>();
+let lastConvertedHash = '';
+
+async function sha256hex(text: string): Promise<string> {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Shared convert routine — debounced input calls this.
 // Sequence counter lets a newer keystroke supersede a slow in-flight request.
 let convertSeq = 0;
 async function runConvert() {
   const python = pyEl.value.trim();
   if (!python) return;
+
+  const hash = await sha256hex(python);
+  if (hash === lastConvertedHash) return; // unchanged from last successful conversion
+
+  // Cache hit
+  if (convertCache.has(hash)) {
+    lastConvertedHash = hash;
+    isApiResult = true;
+    setIloText(convertCache.get(hash)!);
+    toggleBtn.setAttribute('disabled', 'true');
+    isMultiLine = true;
+    toggleLabel.textContent = 'multi-line';
+    errorDiv.style.display = 'none';
+    return;
+  }
+
   const seq = ++convertSeq;
 
   resetAutoCycle();
-  (convertBtn as HTMLButtonElement).disabled = true;
   convertingOverlay.style.display = 'flex';
   errorDiv.style.display = 'none';
   outputDiv.style.display = 'none';
@@ -1163,6 +1188,8 @@ async function runConvert() {
     const data = await resp.json();
     const iloResult = data.ilo || data.result || data.code || '';
     if (!iloResult) throw new Error('Empty response');
+    convertCache.set(hash, iloResult);
+    lastConvertedHash = hash;
     isApiResult = true;
     setIloText(iloResult);
     toggleBtn.setAttribute('disabled', 'true');
@@ -1176,13 +1203,10 @@ async function runConvert() {
     errorDiv.style.display = 'block';
   } finally {
     if (seq === convertSeq) {
-      (convertBtn as HTMLButtonElement).disabled = false;
       convertingOverlay.style.display = 'none';
     }
   }
 }
-
-convertBtn.addEventListener('click', runConvert);
 
 // Build preset chips
 const presetsContainer = document.getElementById('demo-presets')!;
@@ -1690,10 +1714,8 @@ scheduleAutoCycle();
   .sia-preset-chip { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.72rem; cursor: pointer; transition: color 0.15s, border-color 0.15s, background 0.15s; }
   .sia-preset-chip:hover { color: var(--text); border-color: var(--border-hover); }
   .sia-preset-chip.active { color: var(--accent); border-color: rgba(224, 148, 34, 0.4); background: var(--accent-dim); }
-  .sia-convert-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; background: var(--accent); color: #1a0e02; border: 0; font-family: var(--font-display); font-size: 0.86rem; font-weight: 600; cursor: pointer; transition: background 0.15s, opacity 0.15s; }
-  .sia-convert-btn:hover { background: var(--ilo-amber-high); }
-  .sia-convert-btn:disabled { opacity: 0.45; cursor: not-allowed; background: var(--accent); }
-  .sia-convert-btn:disabled:hover { background: var(--accent); }
+  .sia-seemore { margin-top: 10px; }
+  .btn-text--sm { font-size: 12px; }
 
   .sia-output { margin-top: 14px; border: 1px solid var(--border); border-radius: 8px; background: rgba(0,0,0,0.25); overflow: hidden; }
   .sia-output-label { padding: 6px 12px; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
