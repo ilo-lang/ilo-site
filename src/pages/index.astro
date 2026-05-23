@@ -28,22 +28,28 @@ const shipped = [
   { tag: 'ecosystem', name: 'ilo httpd',       body: 'Serve functions as HTTP endpoints. One command, no framework.' },
 ];
 
-type InstallSub = { id: string; label: string; cmd: string };
-type InstallGroup = { id: string; label: string; hint: string; subs: InstallSub[] };
+type InstallSub = { id: string; label: string; file: string; cmd: string };
+type InstallGroup = { id: string; label: string; verify: string; verifyOut?: string; verifyNote?: string; subs: InstallSub[] };
 const installGroups: InstallGroup[] = [
   {
-    id: 'humans', label: 'For humans', hint: 'shell',
+    id: 'humans',
+    label: 'For humans',
+    verify: "ilo 'dbl x:n>n;*x 2' 5",
+    verifyOut: '10',
     subs: [
-      { id: 'mac',     label: 'macOS / Linux', cmd: 'curl -fsSL ilo-lang.ai/install.sh | sh' },
-      { id: 'windows', label: 'Windows',       cmd: 'irm https://ilo-lang.ai/install.ps1 | iex' },
+      { id: 'mac',     label: 'macOS / Linux', file: 'install.sh',  cmd: 'curl -fsSL ilo-lang.ai/install.sh | sh' },
+      { id: 'windows', label: 'Windows',       file: 'install.ps1', cmd: 'irm https://ilo-lang.ai/install.ps1 | iex' },
     ],
   },
   {
-    id: 'agents', label: 'For agents', hint: 'plugin',
+    id: 'agents',
+    label: 'For agents',
+    verify: 'tool: ilo',
+    verifyNote: 'type-checked at load',
     subs: [
-      { id: 'claude', label: 'Claude marketplace', cmd: '/plugin marketplace add ilo-lang/ilo\n/plugin install ilo-lang/ilo' },
-      { id: 'pi',     label: 'Pi',                 cmd: 'pi install ilo-lang/ilo' },
-      { id: 'other',  label: 'Other agents',       cmd: 'npx skills add ilo-lang/ilo' },
+      { id: 'claude', label: 'Claude Code',  file: 'mcp.json', cmd: 'claude mcp add ilo --scope user npx -y @ilo-lang/mcp' },
+      { id: 'pi',     label: 'Pi',           file: 'pi.json',  cmd: 'pi install ilo-lang/ilo' },
+      { id: 'other',  label: 'Other agents', file: 'skills.json', cmd: 'npx skills add ilo-lang/ilo' },
     ],
   },
 ];
@@ -112,13 +118,12 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
       <div class="hero-glow" aria-hidden="true"></div>
       <div class="container-wide hero-grid">
         <div class="hero-left">
-          <div class="kicker">Programming language · for AI agents</div>
           <h1 class="hero-title">
-            The fewest tokens from intent to <span class="accent">working code.</span>
+            Built for AI agents, <span class="accent">not humans.</span>
           </h1>
+          <p class="hero-sub">The fewest tokens from intent to working code.</p>
           <p class="hero-lede">
-            Its intended author is an LLM, not a human. Prefix notation, single-character names, type-verified before execution, structured JSON out by default.
-            One metric: <em>total token cost from intent to working code.</em>
+            The first programming language designed from the ground up for LLM agents. The audience is not human. The vocabulary is small. The verifier runs before the program does. Errors arrive as JSON with fix plans attached. The metric is <em>total tokens spent</em>. Everything else is negotiable.
           </p>
 
           <div class="hero-actions">
@@ -167,58 +172,79 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
     <!-- INSTALL -->
     <section id="install" class="install">
       <div class="container-wide install-wrap">
-        <div class="section-head">
-          <div class="kicker">Install</div>
-          <h2>Two paths. One binary.</h2>
-          <p class="sub">Shell installer for humans. MCP registration for agents. Native on Linux, macOS, Windows; WASM via npm. The rest are in the docs.</p>
-        </div>
+        <h2 class="install-h2"><span class="hash">#</span>install</h2>
 
-        <div class="install-block">
-          <div class="install-tabs" role="tablist">
-            {installGroups.map((g, i) => (
-              <button class={`install-tab${i === 0 ? ' active' : ''}`} role="tab" data-install-tab={g.id} aria-selected={i === 0}>
-                <span>{g.label}</span>
-                <span class="hint mono">{g.hint}</span>
-              </button>
-            ))}
-          </div>
+        <div class="install-tabs" role="tablist">
           {installGroups.map((g, i) => (
-            <div class={`install-group${i === 0 ? ' active' : ''}`} data-install-group={g.id}>
-              <div class="install-subtabs" role="tablist">
-                {g.subs.map((s, j) => (
-                  <button class={`install-subtab${j === 0 ? ' active' : ''}`} role="tab" data-install-subtab={`${g.id}:${s.id}`} aria-selected={j === 0}>{s.label}</button>
-                ))}
-              </div>
-              {g.subs.map((s, j) => (
-                <div class={`install-term${j === 0 ? ' active' : ''}`} data-install-panel={`${g.id}:${s.id}`}>
-                  <div class="install-term-body">
-                    <span class="dollar">$</span> {s.cmd}
-                  </div>
-                  <button class="install-term-copy frame-copy" data-copy={s.cmd} aria-label={`Copy ${g.label} ${s.label} install command`}>copy</button>
-                </div>
-              ))}
-            </div>
+            <button class={`install-tab${i === 0 ? ' active' : ''}`} role="tab" data-install-tab={g.id} aria-selected={i === 0}>
+              {g.label}
+            </button>
           ))}
         </div>
 
-        <div class="install-verify">
-          Verify it works: <code>ilo 'dbl x:n&gt;n;*x 2' 5</code> → <span class="mono accent">10</span>
-          <a class="btn-text install-more" href="/docs/learn/install/">
-            All install paths
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </a>
-        </div>
+        {installGroups.map((g, gi) => (
+          <div class={`install-group${gi === 0 ? ' active' : ''}`} data-install-group={g.id}>
+            <div class="term-wrap">
+              <div class="term">
+                <div class="term-head">
+                  {g.subs.map((s, j) => (
+                    <span class={`term-file${j === 0 ? ' active' : ''}`} data-term-file={`${g.id}:${s.id}`}>{s.file}</span>
+                  ))}
+                  <label class="picker">
+                    <select class="picker-select" data-install-picker={g.id}>
+                      {g.subs.map((s) => (
+                        <option value={`${g.id}:${s.id}`}>{s.label}</option>
+                      ))}
+                    </select>
+                    <span class="chev" aria-hidden="true">▾</span>
+                  </label>
+                </div>
+                {g.subs.map((s, j) => (
+                  <div class={`term-body-wrap${j === 0 ? ' active' : ''}`} data-install-panel={`${g.id}:${s.id}`}>
+                    <pre class="term-body"><span class="p">$</span> {s.cmd}</pre>
+                    <button class="term-copy" data-copy={s.cmd} aria-label={`Copy ${g.label} ${s.label} install command`}>copy</button>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-        <p class="install-caveat">
-          ilo is in active development. Today's syntax and builtins are not a contract — expect breaking changes while the language searches for what works best for agents. Run it in a safe environment, not against production.
+            <div class="footer-row">
+              <span class="verify-inline">
+                {g.verifyOut ? (
+                  <>
+                    verify
+                    <code>{g.verify}</code>
+                    <span class="arrow">→</span>
+                    <span class="out">{g.verifyOut}</span>
+                    <span class="check">✓</span>
+                  </>
+                ) : (
+                  <>
+                    <code>{g.verify}</code>
+                    <span class="arrow">·</span>
+                    <span>{g.verifyNote}</span>
+                    <span class="check">✓</span>
+                  </>
+                )}
+              </span>
+              <a class="more" href="/docs/learn/install/">
+                {g.id === 'agents' ? 'All hosts →' : 'All install paths →'}
+              </a>
+            </div>
+          </div>
+        ))}
+
+        <p class="evolving">
+          <span class="evolving-tag">heads-up</span>
+          ilo is actively evolving — today's syntax and builtins are not a contract. Expect breaking changes while the language searches for what works best for agents. Run it in a safe environment, not against production.
         </p>
       </div>
     </section>
 
     <!-- SEE IT IN ACTION (merged interactive demo) -->
     <section id="see-it-in-action" class="sia-section" data-animate>
-      <div class="container">
-        <h2 class="section-title">See it in action</h2>
+      <div class="container-wide">
+        <h2 class="section-title">Try it yourself</h2>
         <p class="section-subtitle">Edit the Python or click a preset. ilo is generated live with token and character counts.</p>
 
         <div class="sia-card">
@@ -293,10 +319,56 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
       </div>
     </section>
 
+    <!-- ILO SERV demo — JSONL stdin/stdout loop -->
+    <section id="ilo-serv" class="serv-section" data-animate>
+      <div class="container-wide">
+        <h2 class="section-title">Wire it into your agent</h2>
+        <p class="section-subtitle"><code>ilo serv</code> is a long-lived JSONL loop. One JSON request per stdin line, one response per stdout line. Process-spawn overhead per call: zero.</p>
+
+        <div class="serv-card">
+          <div class="serv-prompt mono">
+            <span class="dollar">$</span> ilo serv
+          </div>
+          <div class="serv-panes">
+            <div class="serv-pane">
+              <div class="serv-pane-header">
+                <div class="window-dots">
+                  <span class="dot dot--red"></span>
+                  <span class="dot dot--yellow"></span>
+                  <span class="dot dot--green"></span>
+                </div>
+                <span class="serv-pane-lang">stdin</span>
+                <span class="serv-pane-arrow mono">→</span>
+              </div>
+              <pre class="serv-body">&#123;"program":"dbl x:n&gt;n;*x 2","func":"dbl","args":[21]&#125;
+&#123;"program":"upr s:t&gt;t;.upr s","func":"upr","args":["hello"]&#125;
+&#123;"program":"add a:n b:n&gt;n;+a b","func":"add","args":[2,"two"]&#125;</pre>
+            </div>
+            <div class="serv-pane serv-pane--out">
+              <div class="serv-pane-header">
+                <span class="serv-pane-arrow mono">←</span>
+                <span class="serv-pane-lang">stdout</span>
+              </div>
+              <pre class="serv-body">&#123;"schemaVersion":1,"ok":42,"ms":0.4&#125;
+&#123;"schemaVersion":1,"ok":"HELLO","ms":0.3&#125;
+&#123;"schemaVersion":1,"error":&#123;"phase":"verify","code":"ILO-T006","msg":"expected n, got t"&#125;&#125;</pre>
+            </div>
+          </div>
+          <div class="serv-foot">
+            <span>Every line carries <code>schemaVersion</code>. Errors include phase (<code>lex</code>, <code>parse</code>, <code>verify</code>, <code>runtime</code>, <code>program</code>) and a typed code.</span>
+            <a class="btn-text" href="/docs/reference/cli/#ilo-serv">
+              ilo serv reference
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- FEATURES — Designed for machines -->
     <section class="features" data-animate>
-      <div class="container">
-        <h2 class="section-title">Designed for machines</h2>
+      <div class="container-wide">
+        <h2 class="section-title">Language features</h2>
         <p class="section-subtitle">Every feature exists to reduce total token cost.</p>
         <div class="feature-grid">
           <div class="feature-card feature-card--wide">
@@ -356,8 +428,8 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
 
           <div class="feature-card">
             <div class="feature-label">Surface</div>
-            <h3>Structured by default</h3>
-            <p>Every CLI subcommand emits JSON. Diagnostics carry error codes, source spans, and fix metadata. No screen-scraping.</p>
+            <h3>JSON by default</h3>
+            <p>Every CLI subcommand emits structured JSON. Diagnostics carry error codes, source spans, and fix metadata. No screen-scraping.</p>
             <div class="feature-code">
               <code><span class="syn-fn">ilo</span> check <span class="syn-op">--json</span></code>
             </div>
@@ -371,13 +443,22 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
               <code><span class="syn-fn">ilo</span> apply <span class="syn-op">--plan</span> fix.json</code>
             </div>
           </div>
+
+          <div class="feature-card">
+            <div class="feature-label">Agent loop</div>
+            <h3>ilo serv</h3>
+            <p>JSONL over stdio. Each request a line in, each response a line out. The agent-shaped equivalent of an interactive REPL.</p>
+            <div class="feature-code">
+              <code><span class="syn-fn">ilo</span> serv program.ilo</code>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- PHILOSOPHY -->
     <section class="philosophy" data-animate>
-      <div class="container">
+      <div class="container-wide">
         <div class="philosophy-inner">
           <p class="philosophy-quote">
             Named from <a href="https://tokipona.org/" target="_blank" rel="noopener" class="philosophy-link">Toki Pona</a> for &ldquo;tool&rdquo;&mdash;a constructed language that captures all of human expression in ~120 words. <em>ilo</em> does the same for machine programmers.
@@ -498,7 +579,7 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
     </section>
     <!-- FINAL CTA -->
     <section class="final-cta">
-      <div class="container">
+      <div class="container-wide">
         <p class="cta-statement">Make your AI agents more efficient.</p>
         <div class="final-cta-actions">
           <a href="/docs/introduction/" class="btn btn-primary">
@@ -574,26 +655,22 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
     });
   });
 
-  // Install sub-tabs (mac/linux/windows | claude/pi/other)
-  const subTabs = document.querySelectorAll<HTMLButtonElement>('[data-install-subtab]');
-  subTabs.forEach(t => {
-    t.addEventListener('click', () => {
-      const id = t.getAttribute('data-install-subtab')!;
+  // Install pickers (per-group sub-option dropdown in the terminal head)
+  document.querySelectorAll<HTMLSelectElement>('[data-install-picker]').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const id = sel.value; // e.g. "humans:windows"
       const groupId = id.split(':')[0];
-      // Scope to this group's subtabs only
-      const groupSiblings = document.querySelectorAll<HTMLButtonElement>(`[data-install-subtab^="${groupId}:"]`);
-      groupSiblings.forEach(x => {
-        const on = x === t;
-        x.classList.toggle('active', on);
-        x.setAttribute('aria-selected', String(on));
+      document.querySelectorAll<HTMLElement>(`[data-install-panel^="${groupId}:"]`).forEach(p => {
+        p.classList.toggle('active', p.getAttribute('data-install-panel') === id);
       });
-      const groupPanels = document.querySelectorAll<HTMLElement>(`[data-install-panel^="${groupId}:"]`);
-      groupPanels.forEach(p => p.classList.toggle('active', p.getAttribute('data-install-panel') === id));
+      document.querySelectorAll<HTMLElement>(`[data-term-file^="${groupId}:"]`).forEach(f => {
+        f.classList.toggle('active', f.getAttribute('data-term-file') === id);
+      });
     });
   });
 
   // Per-panel copy buttons
-  document.querySelectorAll<HTMLButtonElement>('.frame-copy').forEach(btn => {
+  document.querySelectorAll<HTMLButtonElement>('.frame-copy, .term-copy').forEach(btn => {
     btn.addEventListener('click', () => {
       const cmd = btn.getAttribute('data-copy') || '';
       navigator.clipboard?.writeText(cmd);
@@ -945,7 +1022,9 @@ function updateStats() {
 
   if (pyTok > 0 && iloTok > 0) {
     const pct = Math.round((1 - iloTok / pyTok) * 100);
-    diffEl.textContent = `-${pct}% tokens`;
+    diffEl.textContent = pct === 0
+      ? `0% tokens`
+      : `${pct > 0 ? '−' : '+'}${Math.abs(pct)}% tokens`;
     diffEl.classList.remove('bounce');
     void diffEl.offsetWidth; // reflow
     diffEl.classList.add('bounce');
@@ -1037,7 +1116,7 @@ pyEl.addEventListener('input', () => {
   pyHighlight.innerHTML = highlightPy(pyEl.value);
   if (debounceTimer) clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
-    // update python stats; ilo stays as-is until Convert
+    // Update python stats then auto-convert
     const py = pyEl.value;
     const pyTok = countTokens(py);
     const pyChar = py.length;
@@ -1045,14 +1124,18 @@ pyEl.addEventListener('input', () => {
     animateCounter(pyCharsEl, prevPyChar, pyChar);
     prevPyTok = pyTok;
     prevPyChar = pyChar;
-  }, 500);
+    runConvert();
+  }, 700);
   resetAutoCycle();
 });
 
-// Convert button
-convertBtn.addEventListener('click', async () => {
+// Shared convert routine — manual button and debounced input both call this.
+// Sequence counter lets a newer keystroke supersede a slow in-flight request.
+let convertSeq = 0;
+async function runConvert() {
   const python = pyEl.value.trim();
   if (!python) return;
+  const seq = ++convertSeq;
 
   resetAutoCycle();
   (convertBtn as HTMLButtonElement).disabled = true;
@@ -1066,6 +1149,7 @@ convertBtn.addEventListener('click', async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ python }),
     });
+    if (seq !== convertSeq) return;
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     const iloResult = data.ilo || data.result || data.code || '';
@@ -1076,16 +1160,20 @@ convertBtn.addEventListener('click', async () => {
     isMultiLine = true;
     toggleLabel.textContent = isMultiLine ? 'multi-line' : 'compact';
   } catch (err) {
-    // Fallback: show last preset
+    if (seq !== convertSeq) return;
     const fallback = PRESETS[activePreset];
     setIloText(isMultiLine ? fallback.iloMulti : fallback.iloInline);
     errorDiv.textContent = `Conversion unavailable — showing preset. (${(err as Error).message})`;
     errorDiv.style.display = 'block';
   } finally {
-    (convertBtn as HTMLButtonElement).disabled = false;
-    convertingOverlay.style.display = 'none';
+    if (seq === convertSeq) {
+      (convertBtn as HTMLButtonElement).disabled = false;
+      convertingOverlay.style.display = 'none';
+    }
   }
-});
+}
+
+convertBtn.addEventListener('click', runConvert);
 
 // Build preset chips
 const presetsContainer = document.getElementById('demo-presets')!;
@@ -1168,6 +1256,13 @@ scheduleAutoCycle();
   }
   .hero-title { font-family: var(--ilo-font-sans); font-weight: 700; font-size: 68px; line-height: 1.02; letter-spacing: -0.035em; color: var(--ilo-fg-1); }
   .hero-title .accent { color: var(--ilo-accent); }
+  .hero-sub {
+    font-family: var(--ilo-font-sans);
+    font-size: 22px; font-weight: 500;
+    line-height: 1.3; letter-spacing: -0.015em;
+    color: var(--ilo-fg-2);
+    margin-top: -4px;
+  }
   .hero-lede { font-size: 18px; line-height: 1.55; color: var(--ilo-fg-3); max-width: 520px; }
 
 
@@ -1269,10 +1364,22 @@ scheduleAutoCycle();
   .ship-tag { font-size: 11px; color: var(--ilo-fg-4); }
   .ship-card p { font-size: 13px; line-height: 1.55; color: var(--ilo-fg-3); }
 
-  /* ===== install ===== */
-  .install { border-top: 1px solid var(--ilo-hairline); }
-  .install-wrap { max-width: 760px; }
-  .install-block { display: flex; flex-direction: column; }
+  /* ===== install (v3 design) ===== */
+  .install { border-top: 1px solid var(--ilo-hairline); padding: 6rem 0; }
+  .install-wrap { max-width: 720px; }
+
+  .install-h2 {
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 22px; font-weight: 500;
+    color: var(--ilo-fg-1);
+    margin: 0 0 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--ilo-hairline);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .install-h2 .hash { color: var(--ilo-accent); margin-right: 6px; font-weight: 400; }
+
   .install-tabs {
     display: flex; gap: 4px; align-items: flex-end;
     margin-bottom: -1px;
@@ -1280,14 +1387,13 @@ scheduleAutoCycle();
   }
   .install-tab {
     font-family: var(--ilo-font-sans);
-    font-size: 13px; font-weight: 500;
-    padding: 8px 14px 9px;
+    font-size: 13.5px; font-weight: 500;
+    padding: 9px 16px 10px;
     background: transparent;
     color: var(--ilo-fg-3);
     border: 1px solid transparent; border-bottom: 0;
     border-top-left-radius: 6px; border-top-right-radius: 6px;
     cursor: pointer; line-height: 1.2;
-    display: inline-flex; align-items: center; gap: 6px;
     transition: color var(--ilo-duration-1) var(--ilo-ease);
   }
   .install-tab:hover { color: var(--ilo-fg-1); }
@@ -1297,67 +1403,134 @@ scheduleAutoCycle();
     border-color: var(--ilo-hairline);
     box-shadow: inset 0 -1px 0 0 var(--ilo-ink-2);
   }
-  .install-tab .hint { font-size: 10.5px; color: var(--ilo-fg-4); font-weight: 400; }
-  .install-tab.active .hint { color: rgba(224, 148, 34, 0.65); }
 
-  .install-group { display: none; flex-direction: column; gap: 12px; }
+  .install-group { display: none; flex-direction: column; }
   .install-group.active { display: flex; }
-  .install-subtabs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-  .install-subtab {
-    font-family: var(--ilo-font-sans); font-size: 12.5px; font-weight: 500;
-    padding: 5px 11px;
-    border-radius: var(--ilo-radius-full);
-    background: transparent;
-    color: var(--ilo-fg-3);
-    border: 1px solid var(--ilo-hairline);
-    cursor: pointer;
-    line-height: 1.2;
-    transition: color var(--ilo-duration-1) var(--ilo-ease), border-color var(--ilo-duration-1) var(--ilo-ease), background var(--ilo-duration-1) var(--ilo-ease);
-  }
-  .install-subtab:hover { color: var(--ilo-fg-1); }
-  .install-subtab.active {
-    color: var(--ilo-accent);
-    border-color: rgba(224, 148, 34, 0.45);
-    background: rgba(224, 148, 34, 0.08);
-  }
 
-  .install-term {
-    display: none;
-    align-items: stretch;
-    background: var(--ilo-ink-2);
-    border: 1px solid var(--ilo-hairline);
+  .term-wrap {
+    position: relative;
     border-radius: 8px;
     border-top-left-radius: 0;
-    overflow: hidden;
   }
-  .install-term.active { display: flex; }
-  .install-term-body {
+  .term-wrap::after {
+    content: "";
+    position: absolute; inset: -1px;
+    border-radius: inherit;
+    box-shadow:
+      0 0 0 1px rgba(224, 148, 34, 0.08),
+      0 12px 40px -12px rgba(224, 148, 34, 0.18);
+    pointer-events: none;
+  }
+  .term {
+    position: relative;
+    background: var(--ilo-ink-2);
+    border: 1px solid var(--ilo-hairline);
+    border-radius: inherit;
+    overflow: hidden;
+    z-index: 1;
+    display: flex; flex-direction: column;
+  }
+  .term-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px 8px 16px;
+    border-bottom: 1px solid var(--ilo-hairline);
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 11px;
+    color: var(--ilo-fg-4);
+    letter-spacing: 0.02em;
+  }
+  .term-file { display: none; color: var(--ilo-fg-3); }
+  .term-file.active { display: inline; }
+  .picker {
+    margin-left: auto;
+    position: relative;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background var(--ilo-duration-1) var(--ilo-ease), color var(--ilo-duration-1) var(--ilo-ease);
+  }
+  .picker:hover { background: rgba(255,255,255,0.05); }
+  .picker-select {
+    appearance: none; -webkit-appearance: none;
+    background: transparent; border: 0;
+    font-family: var(--ilo-font-sans); font-size: 11.5px;
+    color: var(--ilo-fg-2);
+    padding: 0 18px 0 0;
+    cursor: pointer;
+    line-height: 1.3;
+    outline: none;
+  }
+  .picker-select option { background: var(--ilo-ink-2); color: var(--ilo-fg-1); }
+  .picker .chev { position: absolute; right: 6px; pointer-events: none; color: var(--ilo-fg-4); font-size: 10px; }
+  .picker:hover .picker-select { color: var(--ilo-fg-1); }
+
+  .term-body-wrap { display: none; align-items: stretch; }
+  .term-body-wrap.active { display: flex; }
+  .term-body {
+    margin: 0;
     padding: 14px 18px;
     font-family: var(--ilo-font-mono); font-variant-ligatures: none;
-    font-size: 14px; line-height: 1.4;
+    font-size: 14.5px; line-height: 1.4;
     color: var(--ilo-fg-1);
     flex: 1; min-width: 0;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    background: transparent;
   }
-  .install-term-body .dollar { color: var(--ilo-fg-4); }
-  .install-term-copy {
+  .term-body .p { color: var(--ilo-fg-4); }
+  .term-copy {
     background: transparent;
     color: var(--ilo-accent);
     border: 0; border-left: 1px solid var(--ilo-hairline);
-    padding: 0 18px;
+    padding: 0 16px;
     font-family: var(--ilo-font-sans); font-size: 13px; font-weight: 500;
     cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: background var(--ilo-duration-1) var(--ilo-ease), color var(--ilo-duration-1) var(--ilo-ease);
   }
-  .install-term-copy:hover { background: rgba(255, 255, 255, 0.03); }
-  .install-term-copy.done { color: var(--ilo-ok); }
+  .term-copy:hover { background: rgba(255,255,255,0.03); }
+  .term-copy.done { color: var(--ilo-ok); }
 
-  .install-verify {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 18px;
-    margin-top: 24px;
-    font-size: 13px; color: var(--ilo-fg-4);
+  .footer-row {
+    margin-top: 14px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
   }
-  .install-verify code { font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 0.9em; background: var(--ilo-inline-code-bg); padding: 0.12em 0.4em; border-radius: 4px; }
-  .install-more { margin-left: auto; }
+  .verify-inline {
+    display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    font-family: var(--ilo-font-sans); font-size: 12.5px; color: var(--ilo-fg-4);
+  }
+  .verify-inline code {
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 12px; color: var(--ilo-fg-2);
+    background: rgba(255,255,255,0.04);
+    padding: 2px 7px; border-radius: 4px;
+  }
+  .verify-inline .arrow { color: var(--ilo-fg-4); }
+  .verify-inline .out { color: var(--ilo-accent); font-family: var(--ilo-font-mono); font-size: 12px; font-weight: 500; }
+  .verify-inline .check { color: var(--ilo-lime); font-family: var(--ilo-font-mono); font-size: 11px; font-weight: 600; }
+  .more {
+    margin-left: auto;
+    font-family: var(--ilo-font-sans); font-size: 13px; font-weight: 500;
+    color: var(--ilo-accent); text-decoration: none;
+  }
+  .more:hover { color: var(--ilo-amber-high); }
+
+  .evolving {
+    margin: 22px 0 0;
+    padding: 12px 14px;
+    border-left: 2px solid var(--ilo-accent);
+    background: rgba(224, 148, 34, 0.03);
+    border-radius: 0 4px 4px 0;
+    font-family: var(--ilo-font-sans);
+    font-size: 12.5px; line-height: 1.55;
+    color: var(--ilo-fg-3);
+  }
+  .evolving-tag {
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ilo-accent); font-weight: 500;
+    margin-right: 8px;
+  }
 
   /* ===== benchmarks ===== */
   .benchmarks { border-top: 1px solid var(--ilo-hairline); }
@@ -1421,6 +1594,7 @@ scheduleAutoCycle();
 
   .section-title { font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 700; letter-spacing: -0.025em; text-align: center; margin-bottom: 0.5rem; color: var(--text); }
   .section-subtitle { text-align: center; color: var(--text-muted); font-size: 1.05rem; margin-bottom: 3rem; }
+  .section-subtitle code { font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 0.85em; background: var(--ilo-inline-code-bg); padding: 0.1em 0.4em; border-radius: var(--ilo-radius-xs); color: var(--ilo-fg-2); }
 
   /* ===== Nav CTA (Get Started) ===== */
   .nav-cta { padding: 8px 16px; font-size: 13px; }
@@ -1507,8 +1681,10 @@ scheduleAutoCycle();
   .sia-preset-chip { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.72rem; cursor: pointer; transition: color 0.15s, border-color 0.15s, background 0.15s; }
   .sia-preset-chip:hover { color: var(--text); border-color: var(--border-hover); }
   .sia-preset-chip.active { color: var(--accent); border-color: rgba(224, 148, 34, 0.4); background: var(--accent-dim); }
-  .sia-convert-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; background: var(--accent); color: #1a0e02; border: 0; font-family: var(--font-display); font-size: 0.86rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+  .sia-convert-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; background: var(--accent); color: #1a0e02; border: 0; font-family: var(--font-display); font-size: 0.86rem; font-weight: 600; cursor: pointer; transition: background 0.15s, opacity 0.15s; }
   .sia-convert-btn:hover { background: var(--ilo-amber-high); }
+  .sia-convert-btn:disabled { opacity: 0.45; cursor: not-allowed; background: var(--accent); }
+  .sia-convert-btn:disabled:hover { background: var(--accent); }
 
   .sia-output { margin-top: 14px; border: 1px solid var(--border); border-radius: 8px; background: rgba(0,0,0,0.25); overflow: hidden; }
   .sia-output-label { padding: 6px 12px; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
@@ -1517,18 +1693,90 @@ scheduleAutoCycle();
   .sia-error { margin-top: 10px; font-family: var(--font-mono); font-size: 0.78rem; color: #f87171; background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.15); border-radius: 6px; padding: 10px 14px; }
 
   /* SIA syntax tokens (Python in editor, ilo on the right) */
-  .syn-kw { color: #c8b3ff; }
+  .syn-kw  { color: #c8b3ff; }
   .syn-num { color: var(--ilo-syn-num); }
-  .syn-s { color: var(--ilo-syn-str); }
-  .syn-op { color: var(--ilo-syn-op); }
-  .syn-p { color: var(--text); }
-  .syn-fn { color: var(--ilo-amber-high); }
-  .syn-com { color: var(--ilo-syn-cmt); font-style: italic; }
+  .syn-s   { color: var(--ilo-syn-str); }
+  .syn-op  { color: var(--ilo-syn-op); }
+  .syn-t   { color: var(--ilo-syn-op); }
+  .syn-p   { color: var(--text); }
+  .syn-fn  { color: var(--ilo-amber-high); }
+  .syn-com,
+  .syn-cm,
+  .syn-cmt { color: var(--ilo-syn-cmt); font-style: italic; }
 
   @media (max-width: 700px) {
     .sia-panes { grid-template-columns: 1fr; }
     .sia-arrow { display: none; }
     .sia-card { padding: 18px; }
+  }
+
+  /* ===== ilo serv demo ===== */
+  .serv-section { padding: 6rem 0; border-top: 1px solid var(--border); }
+  .serv-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex; flex-direction: column; gap: 14px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .serv-card:hover { border-color: var(--border-hover); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); }
+  .serv-prompt {
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 0.84rem; color: var(--ilo-fg-2);
+    padding: 6px 12px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    align-self: flex-start;
+  }
+  .serv-prompt .dollar { color: var(--ilo-fg-4); margin-right: 6px; }
+  .serv-panes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .serv-pane {
+    display: flex; flex-direction: column;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .serv-pane--out { background: #0c0c12; }
+  .serv-pane-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .serv-pane-lang {
+    font-family: var(--ilo-font-mono); font-size: 0.75rem;
+    color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .serv-pane--out .serv-pane-lang { color: var(--ilo-accent); }
+  .serv-pane-arrow { color: var(--ilo-fg-4); font-size: 0.78rem; margin-left: auto; }
+  .serv-pane--out .serv-pane-arrow { margin-left: 0; margin-right: auto; }
+  .serv-body {
+    margin: 0; padding: 14px 16px;
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 0.78rem; line-height: 1.7;
+    color: var(--text);
+    background: transparent;
+    overflow-x: auto;
+    white-space: pre;
+    min-height: 120px;
+  }
+  .serv-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 14px; flex-wrap: wrap;
+    padding-top: 6px;
+    font-size: 13px; color: var(--ilo-fg-3); line-height: 1.55;
+  }
+  .serv-foot code {
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 0.9em; background: var(--ilo-inline-code-bg);
+    padding: 0.1em 0.4em; border-radius: var(--ilo-radius-xs);
+    color: var(--ilo-fg-2);
+  }
+  @media (max-width: 700px) {
+    .serv-panes { grid-template-columns: 1fr; }
+    .serv-card { padding: 18px; }
   }
 
   /* ===== Features grid (Designed for machines) ===== */
