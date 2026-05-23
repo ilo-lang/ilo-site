@@ -898,8 +898,20 @@ const exampleJson = JSON.stringify(
   }
 
   function customStem(pyText) {
-    const m = pyText.match(/[A-Za-z_][A-Za-z0-9_]*/);
-    return m ? m[0].toLowerCase() : 'custom';
+    const b = b64encode(pyText);
+    return b ? b.slice(0, 5).toLowerCase() : 'custom';
+  }
+
+  function updateNote() {
+    if (!els.note) return;
+    const ex = currentKey ? EXAMPLES[currentKey] : null;
+    const isExample = ex && ex.py === els.pyEdit.value;
+    if (isExample) {
+      replaceHtml(els.note, ex.note);
+      els.note.hidden = false;
+    } else {
+      els.note.hidden = true;
+    }
   }
 
   function updateFilenames() {
@@ -930,7 +942,7 @@ const exampleJson = JSON.stringify(
     updateResetBtn();
     currentIloText = ex.iloText;
     renderIlo();
-    replaceHtml(els.note, ex.note);
+    updateNote();
     els.sideButtons().forEach((b) => b.classList.toggle('is-active', b.getAttribute('data-key') === key));
     if (history.replaceState) {
       const u = new URL(window.location);
@@ -1048,6 +1060,7 @@ const exampleJson = JSON.stringify(
     syncActiveExample();
     updateFilenames();
     updateResetBtn();
+    updateNote();
     updateShareUrl();
     if (convertTimer) clearTimeout(convertTimer);
     convertTimer = setTimeout(convertNow, 500);
@@ -1112,6 +1125,7 @@ const exampleJson = JSON.stringify(
       syncActiveExample();
       updateFilenames();
       updateResetBtn();
+      updateNote();
       updateConvertBtn();
       convertNow();
     } else if (key && EXAMPLES[key]) {
