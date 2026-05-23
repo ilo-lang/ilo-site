@@ -28,22 +28,28 @@ const shipped = [
   { tag: 'ecosystem', name: 'ilo httpd',       body: 'Serve functions as HTTP endpoints. One command, no framework.' },
 ];
 
-type InstallSub = { id: string; label: string; cmd: string };
-type InstallGroup = { id: string; label: string; hint: string; subs: InstallSub[] };
+type InstallSub = { id: string; label: string; file: string; cmd: string };
+type InstallGroup = { id: string; label: string; verify: string; verifyOut?: string; verifyNote?: string; subs: InstallSub[] };
 const installGroups: InstallGroup[] = [
   {
-    id: 'humans', label: 'For humans', hint: 'shell',
+    id: 'humans',
+    label: 'For humans',
+    verify: "ilo 'dbl x:n>n;*x 2' 5",
+    verifyOut: '10',
     subs: [
-      { id: 'mac',     label: 'macOS / Linux', cmd: 'curl -fsSL ilo-lang.ai/install.sh | sh' },
-      { id: 'windows', label: 'Windows',       cmd: 'irm https://ilo-lang.ai/install.ps1 | iex' },
+      { id: 'mac',     label: 'macOS / Linux', file: 'install.sh',  cmd: 'curl -fsSL ilo-lang.ai/install.sh | sh' },
+      { id: 'windows', label: 'Windows',       file: 'install.ps1', cmd: 'irm https://ilo-lang.ai/install.ps1 | iex' },
     ],
   },
   {
-    id: 'agents', label: 'For agents', hint: 'plugin',
+    id: 'agents',
+    label: 'For agents',
+    verify: 'tool: ilo',
+    verifyNote: 'type-checked at load',
     subs: [
-      { id: 'claude', label: 'Claude marketplace', cmd: '/plugin marketplace add ilo-lang/ilo\n/plugin install ilo-lang/ilo' },
-      { id: 'pi',     label: 'Pi',                 cmd: 'pi install ilo-lang/ilo' },
-      { id: 'other',  label: 'Other agents',       cmd: 'npx skills add ilo-lang/ilo' },
+      { id: 'claude', label: 'Claude Code',  file: 'mcp.json', cmd: 'claude mcp add ilo --scope user npx -y @ilo-lang/mcp' },
+      { id: 'pi',     label: 'Pi',           file: 'pi.json',  cmd: 'pi install ilo-lang/ilo' },
+      { id: 'other',  label: 'Other agents', file: 'skills.json', cmd: 'npx skills add ilo-lang/ilo' },
     ],
   },
 ];
@@ -167,50 +173,71 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
     <!-- INSTALL -->
     <section id="install" class="install">
       <div class="container-wide install-wrap">
-        <div class="section-head">
-          <div class="kicker">Install</div>
-          <h2>Two paths. One binary.</h2>
-          <p class="sub">Shell installer for humans. MCP registration for agents. Native on Linux, macOS, Windows; WASM via npm. The rest are in the docs.</p>
-        </div>
+        <h2 class="install-h2"><span class="hash">#</span>install</h2>
 
-        <div class="install-block">
-          <div class="install-tabs" role="tablist">
-            {installGroups.map((g, i) => (
-              <button class={`install-tab${i === 0 ? ' active' : ''}`} role="tab" data-install-tab={g.id} aria-selected={i === 0}>
-                <span>{g.label}</span>
-                <span class="hint mono">{g.hint}</span>
-              </button>
-            ))}
-          </div>
+        <div class="install-tabs" role="tablist">
           {installGroups.map((g, i) => (
-            <div class={`install-group${i === 0 ? ' active' : ''}`} data-install-group={g.id}>
-              <div class="install-subtabs" role="tablist">
-                {g.subs.map((s, j) => (
-                  <button class={`install-subtab${j === 0 ? ' active' : ''}`} role="tab" data-install-subtab={`${g.id}:${s.id}`} aria-selected={j === 0}>{s.label}</button>
-                ))}
-              </div>
-              {g.subs.map((s, j) => (
-                <div class={`install-term${j === 0 ? ' active' : ''}`} data-install-panel={`${g.id}:${s.id}`}>
-                  <div class="install-term-body">
-                    <span class="dollar">$</span> {s.cmd}
-                  </div>
-                  <button class="install-term-copy frame-copy" data-copy={s.cmd} aria-label={`Copy ${g.label} ${s.label} install command`}>copy</button>
-                </div>
-              ))}
-            </div>
+            <button class={`install-tab${i === 0 ? ' active' : ''}`} role="tab" data-install-tab={g.id} aria-selected={i === 0}>
+              {g.label}
+            </button>
           ))}
         </div>
 
-        <div class="install-verify">
-          Verify it works: <code>ilo 'dbl x:n&gt;n;*x 2' 5</code> → <span class="mono accent">10</span>
-          <a class="btn-text install-more" href="/docs/learn/install/">
-            All install paths
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </a>
-        </div>
+        {installGroups.map((g, gi) => (
+          <div class={`install-group${gi === 0 ? ' active' : ''}`} data-install-group={g.id}>
+            <div class="term-wrap">
+              <div class="term">
+                <div class="term-head">
+                  {g.subs.map((s, j) => (
+                    <span class={`term-file${j === 0 ? ' active' : ''}`} data-term-file={`${g.id}:${s.id}`}>{s.file}</span>
+                  ))}
+                  <label class="picker">
+                    <select class="picker-select" data-install-picker={g.id}>
+                      {g.subs.map((s) => (
+                        <option value={`${g.id}:${s.id}`}>{s.label}</option>
+                      ))}
+                    </select>
+                    <span class="chev" aria-hidden="true">▾</span>
+                  </label>
+                </div>
+                {g.subs.map((s, j) => (
+                  <div class={`term-body-wrap${j === 0 ? ' active' : ''}`} data-install-panel={`${g.id}:${s.id}`}>
+                    <pre class="term-body"><span class="p">$</span> {s.cmd}</pre>
+                    <button class="term-copy" data-copy={s.cmd} aria-label={`Copy ${g.label} ${s.label} install command`}>copy</button>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-        <p class="install-caveat">
-          ilo is in active development. Today's syntax and builtins are not a contract — expect breaking changes while the language searches for what works best for agents. Run it in a safe environment, not against production.
+            <div class="footer-row">
+              <span class="verify-inline">
+                {g.verifyOut ? (
+                  <>
+                    verify
+                    <code>{g.verify}</code>
+                    <span class="arrow">→</span>
+                    <span class="out">{g.verifyOut}</span>
+                    <span class="check">✓</span>
+                  </>
+                ) : (
+                  <>
+                    <code>{g.verify}</code>
+                    <span class="arrow">·</span>
+                    <span>{g.verifyNote}</span>
+                    <span class="check">✓</span>
+                  </>
+                )}
+              </span>
+              <a class="more" href="/docs/learn/install/">
+                {g.id === 'agents' ? 'All hosts →' : 'All install paths →'}
+              </a>
+            </div>
+          </div>
+        ))}
+
+        <p class="evolving">
+          <span class="evolving-tag">heads-up</span>
+          ilo is actively evolving — today's syntax and builtins are not a contract. Expect breaking changes while the language searches for what works best for agents. Run it in a safe environment, not against production.
         </p>
       </div>
     </section>
@@ -629,26 +656,22 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
     });
   });
 
-  // Install sub-tabs (mac/linux/windows | claude/pi/other)
-  const subTabs = document.querySelectorAll<HTMLButtonElement>('[data-install-subtab]');
-  subTabs.forEach(t => {
-    t.addEventListener('click', () => {
-      const id = t.getAttribute('data-install-subtab')!;
+  // Install pickers (per-group sub-option dropdown in the terminal head)
+  document.querySelectorAll<HTMLSelectElement>('[data-install-picker]').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const id = sel.value; // e.g. "humans:windows"
       const groupId = id.split(':')[0];
-      // Scope to this group's subtabs only
-      const groupSiblings = document.querySelectorAll<HTMLButtonElement>(`[data-install-subtab^="${groupId}:"]`);
-      groupSiblings.forEach(x => {
-        const on = x === t;
-        x.classList.toggle('active', on);
-        x.setAttribute('aria-selected', String(on));
+      document.querySelectorAll<HTMLElement>(`[data-install-panel^="${groupId}:"]`).forEach(p => {
+        p.classList.toggle('active', p.getAttribute('data-install-panel') === id);
       });
-      const groupPanels = document.querySelectorAll<HTMLElement>(`[data-install-panel^="${groupId}:"]`);
-      groupPanels.forEach(p => p.classList.toggle('active', p.getAttribute('data-install-panel') === id));
+      document.querySelectorAll<HTMLElement>(`[data-term-file^="${groupId}:"]`).forEach(f => {
+        f.classList.toggle('active', f.getAttribute('data-term-file') === id);
+      });
     });
   });
 
   // Per-panel copy buttons
-  document.querySelectorAll<HTMLButtonElement>('.frame-copy').forEach(btn => {
+  document.querySelectorAll<HTMLButtonElement>('.frame-copy, .term-copy').forEach(btn => {
     btn.addEventListener('click', () => {
       const cmd = btn.getAttribute('data-copy') || '';
       navigator.clipboard?.writeText(cmd);
@@ -1335,10 +1358,22 @@ scheduleAutoCycle();
   .ship-tag { font-size: 11px; color: var(--ilo-fg-4); }
   .ship-card p { font-size: 13px; line-height: 1.55; color: var(--ilo-fg-3); }
 
-  /* ===== install ===== */
-  .install { border-top: 1px solid var(--ilo-hairline); }
-  .install-wrap { max-width: 760px; }
-  .install-block { display: flex; flex-direction: column; }
+  /* ===== install (v3 design) ===== */
+  .install { border-top: 1px solid var(--ilo-hairline); padding: 6rem 0; }
+  .install-wrap { max-width: 720px; }
+
+  .install-h2 {
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 22px; font-weight: 500;
+    color: var(--ilo-fg-1);
+    margin: 0 0 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--ilo-hairline);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .install-h2 .hash { color: var(--ilo-accent); margin-right: 6px; font-weight: 400; }
+
   .install-tabs {
     display: flex; gap: 4px; align-items: flex-end;
     margin-bottom: -1px;
@@ -1346,14 +1381,13 @@ scheduleAutoCycle();
   }
   .install-tab {
     font-family: var(--ilo-font-sans);
-    font-size: 13px; font-weight: 500;
-    padding: 8px 14px 9px;
+    font-size: 13.5px; font-weight: 500;
+    padding: 9px 16px 10px;
     background: transparent;
     color: var(--ilo-fg-3);
     border: 1px solid transparent; border-bottom: 0;
     border-top-left-radius: 6px; border-top-right-radius: 6px;
     cursor: pointer; line-height: 1.2;
-    display: inline-flex; align-items: center; gap: 6px;
     transition: color var(--ilo-duration-1) var(--ilo-ease);
   }
   .install-tab:hover { color: var(--ilo-fg-1); }
@@ -1363,67 +1397,134 @@ scheduleAutoCycle();
     border-color: var(--ilo-hairline);
     box-shadow: inset 0 -1px 0 0 var(--ilo-ink-2);
   }
-  .install-tab .hint { font-size: 10.5px; color: var(--ilo-fg-4); font-weight: 400; }
-  .install-tab.active .hint { color: rgba(224, 148, 34, 0.65); }
 
-  .install-group { display: none; flex-direction: column; gap: 12px; }
+  .install-group { display: none; flex-direction: column; }
   .install-group.active { display: flex; }
-  .install-subtabs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-  .install-subtab {
-    font-family: var(--ilo-font-sans); font-size: 12.5px; font-weight: 500;
-    padding: 5px 11px;
-    border-radius: var(--ilo-radius-full);
-    background: transparent;
-    color: var(--ilo-fg-3);
-    border: 1px solid var(--ilo-hairline);
-    cursor: pointer;
-    line-height: 1.2;
-    transition: color var(--ilo-duration-1) var(--ilo-ease), border-color var(--ilo-duration-1) var(--ilo-ease), background var(--ilo-duration-1) var(--ilo-ease);
-  }
-  .install-subtab:hover { color: var(--ilo-fg-1); }
-  .install-subtab.active {
-    color: var(--ilo-accent);
-    border-color: rgba(224, 148, 34, 0.45);
-    background: rgba(224, 148, 34, 0.08);
-  }
 
-  .install-term {
-    display: none;
-    align-items: stretch;
-    background: var(--ilo-ink-2);
-    border: 1px solid var(--ilo-hairline);
+  .term-wrap {
+    position: relative;
     border-radius: 8px;
     border-top-left-radius: 0;
-    overflow: hidden;
   }
-  .install-term.active { display: flex; }
-  .install-term-body {
+  .term-wrap::after {
+    content: "";
+    position: absolute; inset: -1px;
+    border-radius: inherit;
+    box-shadow:
+      0 0 0 1px rgba(224, 148, 34, 0.08),
+      0 12px 40px -12px rgba(224, 148, 34, 0.18);
+    pointer-events: none;
+  }
+  .term {
+    position: relative;
+    background: var(--ilo-ink-2);
+    border: 1px solid var(--ilo-hairline);
+    border-radius: inherit;
+    overflow: hidden;
+    z-index: 1;
+    display: flex; flex-direction: column;
+  }
+  .term-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px 8px 16px;
+    border-bottom: 1px solid var(--ilo-hairline);
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 11px;
+    color: var(--ilo-fg-4);
+    letter-spacing: 0.02em;
+  }
+  .term-file { display: none; color: var(--ilo-fg-3); }
+  .term-file.active { display: inline; }
+  .picker {
+    margin-left: auto;
+    position: relative;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background var(--ilo-duration-1) var(--ilo-ease), color var(--ilo-duration-1) var(--ilo-ease);
+  }
+  .picker:hover { background: rgba(255,255,255,0.05); }
+  .picker-select {
+    appearance: none; -webkit-appearance: none;
+    background: transparent; border: 0;
+    font-family: var(--ilo-font-sans); font-size: 11.5px;
+    color: var(--ilo-fg-2);
+    padding: 0 18px 0 0;
+    cursor: pointer;
+    line-height: 1.3;
+    outline: none;
+  }
+  .picker-select option { background: var(--ilo-ink-2); color: var(--ilo-fg-1); }
+  .picker .chev { position: absolute; right: 6px; pointer-events: none; color: var(--ilo-fg-4); font-size: 10px; }
+  .picker:hover .picker-select { color: var(--ilo-fg-1); }
+
+  .term-body-wrap { display: none; align-items: stretch; }
+  .term-body-wrap.active { display: flex; }
+  .term-body {
+    margin: 0;
     padding: 14px 18px;
     font-family: var(--ilo-font-mono); font-variant-ligatures: none;
-    font-size: 14px; line-height: 1.4;
+    font-size: 14.5px; line-height: 1.4;
     color: var(--ilo-fg-1);
     flex: 1; min-width: 0;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    background: transparent;
   }
-  .install-term-body .dollar { color: var(--ilo-fg-4); }
-  .install-term-copy {
+  .term-body .p { color: var(--ilo-fg-4); }
+  .term-copy {
     background: transparent;
     color: var(--ilo-accent);
     border: 0; border-left: 1px solid var(--ilo-hairline);
-    padding: 0 18px;
+    padding: 0 16px;
     font-family: var(--ilo-font-sans); font-size: 13px; font-weight: 500;
     cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: background var(--ilo-duration-1) var(--ilo-ease), color var(--ilo-duration-1) var(--ilo-ease);
   }
-  .install-term-copy:hover { background: rgba(255, 255, 255, 0.03); }
-  .install-term-copy.done { color: var(--ilo-ok); }
+  .term-copy:hover { background: rgba(255,255,255,0.03); }
+  .term-copy.done { color: var(--ilo-ok); }
 
-  .install-verify {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 18px;
-    margin-top: 24px;
-    font-size: 13px; color: var(--ilo-fg-4);
+  .footer-row {
+    margin-top: 14px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
   }
-  .install-verify code { font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 0.9em; background: var(--ilo-inline-code-bg); padding: 0.12em 0.4em; border-radius: 4px; }
-  .install-more { margin-left: auto; }
+  .verify-inline {
+    display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    font-family: var(--ilo-font-sans); font-size: 12.5px; color: var(--ilo-fg-4);
+  }
+  .verify-inline code {
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 12px; color: var(--ilo-fg-2);
+    background: rgba(255,255,255,0.04);
+    padding: 2px 7px; border-radius: 4px;
+  }
+  .verify-inline .arrow { color: var(--ilo-fg-4); }
+  .verify-inline .out { color: var(--ilo-accent); font-family: var(--ilo-font-mono); font-size: 12px; font-weight: 500; }
+  .verify-inline .check { color: var(--ilo-lime); font-family: var(--ilo-font-mono); font-size: 11px; font-weight: 600; }
+  .more {
+    margin-left: auto;
+    font-family: var(--ilo-font-sans); font-size: 13px; font-weight: 500;
+    color: var(--ilo-accent); text-decoration: none;
+  }
+  .more:hover { color: var(--ilo-amber-high); }
+
+  .evolving {
+    margin: 22px 0 0;
+    padding: 12px 14px;
+    border-left: 2px solid var(--ilo-accent);
+    background: rgba(224, 148, 34, 0.03);
+    border-radius: 0 4px 4px 0;
+    font-family: var(--ilo-font-sans);
+    font-size: 12.5px; line-height: 1.55;
+    color: var(--ilo-fg-3);
+  }
+  .evolving-tag {
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ilo-accent); font-weight: 500;
+    margin-right: 8px;
+  }
 
   /* ===== benchmarks ===== */
   .benchmarks { border-top: 1px solid var(--ilo-hairline); }
