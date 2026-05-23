@@ -713,7 +713,9 @@ const PRESETS: Preset[] = [
   {
     name: 'upper',
     python: `def up(s):
-    return s.upper()`,
+    return s.upper()
+
+print(up("hello"))`,
     iloMulti: `up s:t>t
   upr s`,
     iloInline: `up s:t>t;upr s`,
@@ -728,7 +730,9 @@ def increment(x):
     return x + 1
 
 def go(x):
-    return increment(double(x))`,
+    return increment(double(x))
+
+print(go(5))`,
     iloMulti: `dbl x:n>n
   *x 2
 
@@ -745,7 +749,9 @@ go x:n>n
     python: `from functools import reduce
 
 def total(xs):
-    return reduce(lambda a, b: a + b, xs, 0)`,
+    return reduce(lambda a, b: a + b, xs, 0)
+
+print(total([1, 2, 3, 4, 5]))`,
     iloMulti: `total xs:L n>n
   fld (a:n b:n>n;+a b) xs 0`,
     iloInline: `total xs:L n>n;fld (a:n b:n>n;+a b) xs 0`,
@@ -754,7 +760,9 @@ def total(xs):
   {
     name: 'map-double',
     python: `def dbls(xs):
-    return [n * 2 for n in xs]`,
+    return [n * 2 for n in xs]
+
+print(dbls([1, 2, 3, 4, 5]))`,
     iloMulti: `dbls xs:L n>L n
   map (n:n>n;*n 2) xs`,
     iloInline: `dbls xs:L n>L n;map (n:n>n;*n 2) xs`,
@@ -763,7 +771,9 @@ def total(xs):
   {
     name: 'filter-even',
     python: `def evens(xs):
-    return [n for n in xs if n % 2 == 0]`,
+    return [n for n in xs if n % 2 == 0]
+
+print(evens([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))`,
     iloMulti: `evens xs:L n>L n
   flt (n:n>b;=(mod n 2) 0) xs`,
     iloInline: `evens xs:L n>L n;flt (n:n>b;=(mod n 2) 0) xs`,
@@ -772,7 +782,9 @@ def total(xs):
   {
     name: 'len-list',
     python: `def count(xs):
-    return len(xs)`,
+    return len(xs)
+
+print(count([1, 2, 3, 4, 5]))`,
     iloMulti: `count xs:L _>n
   len xs`,
     iloInline: `count xs:L _>n;len xs`,
