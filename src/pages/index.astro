@@ -756,8 +756,8 @@ print(total([1, 2, 3, 4, 5]))`,
   fld (a:n b:n>n;+a b) xs 0
 
 main>_
-  prnt total [1,2,3,4,5]`,
-    iloInline: `total xs:L n>n;fld (a:n b:n>n;+a b) xs 0;main>_;prnt total [1,2,3,4,5]`,
+  prnt total [1, 2, 3, 4, 5]`,
+    iloInline: `total xs:L n>n;fld (a:n b:n>n;+a b) xs 0;main>_;prnt total [1, 2, 3, 4, 5]`,
     output: '15',
   },
   {
@@ -770,8 +770,8 @@ print(dbls([1, 2, 3, 4, 5]))`,
   map (n:n>n;*n 2) xs
 
 main>_
-  prnt dbls [1,2,3,4,5]`,
-    iloInline: `dbls xs:L n>L n;map (n:n>n;*n 2) xs;main>_;prnt dbls [1,2,3,4,5]`,
+  prnt dbls [1, 2, 3, 4, 5]`,
+    iloInline: `dbls xs:L n>L n;map (n:n>n;*n 2) xs;main>_;prnt dbls [1, 2, 3, 4, 5]`,
     output: '[2, 4, 6, 8, 10]',
   },
   {
@@ -801,8 +801,8 @@ print(count([1, 2, 3, 4, 5]))`,
   len xs
 
 main>_
-  prnt count [1,2,3,4,5]`,
-    iloInline: `count xs:L _>n;len xs;main>_;prnt count [1,2,3,4,5]`,
+  prnt count [1, 2, 3, 4, 5]`,
+    iloInline: `count xs:L _>n;len xs;main>_;prnt count [1, 2, 3, 4, 5]`,
     output: '5',
   },
 ];
