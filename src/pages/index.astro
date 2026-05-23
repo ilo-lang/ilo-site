@@ -305,7 +305,7 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
             <div class="sia-presets" id="demo-presets"></div>
           </div>
           <div class="sia-seemore">
-            <a class="btn-text btn-text--sm" href="/docs/learn/examples/">
+            <a class="btn-text" href="/docs/learn/examples/">
               See more examples
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </a>
@@ -1705,8 +1705,7 @@ scheduleAutoCycle();
   .sia-preset-chip { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.72rem; cursor: pointer; transition: color 0.15s, border-color 0.15s, background 0.15s; }
   .sia-preset-chip:hover { color: var(--text); border-color: var(--border-hover); }
   .sia-preset-chip.active { color: var(--accent); border-color: rgba(224, 148, 34, 0.4); background: var(--accent-dim); }
-  .sia-seemore { margin-top: 10px; }
-  .btn-text--sm { font-size: 12px; }
+  .sia-seemore { margin-top: 28px; display: flex; justify-content: flex-end; }
 
   .sia-output { margin-top: 14px; border: 1px solid var(--border); border-radius: 8px; background: rgba(0,0,0,0.25); overflow: hidden; }
   .sia-output-label { padding: 6px 12px; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
