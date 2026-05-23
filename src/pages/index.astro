@@ -687,6 +687,8 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
     <section class="section-evolving" data-animate>
       <div class="container-wide">
         <div class="evolving-inner">
+          <div class="evolving-grid">
+            <div class="evolving-col evolving-col--main">
           <div class="evolving-head">
             <svg class="evolving-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
@@ -720,8 +722,9 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </a>
           </div>
-
-          {posts.length > 0 && (
+            </div>
+            <div class="evolving-col evolving-col--side">
+              {posts.length > 0 && (
             <>
               <h3 class="evolving-writing-head">Recent writing</h3>
               <ul class="writing-list">
@@ -742,9 +745,11 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
               </div>
             </>
           )}
+        
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
     <!-- FINAL CTA -->
     <section class="final-cta">
@@ -1821,9 +1826,13 @@ scheduleAutoCycle();
     border-top: 1px solid var(--ilo-hairline);
     padding: 80px 0;
   }
-  .evolving-inner {
-    max-width: 680px;
-  }
+  .evolving-inner { max-width: none; }
+  .evolving-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 48px; }
+  @media (max-width: 900px) { .evolving-grid { grid-template-columns: 1fr; gap: 32px; } }
+  .evolving-col--main { max-width: 680px; }
+  .evolving-col--side .evolving-writing-head { margin-top: 0; }
+  /* original .evolving-inner override below */
+
   .evolving-inner h2 { text-align: left; margin: 0; }
   .evolving-inner > p {
     font-size: 15px; line-height: 1.65; color: var(--ilo-fg-3); margin: 0 0 32px;
