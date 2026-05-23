@@ -355,11 +355,29 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
           </div>
 
           <div class="feature-card">
+            <div class="feature-label">Surface</div>
+            <h3>JSON by default</h3>
+            <p>Every CLI subcommand emits structured JSON. Diagnostics carry error codes, source spans, and fix metadata. No screen-scraping.</p>
+            <div class="feature-code">
+              <code><span class="syn-fn">ilo</span> check <span class="syn-op">--json</span></code>
+            </div>
+          </div>
+
+          <div class="feature-card">
             <div class="feature-label">Repair</div>
             <h3>Fix plans</h3>
             <p><code>ilo apply</code> consumes structured repair plans from <code>ilo check --json</code>. Agents patch ilo with ilo.</p>
             <div class="feature-code">
               <code><span class="syn-fn">ilo</span> apply <span class="syn-op">--plan</span> fix.json</code>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-label">Serve</div>
+            <h3>ilo httpd</h3>
+            <p>Serve any ilo function as an HTTP endpoint. One command, no framework, typed request and response.</p>
+            <div class="feature-code">
+              <code><span class="syn-fn">ilo</span> httpd <span class="syn-op">--port</span> 8080 api.@</code>
             </div>
           </div>
         </div>
