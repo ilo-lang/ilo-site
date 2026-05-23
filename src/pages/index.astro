@@ -693,7 +693,7 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
               <path d="M12 9v4"/>
               <path d="M12 17h.01"/>
             </svg>
-            <h2>An ongoing experiment</h2>
+            <h2 class="section-title">An ongoing experiment</h2>
           </div>
           <p>ilo is a research project. What does a language look like when agents write all the code? The manifesto steers the project. Syntax, builtins, and tooling evolve as we learn what actually helps. Things will break.</p>
 
@@ -1816,11 +1816,7 @@ scheduleAutoCycle();
   .evolving-inner {
     max-width: 680px;
   }
-  .evolving-inner h2 {
-    font-family: var(--ilo-font-sans);
-    font-size: 28px; font-weight: 700; letter-spacing: -0.02em;
-    color: var(--ilo-fg-1); margin: 0;
-  }
+  .evolving-inner h2 { text-align: left; margin: 0; }
   .evolving-inner > p {
     font-size: 15px; line-height: 1.65; color: var(--ilo-fg-3); margin: 0 0 32px;
   }
