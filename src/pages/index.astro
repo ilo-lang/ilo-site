@@ -1,5 +1,5 @@
 ---
-// Custom landing page — implements the ilo-design-system landing-page.html.
+// Custom landing page, implements the ilo-design-system landing-page.html.
 import BaseHead from '../components/BaseHead.astro';
 import JsonLd from '../components/JsonLd.astro';
 import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schema';
@@ -145,7 +145,7 @@ print(total)</pre>
   <section class="install-section" id="install">
     <div class="install-wrap-page">
       <div class="install-head">
-        <h2 class="install-h2">install</h2>
+        <h2 class="install-h2">get started</h2>
         <a class="install-status" href={releaseUrl} target="_blank" rel="noopener">
           <span class="install-status-dot"></span>
           experimental · {versionLabel}
@@ -153,8 +153,13 @@ print(total)</pre>
       </div>
 
       <p class="install-lede">
-        ilo is actively evolving. Today's syntax and builtins are not yet a contract — run it in a safe environment, not against production. Install on your machine, or hand it to an agent.
+        ilo is actively evolving. Today's syntax and builtins are not yet a contract, so run it in a safe environment, not against production. Install on your machine, or hand it to an agent.
       </p>
+
+      <div class="gs-step">
+        <span class="gs-num">01</span>
+        <div class="gs-body">
+          <h3 class="gs-title">Install</h3>
 
       <div role="tablist" class="tabs" id="install-tabs">
         <button role="tab" aria-selected="true" data-tab="humans" class="tab">For humans</button>
@@ -225,6 +230,24 @@ print(total)</pre>
       <div class="install-foot-row">
         <a class="install-foot-link" href="/docs/learn/install/">All install paths <span>→</span></a>
       </div>
+        </div>
+      </div>
+
+      <div class="gs-step">
+        <span class="gs-num">02</span>
+        <div class="gs-body">
+          <h3 class="gs-title">Try it</h3>
+          <p class="gs-text">Edit Python and watch it convert to ilo, with token counts for both. <a href="/playground/">Open the playground →</a></p>
+        </div>
+      </div>
+
+      <div class="gs-step">
+        <span class="gs-num">03</span>
+        <div class="gs-body">
+          <h3 class="gs-title">Read the docs</h3>
+          <p class="gs-text">Learn the syntax, the builtins, and the error model. <a href="/docs/introduction/">Introduction →</a></p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -285,7 +308,7 @@ print(total)</pre>
   <section class="philosophy">
     <div class="philosophy-inner">
       <p class="philosophy-quote">
-        Named from <a href="https://en.wikipedia.org/wiki/Toki_Pona" target="_blank" rel="noopener" class="philosophy-link">Toki Pona</a> for &ldquo;tool&rdquo; — a constructed language that captures all of human expression in ~120 words. <em>ilo</em> does the same for machine programmers.
+        Named from <a href="https://en.wikipedia.org/wiki/Toki_Pona" target="_blank" rel="noopener" class="philosophy-link">Toki Pona</a> for &ldquo;tool&rdquo;: a constructed language that captures all of human expression in ~120 words. <em>ilo</em> does the same for machine programmers.
       </p>
     </div>
   </section>
@@ -295,7 +318,7 @@ print(total)</pre>
     <div class="principles-head">
       <div class="kicker">manifesto · six rules</div>
       <h2>One budget. Six rules.</h2>
-      <p class="sub">Tokens — generation, retries, errors, context loading — is the only cost we minimise. Each rule below is a constraint we accepted to lower it. <b>If a feature spends tokens, it has to earn them.</b></p>
+      <p class="sub">Tokens (generation, retries, errors, context loading) are the only cost we minimise. Each rule below is a constraint we accepted to lower it. <b>If a feature spends tokens, it has to earn them.</b></p>
     </div>
     <div class="principles-list">
 
@@ -304,7 +327,7 @@ print(total)</pre>
         <div class="principle-body">
           <h3>Token-Conservative</h3>
           <p class="rule">Tokens are the only budget. Everything else is decoration.</p>
-          <p class="why">Generation, errors, retries, and context loading all spend the same pool. Every syntax choice is benchmarked against this sum — not lines, not characters, not readability arguments imported from human languages.</p>
+          <p class="why">Generation, errors, retries, and context loading all spend the same pool. Every syntax choice is benchmarked against this sum, not lines, not characters, not readability arguments imported from human languages.</p>
           <p class="rejects"><s>lines</s> · <s>characters</s> · <s>"looks like English"</s></p>
         </div>
         <div class="principle-evidence">
@@ -358,7 +381,7 @@ print(total)</pre>
         <div class="principle-body">
           <h3>Language-Agnostic</h3>
           <p class="rule">Sigils over keywords. English is not a dependency.</p>
-          <p class="why">Operators are single characters. Type annotations are single letters. The full vocabulary fits on one page, and an agent learns it from the spec alone — no training-data exposure required.</p>
+          <p class="why">Operators are single characters. Type annotations are single letters. The full vocabulary fits on one page, and an agent learns it from the spec alone, no training-data exposure required.</p>
           <p class="rejects"><s>keyword soup</s> · <s>word-of-the-day naming</s> · <s>ASCII art operators</s></p>
         </div>
         <div class="principle-evidence">
@@ -375,7 +398,7 @@ print(total)</pre>
         <div class="principle-body">
           <h3>Graph-Reducible</h3>
           <p class="rule">The dependency graph is a first-class CLI artifact.</p>
-          <p class="why"><code>ilo graph</code> returns the call graph, type graph, and caller graph as JSON. Edit one function and the agent reloads only what changed — usually 6–10% of the codebase.</p>
+          <p class="why"><code>ilo graph</code> returns the call graph, type graph, and caller graph as JSON. Edit one function and the agent reloads only what changed, usually 6 to 10% of the codebase.</p>
           <p class="rejects"><s>whole-tree re-reads</s> · <s>file-scope context</s> · <s>"just grep for it"</s></p>
         </div>
         <div class="principle-evidence">
@@ -453,7 +476,7 @@ print(total)</pre>
           <div class="bench-row"><span class="bench-lang">Python 3</span><span class="bench-tag">interp</span><div class="bench-bar"><div class="bench-fill" style="width:100%"></div></div><span class="bench-ns">29.5µs</span></div>
         </div>
         <div class="bench-foot">
-          <span>7 more benchmarks in the full table — string, record, mixed, foreach, recurse…</span>
+          <span>7 more benchmarks in the full table: string, record, mixed, foreach, recurse…</span>
           <a class="btn-text" href="/docs/reference/benchmarks/">All benchmarks →</a>
         </div>
       </div>
@@ -477,7 +500,7 @@ print(total)</pre>
         </div>
         <script type="application/json" id="writing-pool" set:html={JSON.stringify(posts)}></script>
         <div class="writing-foot">
-          <a class="btn-text" href="https://danieljohnmorris.com/writing/" target="_blank" rel="noopener">Read more writing →</a>
+          <a class="btn-text" href="https://danieljohnmorris.com/writing/tag/ilo/" target="_blank" rel="noopener">Read more writing →</a>
         </div>
       </div>
     </section>
@@ -880,6 +903,15 @@ print(total)</pre>
   }
   .install-foot-link span { font-family: var(--ilo-font-mono); margin-left: 4px; }
   .install-foot-link:hover { color: var(--ilo-amber-high); }
+
+  /* Get started steps */
+  .gs-step { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 24px; align-items: start; padding: 28px 0; border-top: 1px solid var(--ilo-hairline); }
+  .gs-step:first-of-type { border-top: 0; padding-top: 8px; }
+  .gs-num { font-family: var(--ilo-font-mono); font-size: 30px; font-weight: 300; color: var(--ilo-amber); line-height: 1; letter-spacing: -0.04em; }
+  .gs-title { font-family: var(--ilo-font-sans); font-size: 19px; font-weight: 700; color: var(--ilo-fg-1); margin: 0 0 14px; letter-spacing: -0.02em; }
+  .gs-text { font-family: var(--ilo-font-sans); font-size: 15px; color: var(--ilo-fg-3); line-height: 1.6; margin: 0; }
+  .gs-text a { color: var(--ilo-amber); text-decoration: none; font-weight: 500; }
+  .gs-text a:hover { color: var(--ilo-amber-high); }
 
   /* Features */
   .features { padding: 100px 32px; border-bottom: 1px solid var(--ilo-hairline); }
@@ -1433,6 +1465,8 @@ print(total)</pre>
     .install-section { padding: 64px 20px; }
     .install-head { gap: 10px; }
     .install-status { margin-left: 0; }
+    .gs-step { grid-template-columns: 40px minmax(0,1fr); gap: 16px; }
+    .gs-num { font-size: 24px; }
     .features { padding: 64px 20px; }
     .features-grid { grid-template-columns: 1fr; }
     .philosophy { padding: 56px 20px; }
@@ -1647,7 +1681,7 @@ print(total)</pre>
           if (headingIdx === -1) {
             headingIdx = i;
             // version = left side of em dash or hyphen separator
-            const sep = title.search(/\s[—-]\s/);
+            const sep = title.search(/\s[-\u2014]\s/);
             version = (sep === -1 ? title : title.slice(0, sep)).trim();
           }
         }
