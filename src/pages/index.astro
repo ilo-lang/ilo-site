@@ -315,52 +315,6 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
       </div>
     </section>
 
-    <!-- ILO SERV demo — JSONL stdin/stdout loop -->
-    <section id="ilo-serv" class="serv-section" data-animate>
-      <div class="container-wide">
-        <h2 class="section-title">Wire it into your agent</h2>
-        <p class="section-subtitle"><code>ilo serv</code> is a long-lived JSONL loop. One JSON request per stdin line, one response per stdout line. Process-spawn overhead per call: zero.</p>
-
-        <div class="serv-card">
-          <div class="serv-prompt mono">
-            <span class="dollar">$</span> ilo serv
-          </div>
-          <div class="serv-panes">
-            <div class="serv-pane">
-              <div class="serv-pane-header">
-                <div class="window-dots">
-                  <span class="dot dot--red"></span>
-                  <span class="dot dot--yellow"></span>
-                  <span class="dot dot--green"></span>
-                </div>
-                <span class="serv-pane-lang">stdin</span>
-                <span class="serv-pane-arrow mono">→</span>
-              </div>
-              <pre class="serv-body">&#123;"program":"dbl x:n&gt;n;*x 2","func":"dbl","args":[21]&#125;
-&#123;"program":"upr s:t&gt;t;.upr s","func":"upr","args":["hello"]&#125;
-&#123;"program":"add a:n b:n&gt;n;+a b","func":"add","args":[2,"two"]&#125;</pre>
-            </div>
-            <div class="serv-pane serv-pane--out">
-              <div class="serv-pane-header">
-                <span class="serv-pane-arrow mono">←</span>
-                <span class="serv-pane-lang">stdout</span>
-              </div>
-              <pre class="serv-body">&#123;"schemaVersion":1,"ok":42,"ms":0.4&#125;
-&#123;"schemaVersion":1,"ok":"HELLO","ms":0.3&#125;
-&#123;"schemaVersion":1,"error":&#123;"phase":"verify","code":"ILO-T006","msg":"expected n, got t"&#125;&#125;</pre>
-            </div>
-          </div>
-          <div class="serv-foot">
-            <span>Every line carries <code>schemaVersion</code>. Errors include phase (<code>lex</code>, <code>parse</code>, <code>verify</code>, <code>runtime</code>, <code>program</code>) and a typed code.</span>
-            <a class="btn-text" href="/docs/reference/cli/#ilo-serv">
-              ilo serv reference
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- FEATURES — Designed for machines -->
     <section class="features" data-animate>
       <div class="container-wide">
