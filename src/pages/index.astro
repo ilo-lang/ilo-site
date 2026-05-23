@@ -717,8 +717,11 @@ const PRESETS: Preset[] = [
 
 print(up("hello"))`,
     iloMulti: `up s:t>t
-  upr s`,
-    iloInline: `up s:t>t;upr s`,
+  upr s
+
+main>_
+  prnt up "hello"`,
+    iloInline: `up s:t>t;upr s;main>_;prnt up "hello"`,
     output: 'HELLO',
   },
   {
@@ -734,8 +737,11 @@ print(classify(5))`,
     iloMulti: `classify n:n>t
   <n 0 "neg"
   =n 0 "zero"
-  "pos"`,
-    iloInline: `classify n:n>t;<n 0 "neg";=n 0 "zero";"pos"`,
+  "pos"
+
+main>_
+  prnt classify 5`,
+    iloInline: `classify n:n>t;<n 0 "neg";=n 0 "zero";"pos";main>_;prnt classify 5`,
     output: 'pos',
   },
   {
@@ -747,8 +753,11 @@ def total(xs):
 
 print(total([1, 2, 3, 4, 5]))`,
     iloMulti: `total xs:L n>n
-  fld (a:n b:n>n;+a b) xs 0`,
-    iloInline: `total xs:L n>n;fld (a:n b:n>n;+a b) xs 0`,
+  fld (a:n b:n>n;+a b) xs 0
+
+main>_
+  prnt total [1,2,3,4,5]`,
+    iloInline: `total xs:L n>n;fld (a:n b:n>n;+a b) xs 0;main>_;prnt total [1,2,3,4,5]`,
     output: '15',
   },
   {
@@ -758,8 +767,11 @@ print(total([1, 2, 3, 4, 5]))`,
 
 print(dbls([1, 2, 3, 4, 5]))`,
     iloMulti: `dbls xs:L n>L n
-  map (n:n>n;*n 2) xs`,
-    iloInline: `dbls xs:L n>L n;map (n:n>n;*n 2) xs`,
+  map (n:n>n;*n 2) xs
+
+main>_
+  prnt dbls [1,2,3,4,5]`,
+    iloInline: `dbls xs:L n>L n;map (n:n>n;*n 2) xs;main>_;prnt dbls [1,2,3,4,5]`,
     output: '[2, 4, 6, 8, 10]',
   },
   {
@@ -772,8 +784,11 @@ print(dbls([1, 2, 3, 4, 5]))`,
 
 print(desc("A"))`,
     iloMulti: `desc g:t>t
-  ?g{"A":"excellent";"B":"good";_:"ok"}`,
-    iloInline: `desc g:t>t;?g{"A":"excellent";"B":"good";_:"ok"}`,
+  ?g{"A":"excellent";"B":"good";_:"ok"}
+
+main>_
+  prnt desc "A"`,
+    iloInline: `desc g:t>t;?g{"A":"excellent";"B":"good";_:"ok"};main>_;prnt desc "A"`,
     output: 'excellent',
   },
   {
@@ -783,8 +798,11 @@ print(desc("A"))`,
 
 print(count([1, 2, 3, 4, 5]))`,
     iloMulti: `count xs:L _>n
-  len xs`,
-    iloInline: `count xs:L _>n;len xs`,
+  len xs
+
+main>_
+  prnt count [1,2,3,4,5]`,
+    iloInline: `count xs:L _>n;len xs;main>_;prnt count [1,2,3,4,5]`,
     output: '5',
   },
 ];
