@@ -399,7 +399,51 @@ const exampleJson = JSON.stringify(
       border-color: var(--ilo-amber);
     }
     .pl-btn-primary:hover { background: var(--ilo-amber-hot); color: #1a0e02; }
+    .pl-btn-convert {
+      background: var(--ilo-amber);
+      color: #1a0e02;
+      border-color: var(--ilo-amber);
+    }
+    .pl-btn-convert:hover { background: var(--ilo-amber-hot); color: #1a0e02; }
+    .pl-btn-convert.is-clean {
+      background: transparent;
+      color: var(--ilo-fg-4);
+      border-color: var(--ilo-hairline);
+      cursor: default;
+      pointer-events: none;
+    }
+    .pl-btn-convert.is-clean:hover { background: transparent; color: var(--ilo-fg-4); }
+    [hidden] { display: none !important; }
     .pl-actions-right { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .pl-edit-wrap {
+      position: relative;
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+    .pl-edit-input {
+      position: absolute;
+      inset: 0;
+      color: transparent;
+      caret-color: var(--ilo-fg-1);
+      background: transparent;
+      z-index: 2;
+    }
+    .pl-edit-highlight {
+      flex: 1;
+      pointer-events: none;
+      white-space: pre;
+      overflow: auto;
+      z-index: 1;
+      color: var(--ilo-fg-1);
+    }
+    .pl-edit-highlight .kw  { color: var(--ilo-syn-kw); }
+    .pl-edit-highlight .op  { color: var(--ilo-syn-op); }
+    .pl-edit-highlight .str { color: var(--ilo-syn-str); }
+    .pl-edit-highlight .num { color: var(--ilo-syn-num); }
+    .pl-edit-highlight .cmt { color: var(--ilo-syn-cmt); font-style: italic; }
+    .pl-edit-highlight .fn  { color: var(--ilo-syn-id); }
 
     .pl-foot-note {
       margin-top: 18px;
@@ -473,13 +517,16 @@ const exampleJson = JSON.stringify(
             <span class="tag">editable</span>
             <span class="name" id="pl-py-name">{examples[0].pyName}</span>
           </div>
-          <textarea
-            class="pl-edit"
-            id="pl-py-edit"
-            spellcheck="false"
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off">{examples[0].py}</textarea>
+          <div class="pl-edit-wrap">
+            <pre class="pl-edit pl-edit-highlight" id="pl-py-highlight" aria-hidden="true"></pre>
+            <textarea
+              class="pl-edit pl-edit-input"
+              id="pl-py-edit"
+              spellcheck="false"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off">{examples[0].py}</textarea>
+          </div>
         </div>
 
         <div class="pl-pane">
@@ -504,6 +551,7 @@ const exampleJson = JSON.stringify(
       <div class="pl-actions">
         <button class="pl-btn" data-action="reset">Reset to example</button>
         <button class="pl-btn" data-action="copy-ilo" data-target="pl-ilo-out">Copy ilo</button>
+        <button class="pl-btn pl-btn-convert" data-action="convert" id="pl-convert-btn">Convert</button>
         <div class="pl-actions-right">
           <button class="pl-btn" data-action="copy-share" id="pl-share-btn">Copy share link</button>
           <a class="pl-btn pl-btn-primary" href="/#install">Install ilo →</a>
@@ -536,6 +584,7 @@ const exampleJson = JSON.stringify(
     sideButtons: () => document.querySelectorAll('.pl-ex'),
     pyName:  document.getElementById('pl-py-name'),
     pyEdit:  document.getElementById('pl-py-edit'),
+    pyHighlight: document.getElementById('pl-py-highlight'),
     iloName: document.getElementById('pl-ilo-name'),
     iloOut:  document.getElementById('pl-ilo-out'),
     pyTok:   document.getElementById('pl-py-tok'),
@@ -546,10 +595,162 @@ const exampleJson = JSON.stringify(
     statusText: document.getElementById('pl-status-text'),
     footNote: document.getElementById('pl-foot-note'),
     footText: document.getElementById('pl-foot-text'),
+    convertBtn: document.getElementById('pl-convert-btn'),
   };
 
   let currentKey = ORDER[0];
   let isExampleResult = true;
+  let lastConvertedPy = EXAMPLES[ORDER[0]].py;
+  let isConverting = false;
+
+  // ===== Syntax highlighting =====
+  const PY_KW = new Set(['def','if','elif','else','for','while','in','return','import','from','print','not','and','or','True','False','None','lambda','class','try','except','with','as','pass','break','continue','yield','del','raise','assert','global','nonlocal','is']);
+  const ILO_KW = new Set(['wh','ret','brk','cnt','main','if','else']);
+  const ILO_BUILTIN = new Set(['map','flt','fld','len','upr','lwr','str','int','mod','spl','cat','at','prnt','hd','tl','srt','rev','rng','fmt','lst','frq','flat','grp','has','ord','sum','min','max','avg','abs','ceil','flr','rnd','log','exp','sqt','sin','cos','tan','zip','unz','rpl','trm','prfx','sfx','sub','idx','inn','cnt','uni','rsrt','dbl','inc','range','push','pop']);
+
+  function escHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function highlightPy(src) {
+    return src.split('\n').map(line => {
+      let out = '';
+      let i = 0;
+      while (i < line.length) {
+        const ch = line[i];
+        if (ch === '#') {
+          out += '<span class="cmt">' + escHtml(line.slice(i)) + '</span>';
+          break;
+        }
+        if (ch === '"' || ch === "'") {
+          const q = ch;
+          const triple = line[i+1] === q && line[i+2] === q;
+          if (triple) {
+            let j = i + 3;
+            while (j < line.length - 2 && !(line[j]===q && line[j+1]===q && line[j+2]===q)) j++;
+            out += '<span class="str">' + escHtml(line.slice(i, j + 3)) + '</span>';
+            i = j + 3;
+          } else {
+            let j = i + 1;
+            while (j < line.length && line[j] !== q) { if (line[j] === '\\') j++; j++; }
+            out += '<span class="str">' + escHtml(line.slice(i, j + 1)) + '</span>';
+            i = j + 1;
+          }
+          continue;
+        }
+        if (/[0-9]/.test(ch)) {
+          let j = i + 1;
+          while (j < line.length && /[0-9._xXoObBa-fA-F]/.test(line[j])) j++;
+          out += '<span class="num">' + escHtml(line.slice(i, j)) + '</span>';
+          i = j;
+          continue;
+        }
+        if (/[a-zA-Z_]/.test(ch)) {
+          let j = i + 1;
+          while (j < line.length && /[a-zA-Z0-9_]/.test(line[j])) j++;
+          const word = line.slice(i, j);
+          if (PY_KW.has(word)) {
+            out += '<span class="kw">' + escHtml(word) + '</span>';
+          } else if (j < line.length && line[j] === '(') {
+            out += '<span class="fn">' + escHtml(word) + '</span>';
+          } else {
+            out += escHtml(word);
+          }
+          i = j;
+          continue;
+        }
+        if (/[+\-*\/=<>!%&|^~@]/.test(ch)) {
+          let j = i + 1;
+          if (j < line.length && /[=+\-*\/]/.test(line[j])) j++;
+          out += '<span class="op">' + escHtml(line.slice(i, j)) + '</span>';
+          i = j;
+          continue;
+        }
+        out += escHtml(ch);
+        i++;
+      }
+      return out;
+    }).join('\n');
+  }
+
+  function highlightIlo(src) {
+    return src.split('\n').map(line => {
+      let out = '';
+      let i = 0;
+      while (i < line.length) {
+        const ch = line[i];
+        if (ch === '"') {
+          let j = i + 1;
+          while (j < line.length && !(line[j] === '"' && line[j-1] !== '\\')) j++;
+          out += '<span class="str">' + escHtml(line.slice(i, j + 1)) + '</span>';
+          i = j + 1;
+          continue;
+        }
+        if (ch === '-' && line[i+1] === '-') {
+          out += '<span class="cmt">' + escHtml(line.slice(i)) + '</span>';
+          break;
+        }
+        if (/[0-9]/.test(ch)) {
+          let j = i + 1;
+          while (j < line.length && /[0-9.]/.test(line[j])) j++;
+          out += '<span class="num">' + escHtml(line.slice(i, j)) + '</span>';
+          i = j;
+          continue;
+        }
+        if (ch === ':' && line[i+1] && /[ntbLMR]/.test(line[i+1])) {
+          let k = i + 2;
+          if (line[k] === ' ' && /[ntbLMR]/.test(line[k+1] || '')) k += 2;
+          out += '<span class="op">' + escHtml(line.slice(i, k)) + '</span>';
+          i = k;
+          continue;
+        }
+        if (/[+\-*\/=<>!|&^%@?~]/.test(ch)) {
+          let j = i + 1;
+          if ((ch === '>' && line[i+1] === '>') || (ch === '>' && line[i+1] === '=') ||
+              (ch === '<' && line[i+1] === '=') || (ch === '!' && line[i+1] === '=') ||
+              (ch === '+' && line[i+1] === '+') || (ch === '-' && line[i+1] === '>') ||
+              (ch === '*' && line[i+1] === '*') || (ch === '<' && line[i+1] === '-')) {
+            j = i + 2;
+          }
+          out += '<span class="op">' + escHtml(line.slice(i, j)) + '</span>';
+          i = j;
+          continue;
+        }
+        if (/[a-zA-Z_]/.test(ch)) {
+          let j = i + 1;
+          while (j < line.length && /[a-zA-Z0-9_]/.test(line[j])) j++;
+          const word = line.slice(i, j);
+          if (ILO_KW.has(word) || ILO_BUILTIN.has(word)) {
+            out += '<span class="kw">' + escHtml(word) + '</span>';
+          } else {
+            out += escHtml(word);
+          }
+          i = j;
+          continue;
+        }
+        out += escHtml(ch);
+        i++;
+      }
+      return out;
+    }).join('\n');
+  }
+
+  function renderPyHighlight() {
+    if (!els.pyHighlight) return;
+    els.pyHighlight.textContent = '';
+    els.pyHighlight.insertAdjacentHTML('afterbegin', highlightPy(els.pyEdit.value) + '\n');
+  }
+
+  function updateConvertBtn() {
+    if (!els.convertBtn) return;
+    if (isConverting) {
+      els.convertBtn.setAttribute('hidden', '');
+      return;
+    }
+    els.convertBtn.removeAttribute('hidden');
+    const clean = els.pyEdit.value === lastConvertedPy;
+    els.convertBtn.classList.toggle('is-clean', clean);
+  }
 
   function escapeHtml(s) {
     return s
@@ -616,8 +817,11 @@ const exampleJson = JSON.stringify(
     }
     currentKey = key;
     isExampleResult = true;
+    lastConvertedPy = ex.py;
     setFoot('');
     updatePyTokens();
+    renderPyHighlight();
+    updateConvertBtn();
   }
 
   // ===== Live conversion via convert.ilo-lang.ai =====
@@ -631,49 +835,61 @@ const exampleJson = JSON.stringify(
   }
 
   async function convertNow() {
-    const python = els.pyEdit.value.trim();
+    const pythonRaw = els.pyEdit.value;
+    const python = pythonRaw.trim();
     if (!python) return;
-    const hash = await sha256hex(python);
-
-    if (convertCache.has(hash)) {
-      const cached = convertCache.get(hash);
-      replaceHtml(els.iloOut, escapeHtml(cached));
-      setIloTokens(countTokens(cached));
-      isExampleResult = false;
-      setStatus('');
-      setFoot('');
-      return;
-    }
-
-    const seq = ++convertSeq;
-    setStatus('converting…');
-
+    isConverting = true;
+    updateConvertBtn();
     try {
-      const resp = await fetch('https://convert.ilo-lang.ai/convert', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ python }),
-      });
-      if (seq !== convertSeq) return;
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const data = await resp.json();
-      const ilo = data.ilo || data.result || data.code || '';
-      if (!ilo) throw new Error('Empty response');
-      convertCache.set(hash, ilo);
-      replaceHtml(els.iloOut, escapeHtml(ilo));
-      setIloTokens(countTokens(ilo));
-      isExampleResult = false;
-      setStatus('');
-      setFoot('');
-    } catch (err) {
-      if (seq !== convertSeq) return;
-      setStatus('');
-      setFoot('Live conversion unavailable (' + err.message + '). Showing the last example output; install ilo to convert locally.');
+      const hash = await sha256hex(python);
+
+      if (convertCache.has(hash)) {
+        const cached = convertCache.get(hash);
+        replaceHtml(els.iloOut, highlightIlo(cached));
+        setIloTokens(countTokens(cached));
+        isExampleResult = false;
+        lastConvertedPy = pythonRaw;
+        setStatus('');
+        setFoot('');
+        return;
+      }
+
+      const seq = ++convertSeq;
+      setStatus('converting…');
+
+      try {
+        const resp = await fetch('https://convert.ilo-lang.ai/convert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ python }),
+        });
+        if (seq !== convertSeq) return;
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+        const ilo = data.ilo || data.result || data.code || '';
+        if (!ilo) throw new Error('Empty response');
+        convertCache.set(hash, ilo);
+        replaceHtml(els.iloOut, highlightIlo(ilo));
+        setIloTokens(countTokens(ilo));
+        isExampleResult = false;
+        lastConvertedPy = pythonRaw;
+        setStatus('');
+        setFoot('');
+      } catch (err) {
+        if (seq !== convertSeq) return;
+        setStatus('');
+        setFoot('Live conversion unavailable (' + err.message + '). Showing the last example output; install ilo to convert locally.');
+      }
+    } finally {
+      isConverting = false;
+      updateConvertBtn();
     }
   }
 
   function scheduleConvert() {
     updatePyTokens();
+    renderPyHighlight();
+    updateConvertBtn();
     if (convertTimer) clearTimeout(convertTimer);
     convertTimer = setTimeout(convertNow, 500);
   }
@@ -686,6 +902,11 @@ const exampleJson = JSON.stringify(
   });
 
   els.pyEdit.addEventListener('input', scheduleConvert);
+  els.pyEdit.addEventListener('scroll', () => {
+    if (!els.pyHighlight) return;
+    els.pyHighlight.scrollTop = els.pyEdit.scrollTop;
+    els.pyHighlight.scrollLeft = els.pyEdit.scrollLeft;
+  });
 
   document.body.addEventListener('click', (e) => {
     const btn = e.target.closest('button.pl-btn, a.pl-btn');
@@ -700,6 +921,9 @@ const exampleJson = JSON.stringify(
     } else if (action === 'copy-share') {
       copy(window.location.href);
       flash(btn, 'copied link ✓');
+    } else if (action === 'convert') {
+      if (convertTimer) { clearTimeout(convertTimer); convertTimer = null; }
+      convertNow();
     }
   });
 
@@ -720,6 +944,8 @@ const exampleJson = JSON.stringify(
       apply(key);
     } else {
       updatePyTokens();
+      renderPyHighlight();
+      updateConvertBtn();
     }
   })();
 </script>
