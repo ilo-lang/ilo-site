@@ -745,19 +745,17 @@ main>_
     output: 'pos',
   },
   {
-    name: 'fold-sum',
-    python: `from functools import reduce
-
-def total(xs):
-    return reduce(lambda a, b: a + b, xs, 0)
+    name: 'sum',
+    python: `def total(xs):
+    return sum(xs)
 
 print(total([1, 2, 3, 4, 5]))`,
     iloMulti: `total xs:L n>n
-  fld (a:n b:n>n;+a b) xs 0
+  sum xs
 
 main>_
   prnt total [1, 2, 3, 4, 5]`,
-    iloInline: `total xs:L n>n;fld (a:n b:n>n;+a b) xs 0;main>_;prnt total [1, 2, 3, 4, 5]`,
+    iloInline: `total xs:L n>n;sum xs;main>_;prnt total [1, 2, 3, 4, 5]`,
     output: '15',
   },
   {
