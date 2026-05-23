@@ -722,27 +722,21 @@ print(up("hello"))`,
     output: 'HELLO',
   },
   {
-    name: 'pipes',
-    python: `def double(x):
-    return x * 2
+    name: 'guards',
+    python: `def classify(n):
+    if n < 0:
+        return "neg"
+    if n == 0:
+        return "zero"
+    return "pos"
 
-def increment(x):
-    return x + 1
-
-def go(x):
-    return increment(double(x))
-
-print(go(5))`,
-    iloMulti: `dbl x:n>n
-  *x 2
-
-inc x:n>n
-  +x 1
-
-go x:n>n
-  x>>dbl>>inc`,
-    iloInline: `dbl x:n>n;*x 2;inc x:n>n;+x 1;go x:n>n;x>>dbl>>inc`,
-    output: '11',
+print(classify(5))`,
+    iloMulti: `classify n:n>t
+  <n 0 "neg"
+  =n 0 "zero"
+  "pos"`,
+    iloInline: `classify n:n>t;<n 0 "neg";=n 0 "zero";"pos"`,
+    output: 'pos',
   },
   {
     name: 'fold-sum',
