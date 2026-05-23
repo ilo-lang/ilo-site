@@ -142,7 +142,7 @@ const exampleJson = JSON.stringify(
   <link rel="canonical" href={`${SITE_URL}/playground/`} />
   <JsonLd data={softwareApplicationSchema} />
   <JsonLd data={websiteSchema} />
-  <style>
+  <style is:global>
     :root {
       --ilo-green:        #a3d977;
       --ilo-green-low:    rgba(163, 217, 119, 0.12);
@@ -335,6 +335,17 @@ const exampleJson = JSON.stringify(
       letter-spacing: 0.08em; font-weight: 500;
     }
     .pl-pane-head .name { color: var(--ilo-fg-3); margin-left: auto; }
+    .pl-pane-copy {
+      margin-left: 12px;
+      font-family: var(--ilo-font-sans); font-size: 11px; font-weight: 500;
+      color: var(--ilo-amber); background: transparent;
+      border: 1px solid var(--ilo-hairline); border-radius: 4px;
+      padding: 2px 9px; cursor: pointer;
+      transition: color var(--ilo-duration-2) var(--ilo-ease),
+                  border-color var(--ilo-duration-2) var(--ilo-ease);
+    }
+    .pl-pane-copy:hover { color: var(--ilo-amber-high); border-color: rgba(224, 148, 34, 0.4); }
+    .pl-pane-copy.is-copied { color: var(--ilo-green); border-color: var(--ilo-green-border); }
     .pl-pane-head .tag {
       margin-left: 8px;
       padding: 2px 6px; border-radius: 4px;
@@ -552,26 +563,12 @@ const exampleJson = JSON.stringify(
         </div>
 
         <div class="pl-ilo-stack">
-          <div class="pl-pane is-ilo-multi">
-            <div class="pl-pane-head">
-              <span class="lang">ilo</span>
-              <span class="tag amber">multi-line</span>
-              <span class="name" id="pl-ilo-name">{examples[0].iloName}</span>
-            </div>
-            <pre class="pl-out" id="pl-ilo-multi"></pre>
-            <div class="pl-pane-foot">
-              <span id="pl-ilo-multi-tok">—</span><span class="unit">tok</span>
-              <span class="pl-r-dot">·</span>
-              <span id="pl-ilo-multi-ch">—</span><span class="unit">ch</span>
-              <span class="pl-r-delta is-empty" id="pl-delta-multi">—</span>
-            </div>
-          </div>
-
           <div class="pl-pane is-ilo-compact">
             <div class="pl-pane-head">
               <span class="lang">ilo</span>
               <span class="tag amber">compact</span>
               <span class="name" id="pl-ilo-name-compact">{examples[0].iloName}</span>
+              <button class="pl-pane-copy" data-action="copy-ilo" data-target="pl-ilo-compact">copy</button>
             </div>
             <pre class="pl-out" id="pl-ilo-compact"></pre>
             <div class="pl-pane-foot">
@@ -581,6 +578,22 @@ const exampleJson = JSON.stringify(
               <span class="pl-r-delta is-empty" id="pl-delta-compact">—</span>
             </div>
           </div>
+
+          <div class="pl-pane is-ilo-multi">
+            <div class="pl-pane-head">
+              <span class="lang">ilo</span>
+              <span class="tag amber">multi-line</span>
+              <span class="name" id="pl-ilo-name">{examples[0].iloName}</span>
+              <button class="pl-pane-copy" data-action="copy-ilo" data-target="pl-ilo-multi">copy</button>
+            </div>
+            <pre class="pl-out" id="pl-ilo-multi"></pre>
+            <div class="pl-pane-foot">
+              <span id="pl-ilo-multi-tok">—</span><span class="unit">tok</span>
+              <span class="pl-r-dot">·</span>
+              <span id="pl-ilo-multi-ch">—</span><span class="unit">ch</span>
+              <span class="pl-r-delta is-empty" id="pl-delta-multi">—</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -588,7 +601,6 @@ const exampleJson = JSON.stringify(
 
       <div class="pl-actions">
         <button class="pl-btn" data-action="reset">Reset to example</button>
-        <button class="pl-btn" data-action="copy-ilo" data-target="pl-ilo-multi">Copy ilo</button>
         <button class="pl-btn pl-btn-convert" data-action="convert" id="pl-convert-btn">Convert</button>
         <div class="pl-actions-right">
           <button class="pl-btn" data-action="copy-share" id="pl-share-btn">Copy share link</button>
@@ -609,7 +621,13 @@ const exampleJson = JSON.stringify(
 
   function countTokens(text) {
     if (!text || !text.trim()) return 0;
-    return text.split(/([^\w])/u).filter(p => p.trim().length > 0).length;
+    // Word runs and individual punctuation chars are tokens; newlines count
+    // too (a line break is ~1 BPE token), so collapsing a multi-line program
+    // into a compact one-liner trades each newline for a separator, not a
+    // free saving. Whitespace runs between tokens are not counted.
+    const wordsAndPunct = text.match(/\w+|[^\w\s]/gu);
+    const newlines = text.match(/\n/g);
+    return (wordsAndPunct ? wordsAndPunct.length : 0) + (newlines ? newlines.length : 0);
   }
 
   function replaceHtml(el, html) {
@@ -896,6 +914,7 @@ const exampleJson = JSON.stringify(
     if (history.replaceState) {
       const u = new URL(window.location);
       u.searchParams.set('ex', key);
+      u.searchParams.delete('py');
       history.replaceState({}, '', u);
     }
     currentKey = key;
@@ -978,11 +997,36 @@ const exampleJson = JSON.stringify(
     });
   }
 
+  function b64encode(str) {
+    try { return btoa(unescape(encodeURIComponent(str))); } catch (_) { return ''; }
+  }
+  function b64decode(str) {
+    try { return decodeURIComponent(escape(atob(str))); } catch (_) { return ''; }
+  }
+
+  // Keep the URL shareable: a known example uses ?ex=<key>; a custom edit
+  // stores the python verbatim in ?py=<base64> so the link reproduces it.
+  function updateShareUrl() {
+    if (!history.replaceState) return;
+    const u = new URL(window.location);
+    const py = els.pyEdit.value;
+    const matchesCurrent = currentKey && EXAMPLES[currentKey] && EXAMPLES[currentKey].py === py;
+    if (matchesCurrent) {
+      u.searchParams.set('ex', currentKey);
+      u.searchParams.delete('py');
+    } else {
+      u.searchParams.set('py', b64encode(py));
+      u.searchParams.delete('ex');
+    }
+    history.replaceState({}, '', u);
+  }
+
   function scheduleConvert() {
     updatePyTokens();
     renderPyHighlight();
     updateConvertBtn();
     syncActiveExample();
+    updateShareUrl();
     if (convertTimer) clearTimeout(convertTimer);
     convertTimer = setTimeout(convertNow, 500);
   }
@@ -1002,15 +1046,15 @@ const exampleJson = JSON.stringify(
   });
 
   document.body.addEventListener('click', (e) => {
-    const btn = e.target.closest('button.pl-btn, a.pl-btn');
+    const btn = e.target.closest('button.pl-btn, a.pl-btn, button.pl-pane-copy');
     if (!btn) return;
     const action = btn.getAttribute('data-action');
     if (action === 'reset') {
-      apply(currentKey);
+      apply(currentKey || ORDER[0]);
     } else if (action === 'copy-ilo') {
       const target = document.getElementById(btn.getAttribute('data-target'));
       const text = target ? target.innerText.trim() : '';
-      copy(text); flash(btn, 'copied ilo ✓');
+      copy(text); flash(btn, btn.classList.contains('pl-pane-copy') ? 'copied ✓' : 'copied ilo ✓');
     } else if (action === 'copy-share') {
       copy(window.location.href);
       flash(btn, 'copied link ✓');
@@ -1032,8 +1076,21 @@ const exampleJson = JSON.stringify(
 
   (function () {
     const params = new URLSearchParams(window.location.search);
+    const pyParam = params.get('py');
     const key = params.get('ex');
-    if (key && EXAMPLES[key]) {
+    const customPy = pyParam ? b64decode(pyParam) : '';
+    if (customPy) {
+      els.pyEdit.value = customPy;
+      currentKey = null;
+      isExampleResult = false;
+      lastConvertedPy = '';
+      updatePyTokens();
+      renderPyHighlight();
+      renderIlo();
+      syncActiveExample();
+      updateConvertBtn();
+      convertNow();
+    } else if (key && EXAMPLES[key]) {
       apply(key);
     } else {
       updatePyTokens();
