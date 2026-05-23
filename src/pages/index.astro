@@ -1445,6 +1445,7 @@ scheduleAutoCycle();
 <style>
   /* ===== reset ===== */
   *, *::before, *::after { box-sizing: border-box; }
+  html { font-size: 15px; }
   html, body { margin: 0; padding: 0; background: var(--ilo-ink-0); color: var(--ilo-fg-1); font-family: var(--ilo-font-sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
   a { color: var(--ilo-accent); text-decoration: none; transition: color var(--ilo-duration-1) var(--ilo-ease); }
   a:hover { color: var(--ilo-amber-high); }
@@ -1564,7 +1565,7 @@ scheduleAutoCycle();
     background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent);
   }
   .stat-nums { display: flex; align-items: baseline; gap: 14px; font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 12.5px; color: var(--ilo-fg-3); }
-  .stat-nums b { color: var(--ilo-fg-1); font-weight: 600; font-family: var(--ilo-font-sans); font-size: 15px; }
+  .stat-nums b { color: var(--ilo-fg-1); font-weight: 600; font-family: var(--ilo-font-sans); font-size: 14px; }
   .stat-nums .arrow { color: var(--ilo-fg-4); }
   .pill { font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 11.5px; padding: 4px 12px; border-radius: var(--ilo-radius-full); border: 1px solid transparent; line-height: 1.4; display: inline-flex; align-items: center; gap: 6px; }
   .pill-lime {
@@ -1580,7 +1581,7 @@ scheduleAutoCycle();
   .section-head { display: flex; flex-direction: column; gap: 6px; margin-bottom: 40px; }
   .section-head .kicker { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ilo-accent); font-weight: 500; }
   .section-head h2 { font-family: var(--ilo-font-sans); font-size: 36px; line-height: 1.15; letter-spacing: -0.02em; font-weight: 600; color: var(--ilo-fg-1); max-width: 760px; }
-  .section-head .sub { font-size: 16px; color: var(--ilo-fg-3); max-width: 640px; margin-top: 6px; line-height: 1.55; }
+  .section-head .sub { font-size: 15px; color: var(--ilo-fg-3); max-width: 640px; margin-top: 6px; line-height: 1.55; }
 
   /* ===== principles ===== */
   .principles { border-top: 1px solid var(--ilo-hairline); }
@@ -1614,7 +1615,7 @@ scheduleAutoCycle();
   .shipped-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
   .ship-card { padding: 20px 22px; border: 1px solid var(--ilo-hairline); border-radius: 8px; background: var(--ilo-ink-0); display: flex; flex-direction: column; gap: 8px; }
   .ship-head { display: flex; justify-content: space-between; align-items: baseline; }
-  .ship-name { font-family: var(--ilo-font-sans); font-size: 16px; font-weight: 600; color: var(--ilo-fg-1); }
+  .ship-name { font-family: var(--ilo-font-sans); font-size: 15px; font-weight: 600; color: var(--ilo-fg-1); }
   .ship-tag { font-size: 11px; color: var(--ilo-fg-4); }
   .ship-card p { font-size: 13px; line-height: 1.55; color: var(--ilo-fg-3); }
 
@@ -1862,7 +1863,7 @@ scheduleAutoCycle();
 
   .evolving-inner h2 { text-align: left; margin: 0; }
   .evolving-inner > p {
-    font-size: 15px; line-height: 1.65; color: var(--ilo-fg-3); margin: 0 0 32px;
+    font-size: 14px; line-height: 1.65; color: var(--ilo-fg-3); margin: 0 0 32px;
   }
   .evolving-inner h3 {
     font-family: var(--ilo-font-sans);
@@ -1875,7 +1876,7 @@ scheduleAutoCycle();
   .evolving-cta strong { color: var(--ilo-fg-1); }
   .evolving-actions { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
   .open-questions { list-style: none; padding: 0; margin: 0 0 28px; }
-  .open-questions li { padding: 10px 0; border-bottom: 1px solid var(--ilo-hairline); color: var(--ilo-fg-2); font-size: 15px; line-height: 1.5; }
+  .open-questions li { padding: 10px 0; border-bottom: 1px solid var(--ilo-hairline); color: var(--ilo-fg-2); font-size: 14px; line-height: 1.5; }
   .open-questions li:last-child { border-bottom: 0; }
   .open-questions li::before { content: "?"; color: var(--ilo-accent); font-weight: 700; margin-right: 10px; }
     .evolving-writing-head { margin-top: 28px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ilo-fg-4); }
@@ -1891,7 +1892,7 @@ scheduleAutoCycle();
   .writing-card { border: 1px solid var(--ilo-hairline); border-radius: 8px; background: var(--ilo-ink-1); transition: border-color 0.15s, background 0.15s; }
   .writing-card:hover { border-color: var(--ilo-accent); background: rgba(224, 148, 34, 0.04); }
   .writing-link { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 14px 18px; text-decoration: none; color: var(--ilo-fg-1); }
-  .writing-title { font-size: 15px; font-weight: 500; line-height: 1.4; }
+  .writing-title { font-size: 14px; font-weight: 500; line-height: 1.4; }
   .writing-date { font-size: 12px; color: var(--ilo-fg-4); flex-shrink: 0; }
     .posts-list {
     list-style: none; padding: 0; margin: 0;
@@ -1965,7 +1966,7 @@ scheduleAutoCycle();
   }
   .changelog-list li:first-child { border-top: 0; }
   .cl-tag { font-size: 11px; color: var(--ilo-fg-4); letter-spacing: 0.04em; text-transform: uppercase; }
-  .cl-name { font-family: var(--ilo-font-sans); font-size: 15px; font-weight: 600; color: var(--ilo-fg-1); }
+  .cl-name { font-family: var(--ilo-font-sans); font-size: 14px; font-weight: 600; color: var(--ilo-fg-1); }
   .cl-body { font-size: 14px; line-height: 1.55; color: var(--ilo-fg-3); }
   .cl-body code { font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 0.9em; background: var(--ilo-inline-code-bg); padding: 0.1em 0.4em; border-radius: var(--ilo-radius-xs); color: var(--ilo-fg-2); }
   @media (max-width: 700px) {
@@ -1984,7 +1985,7 @@ scheduleAutoCycle();
   }
   .changelog-cta:hover { border-color: rgba(224, 148, 34, 0.35); background: var(--ilo-ink-3); color: var(--ilo-fg-1); }
   .changelog-cta-eyebrow { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ilo-fg-4); margin-bottom: 4px; }
-  .changelog-cta-title { font-family: var(--ilo-font-sans); font-size: 16px; font-weight: 600; color: var(--ilo-fg-1); }
+  .changelog-cta-title { font-family: var(--ilo-font-sans); font-size: 15px; font-weight: 600; color: var(--ilo-fg-1); }
   .changelog-cta svg { color: var(--ilo-accent); flex: none; }
 
   /* ===== See It In Action ===== */
