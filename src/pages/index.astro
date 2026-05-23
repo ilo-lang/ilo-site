@@ -463,6 +463,88 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
       </div>
     </section>
 
+    <!-- AGENT CONVERSATION DEMO -->
+    <section id="agent-surface" class="agent-conv-section" data-animate>
+      <div class="container-wide">
+        <h2 class="section-title">How agents drive ilo</h2>
+        <p class="section-subtitle">Every CLI subcommand has <code>--json</code>. Every diagnostic carries an error code, source span, and fix plan. Agents read structured responses; no screen-scraping.</p>
+
+        <div class="conv-frames" id="conv-frames">
+
+          <!-- Frame 1: Agent check -->
+          <div class="conv-frame conv-frame--agent" data-frame="0">
+            <div class="conv-frame-header">
+              <span class="conv-label conv-label--agent">Agent</span>
+            </div>
+            <pre class="conv-body"><code><span class="syn-s">"method"</span><span class="conv-colon">:</span> <span class="syn-s">"check"</span><span class="conv-punct">,</span>
+<span class="syn-s">"source"</span><span class="conv-colon">:</span> <span class="syn-s">"main&gt;_;prnt +2 a"</span></code></pre>
+          </div>
+
+          <!-- Frame 2: ilo serv diagnostic -->
+          <div class="conv-frame conv-frame--serv" data-frame="1">
+            <div class="conv-frame-header">
+              <span class="conv-label conv-label--serv">ilo serv</span>
+            </div>
+            <pre class="conv-body"><code><span class="syn-s">"schemaVersion"</span><span class="conv-colon">:</span> <span class="syn-p">1</span><span class="conv-punct">,</span>
+<span class="syn-s">"ok"</span><span class="conv-colon">:</span> <span class="syn-kw">false</span><span class="conv-punct">,</span>
+<span class="syn-s">"diagnostics"</span><span class="conv-colon">:</span> <span class="conv-punct">[{</span>
+  <span class="syn-s">"code"</span><span class="conv-colon">:</span> <span class="syn-s">"ILO-T005"</span><span class="conv-punct">,</span>
+  <span class="syn-s">"message"</span><span class="conv-colon">:</span> <span class="syn-s">"unknown name `a`"</span><span class="conv-punct">,</span>
+  <span class="syn-s">"span"</span><span class="conv-colon">:</span> <span class="conv-punct">{</span><span class="syn-s">"line"</span><span class="conv-colon">:</span> <span class="syn-p">1</span><span class="conv-punct">,</span> <span class="syn-s">"col"</span><span class="conv-colon">:</span> <span class="syn-p">14</span><span class="conv-punct">},</span>
+  <span class="syn-s">"fixPlans"</span><span class="conv-colon">:</span> <span class="conv-punct">[{</span><span class="syn-s">"safety"</span><span class="conv-colon">:</span> <span class="syn-s">"safe"</span><span class="conv-punct">,</span> <span class="syn-s">"edit"</span><span class="conv-colon">:</span> <span class="syn-s">"rename to `2`"</span><span class="conv-punct">}]</span>
+<span class="conv-punct">}]</span></code></pre>
+          </div>
+
+          <!-- Frame 3: Agent apply -->
+          <div class="conv-frame conv-frame--agent" data-frame="2">
+            <div class="conv-frame-header">
+              <span class="conv-label conv-label--agent">Agent</span>
+            </div>
+            <pre class="conv-body"><code><span class="syn-s">"method"</span><span class="conv-colon">:</span> <span class="syn-s">"apply"</span><span class="conv-punct">,</span>
+<span class="syn-s">"fixPlan"</span><span class="conv-colon">:</span> <span class="syn-p">0</span><span class="conv-punct">,</span>
+<span class="syn-s">"source"</span><span class="conv-colon">:</span> <span class="syn-s">"main&gt;_;prnt +2 a"</span></code></pre>
+          </div>
+
+          <!-- Frame 4: ilo serv ok + patched source -->
+          <div class="conv-frame conv-frame--serv" data-frame="3">
+            <div class="conv-frame-header">
+              <span class="conv-label conv-label--serv">ilo serv</span>
+            </div>
+            <pre class="conv-body"><code><span class="syn-s">"schemaVersion"</span><span class="conv-colon">:</span> <span class="syn-p">1</span><span class="conv-punct">,</span>
+<span class="syn-s">"ok"</span><span class="conv-colon">:</span> <span class="syn-kw">true</span><span class="conv-punct">,</span>
+<span class="syn-s">"result"</span><span class="conv-colon">:</span> <span class="conv-punct">{</span><span class="syn-s">"source"</span><span class="conv-colon">:</span> <span class="syn-s">"main&gt;_;prnt +2 2"</span><span class="conv-punct">}</span></code></pre>
+          </div>
+
+          <!-- Frame 5: Agent run -->
+          <div class="conv-frame conv-frame--agent" data-frame="4">
+            <div class="conv-frame-header">
+              <span class="conv-label conv-label--agent">Agent</span>
+            </div>
+            <pre class="conv-body"><code><span class="syn-s">"method"</span><span class="conv-colon">:</span> <span class="syn-s">"run"</span><span class="conv-punct">,</span>
+<span class="syn-s">"source"</span><span class="conv-colon">:</span> <span class="syn-s">"main&gt;_;prnt +2 2"</span></code></pre>
+          </div>
+
+          <!-- Frame 6: ilo serv result -->
+          <div class="conv-frame conv-frame--serv" data-frame="5">
+            <div class="conv-frame-header">
+              <span class="conv-label conv-label--serv">ilo serv</span>
+            </div>
+            <pre class="conv-body"><code><span class="syn-s">"schemaVersion"</span><span class="conv-colon">:</span> <span class="syn-p">1</span><span class="conv-punct">,</span>
+<span class="syn-s">"ok"</span><span class="conv-colon">:</span> <span class="syn-kw">true</span><span class="conv-punct">,</span>
+<span class="syn-s">"result"</span><span class="conv-colon">:</span> <span class="conv-punct">{</span><span class="syn-s">"stdout"</span><span class="conv-colon">:</span> <span class="syn-s">"4\n"</span><span class="conv-punct">,</span> <span class="syn-s">"exitCode"</span><span class="conv-colon">:</span> <span class="syn-p">0</span><span class="conv-punct">}</span></code></pre>
+          </div>
+
+        </div>
+
+        <div class="conv-cta">
+          <a class="btn-text" href="/docs/reference/cli/#ilo-serv">
+            ilo serv reference
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
     <!-- PRINCIPLES -->
     <section id="manifesto" class="principles">
       <div class="container-wide">
@@ -1219,6 +1301,48 @@ PRESETS.forEach((p, i) => {
 // Init
 loadPreset(0, true);
 scheduleAutoCycle();
+
+// ===== AGENT CONVERSATION DEMO — staggered reveal =====
+(function () {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const frames = Array.from(document.querySelectorAll<HTMLElement>('#conv-frames .conv-frame'));
+  if (!frames.length) return;
+
+  if (reduced) {
+    frames.forEach(f => f.classList.add('conv-visible'));
+    return;
+  }
+
+  let triggered = false;
+  const STAGGER = 600; // ms between frames
+  const DURATION = 350;
+
+  function revealFrames() {
+    if (triggered) return;
+    triggered = true;
+    frames.forEach((frame, i) => {
+      const delay = i * STAGGER;
+      setTimeout(() => {
+        frame.style.transition = `opacity ${DURATION}ms ease-out, transform ${DURATION}ms ease-out`;
+        frame.classList.add('conv-visible');
+      }, delay);
+    });
+  }
+
+  const section = document.getElementById('agent-surface');
+  if (!section) return;
+
+  const obs = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        revealFrames();
+        obs.disconnect();
+      }
+    },
+    { threshold: 0.15 }
+  );
+  obs.observe(section);
+})();
 </script>
 
 <style>
@@ -1807,6 +1931,83 @@ scheduleAutoCycle();
   @media (max-width: 700px) {
     .serv-panes { grid-template-columns: 1fr; }
     .serv-card { padding: 18px; }
+  }
+
+  /* ===== Agent conversation demo ===== */
+  .agent-conv-section { padding: 6rem 0; border-top: 1px solid var(--border); }
+  .conv-frames {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 2.5rem;
+  }
+  .conv-frame {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .conv-frame.conv-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .conv-frame--serv {
+    grid-column: 2;
+    background: #0c0c12;
+  }
+  .conv-frame--agent {
+    grid-column: 1;
+  }
+  /* Pair rows explicitly so agent+serv sit on same row */
+  .conv-frame[data-frame="0"] { grid-row: 1; }
+  .conv-frame[data-frame="1"] { grid-row: 1; }
+  .conv-frame[data-frame="2"] { grid-row: 2; }
+  .conv-frame[data-frame="3"] { grid-row: 2; }
+  .conv-frame[data-frame="4"] { grid-row: 3; }
+  .conv-frame[data-frame="5"] { grid-row: 3; }
+  .conv-frame-header {
+    display: flex; align-items: center;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .conv-label {
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .conv-label--agent { color: var(--ilo-amber); }
+  .conv-label--serv  { color: var(--ilo-accent); }
+  .conv-body {
+    margin: 0; padding: 14px 16px;
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 0.78rem; line-height: 1.7;
+    color: var(--text); background: transparent;
+    overflow-x: auto; white-space: pre;
+  }
+  .conv-colon { color: var(--ilo-fg-3); }
+  .conv-punct  { color: var(--ilo-fg-4); }
+  .conv-cta {
+    margin-top: 2rem; text-align: center;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .conv-frame {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+  @media (max-width: 700px) {
+    .conv-frames { grid-template-columns: 1fr; }
+    .conv-frame--agent,
+    .conv-frame--serv { grid-column: 1; }
+    .conv-frame[data-frame="0"] { grid-row: 1; }
+    .conv-frame[data-frame="1"] { grid-row: 2; }
+    .conv-frame[data-frame="2"] { grid-row: 3; }
+    .conv-frame[data-frame="3"] { grid-row: 4; }
+    .conv-frame[data-frame="4"] { grid-row: 5; }
+    .conv-frame[data-frame="5"] { grid-row: 6; }
   }
 
   /* ===== Features grid (Designed for machines) ===== */
