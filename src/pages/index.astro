@@ -47,7 +47,7 @@ const posts: Post[] = await fetch('https://danieljohnmorris.com/rss.xml')
   .catch(() => [] as Post[]);
 
 const principles = [
-  { n: '01', name: 'Token-Conservative', body: 'Every choice evaluated against total token cost — generation, errors, retries, context loading. Prefix notation. Single-char names. Guards instead of nested if/else.', href: '/docs/learn/manifesto/#1-token-conservative' },
+  { n: '01', name: 'Token-Conservative', body: 'Every choice scored against total token cost. Generation, errors, retries, context loading. Prefix notation. Single-char names. Guards instead of nested if/else.', href: '/docs/learn/manifesto/#1-token-conservative' },
   { n: '02', name: 'Constrained',         body: 'Small vocabulary, closed world. Every callable function is known ahead of time. The agent cannot hallucinate an API. Fewer valid next-tokens means fewer retries.', href: '/docs/learn/manifesto/#2-constrained' },
   { n: '03', name: 'Self-Contained',      body: 'Each unit carries its own context: deps, types, rules. The less context required per step, the more of the window is available for the actual task.', href: '/docs/learn/manifesto/#3-self-contained' },
   { n: '04', name: 'Language-Agnostic',   body: 'Minimise dependency on English. Single-char sigils outperform keywords. Agents learn the full vocabulary from spec + examples with 10/10 accuracy.', href: '/docs/learn/manifesto/#4-language-agnostic' },
@@ -61,7 +61,7 @@ const shipped = [
   { tag: 'language',  name: 'Brace-lambda',    body: 'Multi-statement lambda bodies: { |x:n>n; s=*x x; +s 1| }' },
   { tag: 'compiler',  name: 'Cranelift TCO',   body: 'Tail-call optimisation via return_call in the JIT. Recursion is now free.' },
   { tag: 'runtime',   name: 'par-map',         body: 'Parallel map with chunking and a native VM opcode for the common case.' },
-  { tag: 'runtime',   name: 'WASM HTTP fetch', body: '$url works inside WASM builds — Node, the browser, Cowork.' },
+  { tag: 'runtime',   name: 'WASM HTTP fetch', body: '$url works inside WASM builds. Node, the browser, Cowork.' },
   { tag: 'tooling',   name: 'ilo trace',       body: 'Execution trace with per-step timing, JSON output by default.' },
   { tag: 'tooling',   name: 'Fix plans',       body: 'ilo apply applies structured repair plans from ilo check --json.' },
   { tag: 'ecosystem', name: 'Package registry',body: 'ilo add installs packages from the registry. Reproducible.' },
@@ -270,7 +270,7 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
 
         <p class="evolving">
           <span class="evolving-tag">heads-up</span>
-          ilo is actively evolving — today's syntax and builtins are not a contract. Expect breaking changes while the language searches for what works best for agents. Run it in a safe environment, not against production.
+          ilo is changing fast. Today's syntax and builtins are not a contract. Expect breaking changes. Run it in a sandbox, not production.
         </p>
       </div>
     </section>
@@ -652,7 +652,7 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
           <h2>Three engines. None of them is the fastest. That's not the metric.</h2>
           <p class="sub">
             ilo runs on a bytecode VM, a Cranelift JIT, and a Cranelift AOT compiler.
-            They sit in the middle of the runtime field — faster than Python or Ruby, slower than V8 or Go.
+            They sit in the middle of the runtime field. Faster than Python or Ruby, slower than V8 or Go.
             The number that matters is the one above the keyboard, not the one below it.
           </p>
         </div>
@@ -674,7 +674,7 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
             ))}
           </div>
           <div class="bench-foot">
-            <span>7 more benchmarks in the full table — string, record, mixed, foreach, recurse…</span>
+            <span>7 more benchmarks in the full table: string, record, mixed, foreach, recurse.</span>
             <a class="btn-text" href="/docs/reference/benchmarks/">
               All benchmarks
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -695,7 +695,7 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
             </svg>
             <h2>An ongoing experiment</h2>
           </div>
-          <p>ilo is a research project — an exploration of what programming languages can look like when AI agents are the primary author. The manifesto is the stable contract. Everything else (syntax, builtins, tooling) is under active investigation; expect breaking changes while we converge on what works best.</p>
+          <p>ilo is a research project. What does a language look like when agents write all the code? The manifesto fixes the goal. Syntax, builtins, and tooling shift as we learn what actually helps. Things will break.</p>
 
           <p class="evolving-cta">
             <strong>Help shape it.</strong> The rules and optimisations that make ilo best for agents are still being discovered. Try it, find where it fails, file an issue, send a PR, or write about it.
