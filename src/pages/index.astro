@@ -293,6 +293,52 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
       </div>
     </section>
 
+    <!-- ILO SERV demo — JSONL stdin/stdout loop -->
+    <section id="ilo-serv" class="serv-section" data-animate>
+      <div class="container-wide">
+        <h2 class="section-title">Wire it into your agent</h2>
+        <p class="section-subtitle"><code>ilo serv</code> is a long-lived JSONL loop. One JSON request per stdin line, one response per stdout line. Process-spawn overhead per call: zero.</p>
+
+        <div class="serv-card">
+          <div class="serv-prompt mono">
+            <span class="dollar">$</span> ilo serv
+          </div>
+          <div class="serv-panes">
+            <div class="serv-pane">
+              <div class="serv-pane-header">
+                <div class="window-dots">
+                  <span class="dot dot--red"></span>
+                  <span class="dot dot--yellow"></span>
+                  <span class="dot dot--green"></span>
+                </div>
+                <span class="serv-pane-lang">stdin</span>
+                <span class="serv-pane-arrow mono">→</span>
+              </div>
+              <pre class="serv-body">&#123;"program":"dbl x:n&gt;n;*x 2","func":"dbl","args":[21]&#125;
+&#123;"program":"upr s:t&gt;t;.upr s","func":"upr","args":["hello"]&#125;
+&#123;"program":"add a:n b:n&gt;n;+a b","func":"add","args":[2,"two"]&#125;</pre>
+            </div>
+            <div class="serv-pane serv-pane--out">
+              <div class="serv-pane-header">
+                <span class="serv-pane-arrow mono">←</span>
+                <span class="serv-pane-lang">stdout</span>
+              </div>
+              <pre class="serv-body">&#123;"schemaVersion":1,"ok":42,"ms":0.4&#125;
+&#123;"schemaVersion":1,"ok":"HELLO","ms":0.3&#125;
+&#123;"schemaVersion":1,"error":&#123;"phase":"verify","code":"ILO-T006","msg":"expected n, got t"&#125;&#125;</pre>
+            </div>
+          </div>
+          <div class="serv-foot">
+            <span>Every line carries <code>schemaVersion</code>. Errors include phase (<code>lex</code>, <code>parse</code>, <code>verify</code>, <code>runtime</code>, <code>program</code>) and a typed code.</span>
+            <a class="btn-text" href="/docs/reference/cli/#ilo-serv">
+              ilo serv reference
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- FEATURES — Designed for machines -->
     <section class="features" data-animate>
       <div class="container-wide">
@@ -1441,6 +1487,7 @@ scheduleAutoCycle();
 
   .section-title { font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 700; letter-spacing: -0.025em; text-align: center; margin-bottom: 0.5rem; color: var(--text); }
   .section-subtitle { text-align: center; color: var(--text-muted); font-size: 1.05rem; margin-bottom: 3rem; }
+  .section-subtitle code { font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 0.85em; background: var(--ilo-inline-code-bg); padding: 0.1em 0.4em; border-radius: var(--ilo-radius-xs); color: var(--ilo-fg-2); }
 
   /* ===== Nav CTA (Get Started) ===== */
   .nav-cta { padding: 8px 16px; font-size: 13px; }
@@ -1552,6 +1599,75 @@ scheduleAutoCycle();
     .sia-panes { grid-template-columns: 1fr; }
     .sia-arrow { display: none; }
     .sia-card { padding: 18px; }
+  }
+
+  /* ===== ilo serv demo ===== */
+  .serv-section { padding: 6rem 0; border-top: 1px solid var(--border); }
+  .serv-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex; flex-direction: column; gap: 14px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .serv-card:hover { border-color: var(--border-hover); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); }
+  .serv-prompt {
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 0.84rem; color: var(--ilo-fg-2);
+    padding: 6px 12px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    align-self: flex-start;
+  }
+  .serv-prompt .dollar { color: var(--ilo-fg-4); margin-right: 6px; }
+  .serv-panes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .serv-pane {
+    display: flex; flex-direction: column;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .serv-pane--out { background: #0c0c12; }
+  .serv-pane-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .serv-pane-lang {
+    font-family: var(--ilo-font-mono); font-size: 0.75rem;
+    color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .serv-pane--out .serv-pane-lang { color: var(--ilo-accent); }
+  .serv-pane-arrow { color: var(--ilo-fg-4); font-size: 0.78rem; margin-left: auto; }
+  .serv-pane--out .serv-pane-arrow { margin-left: 0; margin-right: auto; }
+  .serv-body {
+    margin: 0; padding: 14px 16px;
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 0.78rem; line-height: 1.7;
+    color: var(--text);
+    background: transparent;
+    overflow-x: auto;
+    white-space: pre;
+    min-height: 120px;
+  }
+  .serv-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 14px; flex-wrap: wrap;
+    padding-top: 6px;
+    font-size: 13px; color: var(--ilo-fg-3); line-height: 1.55;
+  }
+  .serv-foot code {
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 0.9em; background: var(--ilo-inline-code-bg);
+    padding: 0.1em 0.4em; border-radius: var(--ilo-radius-xs);
+    color: var(--ilo-fg-2);
+  }
+  @media (max-width: 700px) {
+    .serv-panes { grid-template-columns: 1fr; }
+    .serv-card { padding: 18px; }
   }
 
   /* ===== Features grid (Designed for machines) ===== */
