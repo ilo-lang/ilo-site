@@ -14,6 +14,7 @@ Use this when concatenating, formatting, splitting, searching, or matching strin
 | `trm` | `t > t` | Trim whitespace | `trm " hi "` -> `"hi"` |
 | `spl` | `t t > L t` | Split string by delimiter | `spl "a,b,c" ","` -> `["a","b","c"]` |
 | `has` | `t t > b` | Check if string contains substring | `has "hello" "ell"` -> `true` |
+| `idxof` | `t t > O n` | First code-point index of substring, or nil. Empty needle returns 0 (Python/JS convention). Pair with `slc` for split-on-first-occurrence. (ILO-39, 26.5) | `idxof "key=value" "="` -> `3` |
 
 ## Regex
 
