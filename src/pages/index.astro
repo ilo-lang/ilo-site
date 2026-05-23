@@ -17,15 +17,6 @@ const latest = releases[0];
 const versionLabel = latest?.tag_name ?? 'v26.5';
 const releaseUrl = latest?.html_url ?? 'https://github.com/ilo-lang/ilo/releases';
 
-function firstSentence(body: string): string {
-  if (!body) return '';
-  const cleaned = body.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).join(' ');
-  const m = cleaned.match(/^(.{10,200}?[.!?])(\s|$)/);
-  return (m ? m[1] : cleaned.slice(0, 180)).trim();
-}
-const shippedBody = latest ? (firstSentence(latest.body) || latest.name || latest.tag_name) : 'Sum types, generics, package registry, Cranelift TCO.';
-const otherChanges = Math.max(releases.length - 1, 0);
-
 // ── Writing feed: filter ilo posts from personal RSS ──────────────────────
 type Post = { title: string; url: string; date: string };
 const posts: Post[] = await fetch('https://danieljohnmorris.com/rss.xml')
@@ -103,19 +94,12 @@ const posts: Post[] = await fetch('https://danieljohnmorris.com/rss.xml')
           <a class="btn-hero-primary" href="#install">Get started →</a>
           <a class="btn-hero-secondary" href="#manifesto">Read the manifesto</a>
         </div>
-
-        <div class="hero-meta">
-          <span class="hero-meta-dot"></span>
-          <span><a class="hero-meta-version" href={releaseUrl} target="_blank" rel="noopener">{versionLabel}</a> · experimental · MIT licensed</span>
-          <span class="hero-meta-sep">·</span>
-          <a href="#install">jump to install ↓</a>
-        </div>
       </div>
 
       <div class="hero-right">
         <div class="demo-h">
           <span class="demo-kicker">see it in action</span>
-          <p class="demo-sub">Same task, four patterns. Token counts update with each. <a class="demo-h-link" href="/playground/">Open playground ↗</a></p>
+          <p class="demo-sub">Try an example, or write your own. <a class="demo-h-link" href="/playground/">Open the playground ↗</a></p>
         </div>
 
         <div class="pane">
@@ -194,11 +178,8 @@ print(total)</pre>
 
             <div class="install-os-row">
               <button class="os-chip is-active" data-os="unix" data-cmd="curl -fsSL ilo-lang.ai/install.sh | sh">macOS / Linux</button>
-              <button class="os-chip" data-os="brew" data-cmd="brew install ilo-lang/tap/ilo">Homebrew</button>
-              <button class="os-chip" data-os="win" data-cmd="iwr -useb ilo-lang.ai/install.ps1 | iex">Windows</button>
-              <button class="os-chip" data-os="nix" data-cmd="nix profile install nixpkgs#ilo">Nix</button>
-              <button class="os-chip" data-os="docker" data-cmd={`docker run --rm ghcr.io/ilo-lang/ilo:${versionLabel} ilo --help`}>Docker</button>
-              <button class="os-chip" data-os="src" data-cmd="git clone https://github.com/ilo-lang/ilo && cd ilo && make">From source</button>
+              <button class="os-chip" data-os="win" data-cmd="irm https://ilo-lang.ai/install.ps1 | iex">Windows</button>
+              <button class="os-chip" data-os="src" data-cmd="cargo install ilo">From source</button>
             </div>
           </div>
         </div>
@@ -206,7 +187,7 @@ print(total)</pre>
 
       <div class="tab-panel" data-panel="agents" hidden>
         <p class="agent-intro">
-          Two ways to give an agent ilo. Either auto-register the skill in Claude, or pipe the spec into any agent that can run shell.
+          Two ways to give an agent ilo: install the Claude Code plugin, or add the skill to any agent that runs the Agent Skills standard.
         </p>
 
         <div class="install-grid">
@@ -215,26 +196,26 @@ print(total)</pre>
               <div class="term">
                 <div class="term-body-wrap">
                   <div class="term-body" id="agent-cmd">
-                    <span class="p">$</span> ilo skill install
+                    <span class="p">$</span> /plugin marketplace add ilo-lang/ilo &amp;&amp; /plugin install ilo-lang/ilo
                   </div>
                   <button class="term-cta" data-action="copy" data-target="agent-cmd">copy</button>
                 </div>
               </div>
             </div>
 
-            <p class="agent-desc" id="agent-desc">Writes a skill to <code>~/.claude/skills/ilo/SKILL.md</code>. Claude Code and Co-work pick it up automatically — invoke with <code>/ilo</code> or just mention ilo in conversation.</p>
+            <p class="agent-desc" id="agent-desc">Adds the marketplace once, then installs the plugin. Claude Code picks up the bundled Agent Skill automatically.</p>
 
             <div class="install-os-row">
               <button class="agent-chip is-active"
                       data-agent="claude"
-                      data-cmd="ilo skill install"
-                      data-desc='Writes a skill to <code>~/.claude/skills/ilo/SKILL.md</code>. Claude Code and Co-work pick it up automatically — invoke with <code>/ilo</code> or just mention ilo in conversation.'>
-                Claude Code / Co-work
+                      data-cmd="/plugin marketplace add ilo-lang/ilo && /plugin install ilo-lang/ilo"
+                      data-desc="Adds the marketplace once, then installs the plugin. Claude Code picks up the bundled Agent Skill automatically.">
+                Claude Code
               </button>
               <button class="agent-chip"
                       data-agent="other"
-                      data-cmd="ilo help ai"
-                      data-desc='Prints a compact agent-optimised spec. Pipe it into any agent that runs shell: <code>ilo help ai &gt; agent-context.md</code> and load that into the system prompt. Pair with <code>-j</code> for JSON output.'>
+                      data-cmd="npx skills add ilo-lang/ilo"
+                      data-desc='Installs the ilo Agent Skill via the <code>skills</code> npm package into any agent that supports the <a href="https://agentskills.io">Agent Skills standard</a>.'>
                 Other agents
               </button>
             </div>
@@ -256,47 +237,47 @@ print(total)</pre>
     </div>
     <div class="features-grid">
 
-      <div class="feat">
+      <a class="feat" href="/docs/reference/prefix-notation/">
         <span class="kicker">syntax</span>
         <h3>Prefix Notation</h3>
         <p>Operators before operands. No parentheses. No precedence ambiguity. 22% fewer tokens, 42% fewer characters vs infix.</p>
 <pre><span class="op">+*</span>a b c   <span class="cmt">(a × b) + c</span></pre>
-      </div>
+      </a>
 
-      <div class="feat">
+      <a class="feat" href="/docs/reference/diagnostics/">
         <span class="kicker">safety</span>
         <h3>Verified Before Execution</h3>
         <p>Every program is type-checked before it runs. Agents get compact error codes, not stack traces. One token, not a paragraph.</p>
 <pre><span class="err">ILO-T004:</span> expected <span class="op">n</span>, got <span class="op">t</span></pre>
-      </div>
+      </a>
 
-      <div class="feat featured">
+      <a class="feat" href="/docs/reference/guards/">
         <span class="kicker">control</span>
         <h3>Guards</h3>
         <p>Flat conditionals. No nesting. No braces.</p>
 <pre><span class="op">&gt;=</span><span class="kw">sp</span> <span class="num">1000</span> <span class="str">"gold"</span></pre>
-      </div>
+      </a>
 
-      <div class="feat">
+      <a class="feat" href="/docs/reference/pipes/">
         <span class="kicker">composition</span>
         <h3>Pipes</h3>
         <p>Chain functions left-to-right.</p>
 <pre>x<span class="op">&gt;&gt;</span>dbl<span class="op">&gt;&gt;</span>inc</pre>
-      </div>
+      </a>
 
-      <div class="feat">
+      <a class="feat" href="/docs/reference/error-handling/">
         <span class="kicker">ergonomics</span>
         <h3>Auto-unwrap <span style="color:var(--ilo-syn-op);">!</span></h3>
         <p>12 tokens down to 1. Error propagation without the ceremony.</p>
 <pre><span class="op">inner!</span> x</pre>
-      </div>
+      </a>
 
-      <div class="feat">
+      <a class="feat" href="/docs/builtins/tools/">
         <span class="kicker">integrations</span>
         <h3>MCP &amp; HTTP Tools</h3>
         <p>Wire external APIs as typed functions. Type-checked at load time.</p>
 <pre><span class="kw">--tools</span> tools.json</pre>
-      </div>
+      </a>
 
     </div>
   </section>
@@ -439,10 +420,10 @@ print(total)</pre>
   <!-- SHIPPED -->
   <section class="shipped" id="shipped">
     <div class="shipped-strip">
-      <span class="shipped-tag">{versionLabel} · latest</span>
-      <p class="shipped-body">{shippedBody}</p>
-      {otherChanges > 0 && <span class="shipped-meta">+ {otherChanges} other release{otherChanges === 1 ? '' : 's'}</span>}
-      <a class="shipped-link" href={releaseUrl} target="_blank" rel="noopener">Read the notes <span>→</span></a>
+      <span class="shipped-tag" id="shipped-tag">latest</span>
+      <p class="shipped-body" id="shipped-body">Loading the latest release…</p>
+      <span class="shipped-meta" id="shipped-meta"></span>
+      <a class="shipped-link" href="https://github.com/ilo-lang/ilo/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Read the changelog <span>→</span></a>
     </div>
   </section>
 
@@ -483,15 +464,16 @@ print(total)</pre>
   {posts.length > 0 && (
     <section class="writing" id="writing">
       <div class="writing-inner">
-        <div class="section-h">
-          <div class="writing-kicker">Recent</div>
+        <div class="writing-kicker">Recent</div>
+        <div class="writing-head">
           <h2>Writing</h2>
+          <a class="btn-text" href="https://danieljohnmorris.com/writing/" target="_blank" rel="noopener">Read more writing →</a>
         </div>
-        <div class="writing-grid">
-          {posts.slice(0, 4).map((p) => (
-            <a class="writing-card" href={p.url} target="_blank" rel="noopener">
-              <span class="writing-card-title">{p.title}</span>
-              {p.date && <time class="writing-card-date">{p.date}</time>}
+        <div class="writing-list">
+          {posts.slice(0, 5).map((p) => (
+            <a class="writing-item" href={p.url} target="_blank" rel="noopener">
+              {p.date && <time class="writing-date">{p.date}</time>}
+              <span class="writing-title">{p.title}</span>
             </a>
           ))}
         </div>
@@ -549,6 +531,7 @@ print(total)</pre>
     <div class="foot-meta">
       <a class="badge" href={releaseUrl} target="_blank" rel="noopener">{versionLabel}</a>
       <span class="badge">MIT licensed</span>
+      <span class="foot-built">Compiler built in Rust · tooling built in ilo</span>
     </div>
   </footer>
 
@@ -720,31 +703,6 @@ print(total)</pre>
     text-decoration: none;
   }
   .btn-hero-secondary:hover { border-color: var(--ilo-fg-3); background: rgba(255,255,255,0.03); }
-
-  /* Hero meta */
-  .hero-meta {
-    margin-top: 28px;
-    display: flex; align-items: center; gap: 12px;
-    font-family: var(--ilo-font-mono);
-    font-size: 12px; color: var(--ilo-fg-4);
-    letter-spacing: 0.02em;
-    flex-wrap: wrap;
-  }
-  .hero-meta b { color: var(--ilo-fg-2); font-weight: 500; }
-  .hero-meta-version {
-    color: var(--ilo-fg-2); font-weight: 500;
-    text-decoration: none;
-    border-bottom: 1px dotted var(--ilo-fg-4);
-  }
-  .hero-meta-version:hover { color: var(--ilo-amber); border-bottom-color: var(--ilo-amber); }
-  .hero-meta-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--ilo-amber);
-    box-shadow: 0 0 0 3px rgba(224, 148, 34, 0.18);
-  }
-  .hero-meta-sep { opacity: 0.5; }
-  .hero-meta a { color: var(--ilo-amber); text-decoration: none; }
-  .hero-meta a:hover { color: var(--ilo-amber-high); }
 
   /* Section heading */
   .section-h { text-align: center; margin: 0 auto 18px; }
@@ -932,10 +890,13 @@ print(total)</pre>
     border-radius: var(--ilo-radius-md);
     background: linear-gradient(180deg, rgba(255,255,255,0.012), transparent);
     display: flex; flex-direction: column; gap: 12px;
+    text-decoration: none; color: inherit;
+    transition: border-color var(--ilo-duration-2) var(--ilo-ease),
+                background var(--ilo-duration-2) var(--ilo-ease);
   }
-  .feat.featured {
+  .feat:hover {
     border-color: rgba(224, 148, 34, 0.30);
-    background: linear-gradient(180deg, rgba(224, 148, 34, 0.035), transparent);
+    background: linear-gradient(180deg, rgba(224, 148, 34, 0.045), transparent);
   }
   .feat .kicker {
     font-family: var(--ilo-font-sans);
@@ -1369,36 +1330,40 @@ print(total)</pre>
     letter-spacing: 0.10em; text-transform: uppercase;
     color: var(--ilo-amber); margin-bottom: 8px;
   }
-  .writing-grid {
-    margin-top: 40px;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  .writing-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
   }
-  .writing-card {
-    display: flex; flex-direction: column; gap: 8px;
-    padding: 22px 24px;
-    border: 1px solid var(--ilo-hairline);
-    border-radius: var(--ilo-radius-md);
-    background: linear-gradient(180deg, rgba(255,255,255,0.012), transparent);
-    text-decoration: none;
-    transition: border-color var(--ilo-duration-2) var(--ilo-ease),
-                background var(--ilo-duration-2) var(--ilo-ease);
-  }
-  .writing-card:hover {
-    border-color: rgba(224, 148, 34, 0.35);
-    background: linear-gradient(180deg, rgba(224, 148, 34, 0.035), transparent);
-  }
-  .writing-card-title {
+  .writing-head h2 {
     font-family: var(--ilo-font-sans);
-    font-size: 16px; font-weight: 600;
-    color: var(--ilo-fg-1);
-    line-height: 1.35;
-    letter-spacing: -0.01em;
+    font-size: 48px; font-weight: 700;
+    color: var(--ilo-fg-1); margin: 0;
+    letter-spacing: -0.025em; line-height: 1.05;
   }
-  .writing-card-date {
+  .writing-list {
+    margin-top: 28px;
+    display: flex; flex-direction: column;
+    border-top: 1px solid var(--ilo-hairline);
+  }
+  .writing-item {
+    display: flex; align-items: baseline; gap: 1.5rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--ilo-hairline);
+    text-decoration: none;
+  }
+  .writing-item:hover .writing-title { color: var(--ilo-fg-1); }
+  .writing-date {
     font-family: var(--ilo-font-mono);
-    font-size: 11.5px;
+    font-size: 0.75rem; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.05em;
     color: var(--ilo-fg-4);
-    letter-spacing: 0.02em;
+    min-width: 5rem; flex-shrink: 0;
+  }
+  .writing-title {
+    font-family: var(--ilo-font-sans);
+    font-size: 1rem; font-weight: 500;
+    color: var(--ilo-fg-2);
+    transition: color var(--ilo-duration-2) var(--ilo-ease);
   }
 
   /* Final CTA */
@@ -1450,6 +1415,7 @@ print(total)</pre>
     text-decoration: none;
   }
   a.badge:hover { color: var(--ilo-amber); border-color: rgba(224, 148, 34, 0.30); }
+  .foot-built { margin-left: auto; color: var(--ilo-fg-4); }
 
   /* Responsive */
   @media (max-width: 900px) {
@@ -1478,7 +1444,7 @@ print(total)</pre>
     .bench-row { grid-template-columns: 88px 70px 1fr 70px; gap: 8px; }
     .bench-head h2 { font-size: 26px; }
     .writing { padding: 56px 20px; }
-    .writing-grid { grid-template-columns: 1fr; }
+    .writing-head h2 { font-size: 36px; }
     .final-cta { padding: 56px 20px; }
     .cta-statement { font-size: 28px; }
     footer { padding: 40px 20px 28px; }
@@ -1645,5 +1611,81 @@ print(total)</pre>
         apply(i);
       });
     });
+  })();
+
+  // shipped strip: latest release summary, parsed live from CHANGELOG.md
+  (function () {
+    const tagEl  = document.getElementById('shipped-tag');
+    const bodyEl = document.getElementById('shipped-body');
+    const metaEl = document.getElementById('shipped-meta');
+    if (!tagEl || !bodyEl || !metaEl) return;
+
+    function fallback() {
+      bodyEl!.textContent = 'The latest ilo release. See the changelog for details.';
+      tagEl!.textContent = 'latest';
+      metaEl!.textContent = '';
+    }
+
+    type Parsed = { version: string; summary: string; otherCount: number };
+
+    function parseChangelog(text: string): Parsed | null {
+      const lines = text.split('\n');
+      let headingIdx = -1;
+      let version = '';
+      // count all release sections (non-Unreleased "## " headings)
+      let releaseCount = 0;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.startsWith('## ')) {
+          const title = line.slice(3).trim();
+          if (title.toLowerCase().startsWith('unreleased')) continue;
+          releaseCount++;
+          if (headingIdx === -1) {
+            headingIdx = i;
+            // version = left side of em dash or hyphen separator
+            const sep = title.search(/\s[—-]\s/);
+            version = (sep === -1 ? title : title.slice(0, sep)).trim();
+          }
+        }
+      }
+      if (headingIdx === -1) return null;
+
+      // collect summary lines until the next ### or ##
+      const summaryLines: string[] = [];
+      for (let i = headingIdx + 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.startsWith('### ') || line.startsWith('## ')) break;
+        summaryLines.push(line);
+      }
+
+      // first non-empty paragraph
+      let paragraph = '';
+      for (const raw of summaryLines) {
+        if (raw.trim()) { paragraph = raw.trim(); break; }
+      }
+      if (!paragraph) return null;
+
+      // strip markdown bold markers, collapse whitespace
+      let plain = paragraph.replace(/\*\*/g, '').replace(/\s+/g, ' ').trim();
+      // first sentence: up to ". " followed by a capital, else cap at ~140 chars
+      const m = plain.match(/^(.+?\.)\s+[A-Z]/);
+      let summary = m ? m[1] : plain;
+      if (summary.length > 140) summary = summary.slice(0, 139).trimEnd() + '…';
+
+      return { version, summary, otherCount: Math.max(releaseCount - 1, 0) };
+    }
+
+    fetch('https://raw.githubusercontent.com/ilo-lang/ilo/main/CHANGELOG.md')
+      .then((r) => (r.ok ? r.text() : Promise.reject(new Error('http ' + r.status))))
+      .then((text) => {
+        const parsed = parseChangelog(text);
+        if (!parsed) { fallback(); return; }
+        tagEl!.textContent = parsed.version + ' · latest';
+        bodyEl!.textContent = parsed.summary;
+        metaEl!.textContent = parsed.otherCount > 0
+          ? '+ ' + parsed.otherCount + ' other release' + (parsed.otherCount === 1 ? '' : 's')
+          : '';
+      })
+      .catch(() => fallback());
   })();
 </script>
