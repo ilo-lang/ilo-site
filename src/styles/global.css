@@ -1,5 +1,5 @@
 /* Load matching fonts for docs */
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* Tailwind: theme + utilities only. No preflight, which clobbers Starlight's text colors */
 @layer tw;
@@ -104,6 +104,27 @@ code, pre, .sl-markdown-content code, .sl-markdown-content pre {
   --ilo-ease:       cubic-bezier(0.2, 0.8, 0.2, 1);
   --ilo-duration-1: 120ms;
   --ilo-duration-2: 220ms;
+
+  /* Legacy aliases — keep the previous --bg/--text/--accent names mapping
+     onto the new ilo tokens so older sections (SIA demo, features grid,
+     philosophy block) keep rendering without a rewrite. */
+  --bg:           var(--ilo-ink-0);
+  --bg-raised:    var(--ilo-ink-1);
+  --bg-card:      var(--ilo-ink-2);
+  --bg-card-hover:var(--ilo-ink-3);
+  --border:       var(--ilo-hairline);
+  --border-hover: rgba(224, 148, 34, 0.25);
+  --text:         var(--ilo-fg-1);
+  --text-muted:   var(--ilo-fg-3);
+  --text-dim:     var(--ilo-fg-4);
+  --accent:       var(--ilo-accent);
+  --accent-bright: var(--ilo-amber-high);
+  --accent-dim:    rgba(224, 148, 34, 0.08);
+  --font-display: var(--ilo-font-sans);
+  --font-body:    var(--ilo-font-sans);
+  --font-mono:    var(--ilo-font-mono);
+  --font-serif:   'Instrument Serif', Georgia, serif;
+  --container:    var(--ilo-container);
 
   /* Starlight bridges */
   --sl-color-accent-low: var(--ilo-amber-low);

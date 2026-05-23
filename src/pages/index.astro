@@ -87,6 +87,7 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
         <span>GitHub</span>
       </a>
+      <a class="btn btn-primary nav-cta" href="/docs/introduction/">Get Started</a>
     </div>
   </header>
 
@@ -163,6 +164,159 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
       </div>
     </section>
 
+    <!-- SEE IT IN ACTION (merged interactive demo) -->
+    <section class="sia-section" data-animate>
+      <div class="container">
+        <h2 class="section-title">See it in action</h2>
+        <p class="section-subtitle">Real Python side-by-side with its ilo equivalent. Click a preset or edit the Python yourself.</p>
+
+        <div class="sia-card">
+          <div class="sia-panes">
+            <div class="sia-pane">
+              <div class="sia-pane-header">
+                <div class="window-dots">
+                  <span class="dot dot--red"></span>
+                  <span class="dot dot--yellow"></span>
+                  <span class="dot dot--green"></span>
+                </div>
+                <span class="sia-pane-lang">Python</span>
+                <span class="sia-pane-file" id="py-filename">script.py</span>
+              </div>
+              <div id="demo-python-wrap" style="position:relative">
+                <pre id="py-highlight" class="sia-editor sia-editor--highlight" aria-hidden="true"><code></code></pre>
+                <textarea id="demo-python" class="sia-editor sia-editor--overlay" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+              </div>
+              <div class="sia-stats" id="stats-python">
+                <span class="sia-stat-tokens">Tokens: <b id="py-tokens">—</b></span>
+                <span class="sia-stat-sep">·</span>
+                <span class="sia-stat-chars">Chars: <b id="py-chars">—</b></span>
+              </div>
+            </div>
+
+            <div class="sia-arrow" aria-hidden="true">→</div>
+
+            <div class="sia-pane sia-pane--ilo">
+              <div class="sia-pane-header">
+                <div class="window-dots">
+                  <span class="dot dot--red"></span>
+                  <span class="dot dot--yellow"></span>
+                  <span class="dot dot--green"></span>
+                </div>
+                <span class="sia-pane-lang sia-pane-lang--ilo">ilo</span>
+                <span class="sia-pane-file" id="ilo-filename">script.@</span>
+                <button class="sia-toggle" id="sia-toggle" title="Toggle multi-line ↔ compact">
+                  <span class="sia-toggle-label" id="sia-toggle-label">compact</span>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
+                </button>
+              </div>
+              <div id="demo-ilo-wrap" style="position:relative">
+                <pre id="demo-ilo" class="sia-editor sia-editor--ilo"><code id="ilo-code"></code></pre>
+                <div class="sia-converting" id="sia-converting" style="display:none">
+                  <span class="sia-converting-dot"></span>converting…
+                </div>
+              </div>
+              <div class="sia-stats sia-stats--ilo" id="stats-ilo">
+                <span class="sia-stat-tokens">Tokens: <b id="ilo-tokens">—</b></span>
+                <span class="sia-stat-sep">·</span>
+                <span class="sia-stat-chars">Chars: <b id="ilo-chars">—</b></span>
+                <span class="sia-stat-diff" id="sia-diff"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sia-controls">
+            <div class="sia-presets" id="demo-presets"></div>
+            <button class="sia-convert-btn" id="sia-convert-btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 7l-7 7-7-7"/></svg>
+              Convert
+            </button>
+          </div>
+
+          <div class="sia-output" id="demo-output" style="display:none">
+            <div class="sia-output-label">output</div>
+            <pre class="sia-output-text" id="demo-output-text"></pre>
+          </div>
+
+          <div class="sia-error" id="sia-error" style="display:none"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES — Designed for machines -->
+    <section class="features" data-animate>
+      <div class="container">
+        <h2 class="section-title">Designed for machines</h2>
+        <p class="section-subtitle">Every feature exists to reduce total token cost.</p>
+        <div class="feature-grid">
+          <div class="feature-card feature-card--wide">
+            <div class="feature-label">Syntax</div>
+            <h3>Prefix Notation</h3>
+            <p>Operators before operands. No parentheses. No precedence ambiguity. 22% fewer tokens, 42% fewer characters vs infix.</p>
+            <div class="feature-code">
+              <code><span class="syn-op">+*</span><span class="syn-p">a</span> <span class="syn-p">b</span> <span class="syn-p">c</span></code>
+              <span class="feature-code-note">(a &times; b) + c</span>
+            </div>
+          </div>
+
+          <div class="feature-card feature-card--wide">
+            <div class="feature-label">Safety</div>
+            <h3>Verified Before Execution</h3>
+            <p>Every program is type-checked before it runs. Agents get compact error codes, not stack traces. One token, not a paragraph.</p>
+            <div class="feature-code feature-code--error">
+              <code>ILO-T004: expected n, got t</code>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-label">Control</div>
+            <h3>Guards</h3>
+            <p>Flat conditionals. No nesting. No braces.</p>
+            <div class="feature-code">
+              <code><span class="syn-op">&gt;=</span><span class="syn-p">sp</span> 1000 <span class="syn-s">"gold"</span></code>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-label">Composition</div>
+            <h3>Pipes</h3>
+            <p>Chain functions left-to-right.</p>
+            <div class="feature-code">
+              <code><span class="syn-p">x</span><span class="syn-op">&gt;&gt;</span><span class="syn-fn">dbl</span><span class="syn-op">&gt;&gt;</span><span class="syn-fn">inc</span></code>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-label">Ergonomics</div>
+            <h3>Auto-unwrap !</h3>
+            <p>12 tokens down to 1. Error propagation without the ceremony.</p>
+            <div class="feature-code">
+              <code><span class="syn-fn">inner</span><span class="syn-op">!</span> <span class="syn-p">x</span></code>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-label">Integrations</div>
+            <h3>MCP & HTTP Tools</h3>
+            <p>Wire external APIs as typed functions. Type-checked at load time.</p>
+            <div class="feature-code">
+              <code><span class="syn-op">--</span><span class="syn-p">tools</span> tools.json</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHILOSOPHY -->
+    <section class="philosophy" data-animate>
+      <div class="container">
+        <div class="philosophy-inner">
+          <p class="philosophy-quote">
+            Named from <a href="https://tokipona.org/" target="_blank" rel="noopener" class="philosophy-link">Toki Pona</a> for &ldquo;tool&rdquo;&mdash;a constructed language that captures all of human expression in ~120 words. <em>ilo</em> does the same for machine programmers.
+          </p>
+        </div>
+      </div>
+    </section>
+
     <!-- PRINCIPLES -->
     <section id="manifesto" class="principles">
       <div class="container-wide">
@@ -192,25 +346,21 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
       </div>
     </section>
 
-    <!-- SHIPPED -->
+    <!-- SHIPPED — changelog CTA -->
     <section id="shipped" class="shipped">
       <div class="container-wide">
         <div class="section-head">
           <div class="kicker">v0.13.0 · largest release since 0.10</div>
           <h2>Sum types, generics, package registry, Cranelift TCO.</h2>
-          <p class="sub">A focused release: closing the gap on language expressivity (sum types, generics, brace-lambdas) while keeping the token cost flat.</p>
+          <p class="sub">A focused release: closing the gap on language expressivity while keeping the token cost flat.</p>
         </div>
-        <div class="shipped-grid">
-          {shipped.map((it) => (
-            <div class="ship-card">
-              <div class="ship-head">
-                <span class="ship-name">{it.name}</span>
-                <span class="mono ship-tag">{it.tag}</span>
-              </div>
-              <p>{it.body}</p>
-            </div>
-          ))}
-        </div>
+        <a class="changelog-cta" href="https://github.com/ilo-lang/ilo/releases" target="_blank" rel="noopener">
+          <div>
+            <div class="changelog-cta-eyebrow mono">released 2026-03-13</div>
+            <div class="changelog-cta-title">Read the v0.13.0 release notes</div>
+          </div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
       </div>
     </section>
 
@@ -288,6 +438,19 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </a>
           </div>
+        </div>
+      </div>
+    </section>
+    <!-- FINAL CTA -->
+    <section class="final-cta">
+      <div class="container">
+        <p class="cta-statement">Make your agents more efficient.</p>
+        <div class="final-cta-actions">
+          <a href="/docs/introduction/" class="btn btn-primary">
+            Get Started
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+          <a href="https://github.com/ilo-lang/ilo" target="_blank" rel="noopener" class="btn btn-ghost">View on GitHub</a>
         </div>
       </div>
     </section>
@@ -391,6 +554,500 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
       }, 1400);
     });
   });
+// ===== SEE IT IN ACTION — merged interactive demo =====
+
+// Token approximation (cl100k_base proxy)
+function countTokens(text: string): number {
+  if (!text.trim()) return 0;
+  return text.split(/([^\w])/u).filter(p => p.trim().length > 0).length;
+}
+
+// Animated counter roll (~400ms ease-out)
+function animateCounter(el: HTMLElement, from: number, to: number) {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced || from === to) { el.textContent = String(to); return; }
+  const dur = 400;
+  const start = performance.now();
+  function step(now: number) {
+    const t = Math.min((now - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - t, 3); // ease-out cubic
+    el.textContent = String(Math.round(from + (to - from) * ease));
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+interface Preset {
+  name: string;
+  python: string;
+  iloMulti: string;    // multi-line form
+  iloInline: string;   // one-liner semicolon form
+  output: string;
+}
+
+const PRESETS: Preset[] = [
+  {
+    name: 'pipes',
+    python: `def double(x: int) -> int:
+    return x * 2
+
+def increment(x: int) -> int:
+    return x + 1
+
+print(increment(double(5)))`,
+    iloMulti: `dbl x:n>n
+  *x 2
+
+inc x:n>n
+  +x 1
+
+main>n
+  5>>dbl>>inc`,
+    iloInline: `dbl x:n>n;*x 2\ninc x:n>n;+x 1\nmain>n;5>>dbl>>inc`,
+    output: '11',
+  },
+  {
+    name: 'fold-sum',
+    python: `from functools import reduce
+
+nums = [1, 2, 3, 4, 5]
+total = reduce(lambda a, b: a + b, nums, 0)
+print(total)`,
+    iloMulti: `add a:n b:n>n
+  +a b
+
+main>n
+  fld add [1,2,3,4,5] 0`,
+    iloInline: `main>n;fld (a:n b:n>n;+a b) [1,2,3,4,5] 0`,
+    output: '15',
+  },
+  {
+    name: 'map-double',
+    python: `nums = [1, 2, 3, 4, 5]
+result = list(map(lambda n: n * 2, nums))
+print(result)`,
+    iloMulti: `dbl n:n>n
+  *n 2
+
+main>L n
+  map dbl [1,2,3,4,5]`,
+    iloInline: `main>L n;map (n:n>n;*n 2) [1,2,3,4,5]`,
+    output: '[2, 4, 6, 8, 10]',
+  },
+  {
+    name: 'filter-even',
+    python: `nums = list(range(1, 11))
+result = list(filter(lambda n: n % 2 == 0, nums))
+print(result)`,
+    iloMulti: `even n:n>b
+  =(mod n 2) 0
+
+main>L n
+  flt even [1,2,3,4,5,6,7,8,9,10]`,
+    iloInline: `main>L n;flt (n:n>b;=(mod n 2) 0) [1,2,3,4,5,6,7,8,9,10]`,
+    output: '[2, 4, 6, 8, 10]',
+  },
+  {
+    name: 'text-upper',
+    python: `text = "hello world"
+print(text.upper())`,
+    iloMulti: `main>t
+  upr "hello world"`,
+    iloInline: `main>t;upr "hello world"`,
+    output: 'HELLO WORLD',
+  },
+  {
+    name: 'len-list',
+    python: `nums = [1, 2, 3, 4, 5]
+print(len(nums))`,
+    iloMulti: `main>n
+  len [1,2,3,4,5]`,
+    iloInline: `main>n;len [1,2,3,4,5]`,
+    output: '5',
+  },
+];
+
+let activePreset = 0;
+let isMultiLine = false;
+let isApiResult = false;
+let autoCycleTimer: ReturnType<typeof setTimeout> | null = null;
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+let prevPyTok = 0;
+let prevPyChar = 0;
+let prevIloTok = 0;
+let prevIloChar = 0;
+
+// ===== SYNTAX HIGHLIGHTING =====
+
+function escHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ilo tokenizer / highlighter
+const ILO_KW = new Set(['wh','ret','brk','cnt','main','if','else']);
+const ILO_BUILTIN = new Set(['map','flt','fld','len','upr','lwr','str','int','mod','spl','cat','at','prnt','hd','tl','srt','rev','rng','fmt','flt','fld','hd','tl','lst','frq','flat','grp','has','ord','sum','min','max','avg','abs','ceil','flr','rnd','log','exp','sqt','sin','cos','tan','zip','unz','rpl','trm','prfx','sfx','sub','idx','inn','cnt','uni','srt','rsrt','dbl','inc','range','push','pop']);
+
+function highlightIlo(src: string): string {
+  // Tokenize line by line
+  return src.split('\n').map(line => {
+    let out = '';
+    let i = 0;
+    while (i < line.length) {
+      const ch = line[i];
+      // string literal
+      if (ch === '"') {
+        let j = i + 1;
+        while (j < line.length && !(line[j] === '"' && line[j-1] !== '\\')) j++;
+        out += `<span class="syn-s">${escHtml(line.slice(i, j + 1))}</span>`;
+        i = j + 1;
+        continue;
+      }
+      // comment
+      if (ch === '-' && line[i+1] === '-') {
+        out += `<span class="syn-cm">${escHtml(line.slice(i))}</span>`;
+        break;
+      }
+      // number
+      if (/[0-9]/.test(ch) || (ch === '-' && /[0-9]/.test(line[i+1] || ''))) {
+        let j = i + 1;
+        while (j < line.length && /[0-9.]/.test(line[j])) j++;
+        out += `<span class="syn-p">${escHtml(line.slice(i, j))}</span>`;
+        i = j;
+        continue;
+      }
+      // operators / sigils
+      if (/[+\-*\/=<>!|&^%@?~]/.test(ch) || ch === ';' || (ch === '>' && line[i+1] === '>')) {
+        let j = i + 1;
+        // multi-char ops: >>, >=, <=, !=, >>, >>
+        if ((ch === '>' && line[i+1] === '>') || (ch === '>' && line[i+1] === '=') ||
+            (ch === '<' && line[i+1] === '=') || (ch === '!' && line[i+1] === '=') ||
+            (ch === '+' && line[i+1] === '+') || (ch === '-' && line[i+1] === '>')) {
+          j = i + 2;
+        }
+        const op = line.slice(i, j);
+        if (op === ';') {
+          out += escHtml(op);
+        } else if (op === '>') {
+          // could be return type sigil or op — highlight as op
+          out += `<span class="syn-op">${escHtml(op)}</span>`;
+        } else {
+          out += `<span class="syn-op">${escHtml(op)}</span>`;
+        }
+        i = j;
+        continue;
+      }
+      // identifier or keyword
+      if (/[a-zA-Z_\-]/.test(ch)) {
+        let j = i + 1;
+        while (j < line.length && /[a-zA-Z0-9_\-]/.test(line[j])) j++;
+        const word = line.slice(i, j);
+        if (ILO_KW.has(word)) {
+          out += `<span class="syn-kw">${escHtml(word)}</span>`;
+        } else if (ILO_BUILTIN.has(word)) {
+          out += `<span class="syn-fn">${escHtml(word)}</span>`;
+        } else if (/^[a-z]/.test(word) && j < line.length && line[j] === ' ') {
+          // first word on expression that looks like a fn call
+          out += `<span class="syn-fn">${escHtml(word)}</span>`;
+        } else if (/:[ntbLM]/.test(line.slice(j, j+2))) {
+          // param name followed by type sigil
+          out += `<span class="syn-p">${escHtml(word)}</span>`;
+        } else {
+          out += `<span class="syn-p">${escHtml(word)}</span>`;
+        }
+        i = j;
+        continue;
+      }
+      // type sigil after colon
+      if (ch === ':') {
+        let j = i + 1;
+        const next = line[j];
+        if (next && /[ntbLMR]/.test(next)) {
+          // :n :t :b :L :M etc
+          let k = j + 1;
+          // collect e.g. L n, L t
+          if (line[k] === ' ' && /[ntbLMR]/.test(line[k+1] || '')) k += 2;
+          out += `<span class="syn-t">${escHtml(line.slice(i, k))}</span>`;
+          i = k;
+        } else {
+          out += escHtml(ch);
+          i++;
+        }
+        continue;
+      }
+      out += escHtml(ch);
+      i++;
+    }
+    return out;
+  }).join('\n');
+}
+
+// Python tokenizer / highlighter
+const PY_KW = new Set(['def','if','elif','else','for','while','in','return','import','from','print','not','and','or','True','False','None','lambda','class','try','except','with','as','pass','break','continue','yield','del','raise','assert','global','nonlocal','is']);
+
+function highlightPy(src: string): string {
+  return src.split('\n').map(line => {
+    let out = '';
+    let i = 0;
+    while (i < line.length) {
+      const ch = line[i];
+      // comment
+      if (ch === '#') {
+        out += `<span class="syn-cm">${escHtml(line.slice(i))}</span>`;
+        break;
+      }
+      // string (single or double, simple)
+      if (ch === '"' || ch === "'") {
+        const q = ch;
+        // check triple
+        const triple = line[i+1] === q && line[i+2] === q;
+        if (triple) {
+          let j = i + 3;
+          while (j < line.length - 2 && !(line[j]===q && line[j+1]===q && line[j+2]===q)) j++;
+          out += `<span class="syn-s">${escHtml(line.slice(i, j + 3))}</span>`;
+          i = j + 3;
+        } else {
+          let j = i + 1;
+          while (j < line.length && line[j] !== q) { if (line[j] === '\\') j++; j++; }
+          out += `<span class="syn-s">${escHtml(line.slice(i, j + 1))}</span>`;
+          i = j + 1;
+        }
+        continue;
+      }
+      // number
+      if (/[0-9]/.test(ch)) {
+        let j = i + 1;
+        while (j < line.length && /[0-9._xXoObBa-fA-F]/.test(line[j])) j++;
+        out += `<span class="syn-p">${escHtml(line.slice(i, j))}</span>`;
+        i = j;
+        continue;
+      }
+      // identifier or keyword
+      if (/[a-zA-Z_]/.test(ch)) {
+        let j = i + 1;
+        while (j < line.length && /[a-zA-Z0-9_]/.test(line[j])) j++;
+        const word = line.slice(i, j);
+        if (PY_KW.has(word)) {
+          out += `<span class="syn-kw">${escHtml(word)}</span>`;
+        } else if (j < line.length && line[j] === '(') {
+          out += `<span class="syn-fn">${escHtml(word)}</span>`;
+        } else {
+          out += `<span class="syn-p">${escHtml(word)}</span>`;
+        }
+        i = j;
+        continue;
+      }
+      // operators
+      if (/[+\-*\/=<>!%&|^~@]/.test(ch)) {
+        let j = i + 1;
+        if (j < line.length && /[=+\-*\/]/.test(line[j])) j++;
+        out += `<span class="syn-op">${escHtml(line.slice(i, j))}</span>`;
+        i = j;
+        continue;
+      }
+      out += escHtml(ch);
+      i++;
+    }
+    return out;
+  }).join('\n');
+}
+
+const pyEl = document.getElementById('demo-python') as HTMLTextAreaElement;
+const pyHighlight = document.querySelector('#py-highlight code') as HTMLElement;
+const iloEl = document.getElementById('demo-ilo') as HTMLPreElement;
+const iloCode = document.getElementById('ilo-code') as HTMLElement;
+const pyTokensEl = document.getElementById('py-tokens')!;
+const pyCharsEl = document.getElementById('py-chars')!;
+const iloTokensEl = document.getElementById('ilo-tokens')!;
+const iloCharsEl = document.getElementById('ilo-chars')!;
+const diffEl = document.getElementById('sia-diff')!;
+const outputDiv = document.getElementById('demo-output')!;
+const outputText = document.getElementById('demo-output-text')!;
+const errorDiv = document.getElementById('sia-error')!;
+const convertBtn = document.getElementById('sia-convert-btn')!;
+const convertingOverlay = document.getElementById('sia-converting')!;
+const toggleBtn = document.getElementById('sia-toggle')!;
+const toggleLabel = document.getElementById('sia-toggle-label')!;
+
+// Track raw ilo text for stats
+let iloRawText = '';
+
+function getIloText(): string { return iloRawText; }
+
+function updateStats() {
+  const py = pyEl.value;
+  const ilo = getIloText();
+  const pyTok = countTokens(py);
+  const iloTok = countTokens(ilo);
+  const pyChar = py.length;
+  const iloChar = ilo.length;
+
+  animateCounter(pyTokensEl, prevPyTok, pyTok);
+  animateCounter(pyCharsEl, prevPyChar, pyChar);
+  animateCounter(iloTokensEl, prevIloTok, iloTok);
+  animateCounter(iloCharsEl, prevIloChar, iloChar);
+
+  prevPyTok = pyTok;
+  prevPyChar = pyChar;
+  prevIloTok = iloTok;
+  prevIloChar = iloChar;
+
+  if (pyTok > 0 && iloTok > 0) {
+    const pct = Math.round((1 - iloTok / pyTok) * 100);
+    diffEl.textContent = `-${pct}% tokens`;
+    diffEl.classList.remove('bounce');
+    void diffEl.offsetWidth; // reflow
+    diffEl.classList.add('bounce');
+  } else {
+    diffEl.textContent = '';
+  }
+}
+
+function setIloText(text: string, animate = true) {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!animate || reduced) {
+    iloRawText = text;
+    iloCode.innerHTML = highlightIlo(text);
+    updateStats();
+    return;
+  }
+  iloEl.classList.add('is-fading');
+  setTimeout(() => {
+    iloRawText = text;
+    iloCode.innerHTML = highlightIlo(text);
+    iloEl.classList.remove('is-fading');
+    updateStats();
+  }, 150);
+}
+
+function loadPreset(idx: number, skipAutoCycle = false) {
+  if (!skipAutoCycle) resetAutoCycle();
+  activePreset = idx;
+  isApiResult = false;
+  const p = PRESETS[idx];
+
+  pyEl.value = p.python;
+  pyHighlight.innerHTML = highlightPy(p.python);
+  document.querySelectorAll('.sia-preset-chip').forEach((c, i) => {
+    c.classList.toggle('active', i === idx);
+  });
+
+  // ilo pane lags 150ms
+  setTimeout(() => {
+    const iloText = isMultiLine ? p.iloMulti : p.iloInline;
+    iloRawText = iloText;
+    iloCode.innerHTML = highlightIlo(iloText);
+    updateStats();
+  }, 150);
+
+  // Reset output/error
+  outputDiv.style.display = 'none';
+  errorDiv.style.display = 'none';
+  errorDiv.textContent = '';
+
+  updateStats();
+  toggleBtn.removeAttribute('disabled');
+}
+
+function toggleMode() {
+  if (isApiResult) return;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  isMultiLine = !isMultiLine;
+  toggleLabel.textContent = isMultiLine ? 'multi-line' : 'compact';
+  const p = PRESETS[activePreset];
+  setIloText(isMultiLine ? p.iloMulti : p.iloInline, !reduced);
+}
+
+toggleBtn.addEventListener('click', toggleMode);
+
+// Auto-cycle every 8s, pause on hover
+function resetAutoCycle() {
+  if (autoCycleTimer) clearTimeout(autoCycleTimer);
+  autoCycleTimer = null;
+}
+
+function scheduleAutoCycle() {
+  resetAutoCycle();
+  autoCycleTimer = setTimeout(() => {
+    const next = (activePreset + 1) % PRESETS.length;
+    loadPreset(next, true);
+    scheduleAutoCycle();
+  }, 8000);
+}
+
+const siaCard = document.querySelector('.sia-card');
+siaCard?.addEventListener('mouseenter', resetAutoCycle);
+siaCard?.addEventListener('mouseleave', scheduleAutoCycle);
+
+// Editable Python — debounced stats update (500ms)
+pyEl.removeAttribute('readonly');
+pyEl.addEventListener('input', () => {
+  // Re-highlight on every keystroke (cheap)
+  pyHighlight.innerHTML = highlightPy(pyEl.value);
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    // update python stats; ilo stays as-is until Convert
+    const py = pyEl.value;
+    const pyTok = countTokens(py);
+    const pyChar = py.length;
+    animateCounter(pyTokensEl, prevPyTok, pyTok);
+    animateCounter(pyCharsEl, prevPyChar, pyChar);
+    prevPyTok = pyTok;
+    prevPyChar = pyChar;
+  }, 500);
+  resetAutoCycle();
+});
+
+// Convert button
+convertBtn.addEventListener('click', async () => {
+  const python = pyEl.value.trim();
+  if (!python) return;
+
+  resetAutoCycle();
+  (convertBtn as HTMLButtonElement).disabled = true;
+  convertingOverlay.style.display = 'flex';
+  errorDiv.style.display = 'none';
+  outputDiv.style.display = 'none';
+
+  try {
+    const resp = await fetch('https://convert.ilo-lang.ai/convert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ python }),
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const iloResult = data.ilo || data.result || data.code || '';
+    if (!iloResult) throw new Error('Empty response');
+    isApiResult = true;
+    setIloText(iloResult);
+    toggleBtn.setAttribute('disabled', 'true');
+    isMultiLine = true;
+    toggleLabel.textContent = isMultiLine ? 'multi-line' : 'compact';
+  } catch (err) {
+    // Fallback: show last preset
+    const fallback = PRESETS[activePreset];
+    setIloText(isMultiLine ? fallback.iloMulti : fallback.iloInline);
+    errorDiv.textContent = `Conversion unavailable — showing preset. (${(err as Error).message})`;
+    errorDiv.style.display = 'block';
+  } finally {
+    (convertBtn as HTMLButtonElement).disabled = false;
+    convertingOverlay.style.display = 'none';
+  }
+});
+
+// Build preset chips
+const presetsContainer = document.getElementById('demo-presets')!;
+PRESETS.forEach((p, i) => {
+  const chip = document.createElement('button');
+  chip.className = 'sia-preset-chip' + (i === 0 ? ' active' : '');
+  chip.textContent = p.name;
+  chip.addEventListener('click', () => loadPreset(i));
+  presetsContainer.appendChild(chip);
+});
+
+// Init
+loadPreset(0, true);
+scheduleAutoCycle();
 </script>
 
 <style>
@@ -670,4 +1327,130 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
     .bench-row .bench-tag { display: none; }
     .footer-grid { grid-template-columns: 1fr 1fr; }
   }
+
+  /* ===== Restored sections: shared chrome ===== */
+  .window-dots { display: flex; gap: 6px; }
+  .window-dots .dot { width: 10px; height: 10px; border-radius: 50%; opacity: 0.5; }
+  .dot.dot--red { background: #ff5f57; }
+  .dot.dot--yellow { background: #febc2e; }
+  .dot.dot--green { background: #28c840; }
+
+  .section-title { font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 700; letter-spacing: -0.025em; text-align: center; margin-bottom: 0.5rem; color: var(--text); }
+  .section-subtitle { text-align: center; color: var(--text-muted); font-size: 1.05rem; margin-bottom: 3rem; }
+
+  /* ===== Nav CTA (Get Started) ===== */
+  .nav-cta { padding: 8px 16px; font-size: 13px; }
+
+  /* ===== Changelog CTA (shipped section) ===== */
+  .changelog-cta {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px;
+    background: var(--ilo-ink-2);
+    border: 1px solid var(--ilo-hairline);
+    border-radius: var(--ilo-radius-md);
+    color: var(--ilo-fg-1);
+    transition: border-color var(--ilo-duration-2) var(--ilo-ease), background var(--ilo-duration-2) var(--ilo-ease);
+  }
+  .changelog-cta:hover { border-color: rgba(224, 148, 34, 0.35); background: var(--ilo-ink-3); color: var(--ilo-fg-1); }
+  .changelog-cta-eyebrow { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ilo-fg-4); margin-bottom: 4px; }
+  .changelog-cta-title { font-family: var(--ilo-font-sans); font-size: 16px; font-weight: 600; color: var(--ilo-fg-1); }
+  .changelog-cta svg { color: var(--ilo-accent); flex: none; }
+
+  /* ===== See It In Action ===== */
+  .sia-section { padding: 6rem 0; border-top: 1px solid var(--border); }
+  .sia-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .sia-card:hover { border-color: var(--border-hover); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); }
+  .sia-panes { display: grid; grid-template-columns: 1fr 28px 1fr; gap: 16px; align-items: stretch; }
+  .sia-pane { display: flex; flex-direction: column; background: var(--bg-raised); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .sia-pane-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  .sia-pane-lang { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
+  .sia-pane-lang--ilo { color: var(--accent); }
+  .sia-pane-file { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim); margin-left: auto; }
+  .sia-toggle { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.7rem; cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+  .sia-toggle:hover { color: var(--text); border-color: var(--border-hover); }
+  .sia-toggle-label { line-height: 1; }
+  .sia-editor { margin: 0; padding: 14px 16px; font-family: var(--font-mono); font-variant-ligatures: none; font-size: 0.84rem; line-height: 1.6; color: var(--text); background: transparent; border: 0; outline: 0; resize: none; width: 100%; min-height: 180px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  .sia-editor:focus { outline: 0; }
+  .sia-editor--ilo { color: var(--text); }
+  .sia-editor--ilo code { font-family: inherit; white-space: pre-wrap; word-break: break-word; }
+  .sia-editor--highlight { position: absolute; inset: 0; pointer-events: none; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+  .sia-editor--highlight code { white-space: pre-wrap; word-break: break-word; }
+  .sia-editor--overlay { position: relative; background: transparent; color: transparent; caret-color: var(--text); -webkit-text-fill-color: transparent; }
+  .sia-editor--overlay::selection { background: rgba(224, 148, 34, 0.25); -webkit-text-fill-color: var(--text); color: var(--text); }
+  .sia-stats { padding: 8px 14px; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); display: flex; gap: 6px; align-items: baseline; }
+  .sia-stats b { color: var(--text); font-weight: 600; }
+  .sia-stat-sep { opacity: 0.5; }
+  .sia-stat-diff { margin-left: auto; color: var(--ilo-lime); font-weight: 600; }
+  .sia-stats--ilo .sia-stat-tokens b { color: var(--accent); }
+  .sia-arrow { display: flex; align-items: center; justify-content: center; color: var(--text-dim); font-family: var(--font-mono); }
+  .sia-converting { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(10, 10, 16, 0.6); color: var(--text-muted); font-family: var(--font-mono); font-size: 0.78rem; }
+  .sia-converting-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: sia-pulse 1.2s ease-in-out infinite; }
+  @keyframes sia-pulse { 0%, 100% { opacity: 0.3 } 50% { opacity: 1 } }
+
+  .sia-controls { display: flex; align-items: center; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+  .sia-presets { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; min-width: 0; }
+  .sia-preset-chip { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.72rem; cursor: pointer; transition: color 0.15s, border-color 0.15s, background 0.15s; }
+  .sia-preset-chip:hover { color: var(--text); border-color: var(--border-hover); }
+  .sia-preset-chip.active { color: var(--accent); border-color: rgba(224, 148, 34, 0.4); background: var(--accent-dim); }
+  .sia-convert-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; background: var(--accent); color: #1a0e02; border: 0; font-family: var(--font-display); font-size: 0.86rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+  .sia-convert-btn:hover { background: var(--ilo-amber-high); }
+
+  .sia-output { margin-top: 14px; border: 1px solid var(--border); border-radius: 8px; background: rgba(0,0,0,0.25); overflow: hidden; }
+  .sia-output-label { padding: 6px 12px; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  .sia-output-text { margin: 0; padding: 12px 14px; font-family: var(--font-mono); font-size: 0.82rem; color: var(--text); white-space: pre-wrap; }
+
+  .sia-error { margin-top: 10px; font-family: var(--font-mono); font-size: 0.78rem; color: #f87171; background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.15); border-radius: 6px; padding: 10px 14px; }
+
+  /* SIA syntax tokens (Python in editor, ilo on the right) */
+  .syn-kw { color: #c8b3ff; }
+  .syn-num { color: var(--ilo-syn-num); }
+  .syn-s { color: var(--ilo-syn-str); }
+  .syn-op { color: var(--ilo-syn-op); }
+  .syn-p { color: var(--text); }
+  .syn-fn { color: var(--ilo-amber-high); }
+  .syn-com { color: var(--ilo-syn-cmt); font-style: italic; }
+
+  @media (max-width: 700px) {
+    .sia-panes { grid-template-columns: 1fr; }
+    .sia-arrow { display: none; }
+    .sia-card { padding: 18px; }
+  }
+
+  /* ===== Features grid (Designed for machines) ===== */
+  .features { padding: 6rem 0; border-top: 1px solid var(--border); }
+  .feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .feature-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; transition: border-color 0.3s, transform 0.2s, box-shadow 0.3s; }
+  .feature-card:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); }
+  .feature-label { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .feature-card h3 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em; color: var(--text); }
+  .feature-card p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; }
+  .feature-code { font-family: var(--font-mono); font-size: 0.85rem; background: rgba(0, 0, 0, 0.25); padding: 10px 14px; border-radius: 6px; display: flex; align-items: center; gap: 12px; overflow-x: auto; }
+  .feature-code code { font-family: inherit; white-space: nowrap; }
+  .feature-code-note { color: var(--text-dim); font-size: 0.75rem; white-space: nowrap; }
+  .feature-code--error code { color: #f87171; }
+  @media (max-width: 768px) {
+    .feature-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ===== Philosophy ===== */
+  .philosophy { padding: 6rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .philosophy-inner { text-align: center; max-width: 700px; margin: 0 auto; }
+  .philosophy-quote { font-family: var(--font-serif); font-size: clamp(1.3rem, 3vw, 1.7rem); line-height: 1.7; color: var(--text-muted); font-style: italic; margin: 0; }
+  .philosophy-quote em { color: var(--text); font-style: italic; }
+  .philosophy-link { color: var(--text-muted); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,0.15); transition: color 0.2s, text-decoration-color 0.2s; }
+  .philosophy-link:hover { color: var(--text); text-decoration-color: var(--accent); }
+
+  /* ===== Final CTA ===== */
+  .final-cta { padding: 6rem 0; text-align: center; border-top: 1px solid var(--border); }
+  .cta-statement { font-family: var(--font-display); font-size: clamp(1.5rem, 3.5vw, 2.2rem); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 2rem; color: var(--text); }
+  .final-cta-actions { display: inline-flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; }
+
+  /* container compat for restored sections */
+  .container { max-width: var(--container); margin: 0 auto; padding: 0 28px; }
 </style>
