@@ -373,11 +373,11 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
           </div>
 
           <div class="feature-card">
-            <div class="feature-label">Serve</div>
-            <h3>ilo httpd</h3>
-            <p>Serve any ilo function as an HTTP endpoint. One command, no framework, typed request and response.</p>
+            <div class="feature-label">Agent loop</div>
+            <h3>ilo serv</h3>
+            <p>JSONL over stdio. Each request a line in, each response a line out. The agent-shaped equivalent of an interactive REPL.</p>
             <div class="feature-code">
-              <code><span class="syn-fn">ilo</span> httpd <span class="syn-op">--port</span> 8080 api.@</code>
+              <code><span class="syn-fn">ilo</span> serv program.ilo</code>
             </div>
           </div>
         </div>
