@@ -697,6 +697,15 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
           </div>
           <p>ilo is a research project. What does a language look like when agents write all the code? The manifesto steers the project. Syntax, builtins, and tooling evolve as we learn what actually helps. Things will break.</p>
 
+          <h3 class="evolving-writing-head">Open questions</h3>
+          <ul class="open-questions">
+            <li>How do we reduce errors and retries?</li>
+            <li>How do we introduce terse syntax when the LLM has no prior knowledge of it?</li>
+            <li>How do we break norms from other languages without confusing the model?</li>
+            <li>What is the best trade between brevity and recognisability?</li>
+            <li>Which tooling outputs actually shorten the agent's loop?</li>
+          </ul>
+
           <p class="evolving-cta">
             <strong>Help shape it.</strong> The rules and optimisations that make ilo best for agents are still being discovered. Try it, find where it fails, file an issue, send a PR, or write about it.
           </p>
@@ -1825,7 +1834,11 @@ scheduleAutoCycle();
   .evolving-cta { margin-top: 18px; }
   .evolving-cta strong { color: var(--ilo-fg-1); }
   .evolving-actions { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
-  .evolving-writing-head { margin-top: 28px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ilo-fg-4); }
+  .open-questions { list-style: none; padding: 0; margin: 0 0 28px; }
+  .open-questions li { padding: 10px 0; border-bottom: 1px solid var(--ilo-hairline); color: var(--ilo-fg-2); font-size: 15px; line-height: 1.5; }
+  .open-questions li:last-child { border-bottom: 0; }
+  .open-questions li::before { content: "?"; color: var(--ilo-accent); font-weight: 700; margin-right: 10px; }
+    .evolving-writing-head { margin-top: 28px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ilo-fg-4); }
   .posts-list {
     list-style: none; padding: 0; margin: 0;
     display: flex; flex-direction: column; gap: 10px;
