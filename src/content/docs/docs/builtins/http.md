@@ -21,9 +21,20 @@ HTTP and process-spawn builtins require the native binary. They are not availabl
 | `getx` | `t M > R (M t _) t` | HTTP GET, rich response, with request headers | `getx url headers` |
 | `pstx` | `t t > R (M t _) t` | HTTP POST, rich response | `pstx url body` |
 | `pstx` | `t t M > R (M t _) t` | HTTP POST, rich response, with request headers | `pstx url body headers` |
+| `put` | `t t > R t t` | HTTP PUT (url, body) | `put url body` |
+| `put` | `t t M > R t t` | HTTP PUT with headers | `put url body headers` |
+| `pat` | `t t > R t t` | HTTP PATCH (url, body) | `pat url body` |
+| `pat` | `t t M > R t t` | HTTP PATCH with headers | `pat url body headers` |
+| `del` | `t > R t t` | HTTP DELETE | `del url` |
+| `del` | `t M > R t t` | HTTP DELETE with headers | `del url headers` |
+| `hed` | `t > R t t` | HTTP HEAD (body typically empty; success via Ok/Err) | `hed url` |
+| `hed` | `t M > R t t` | HTTP HEAD with headers | `hed url headers` |
+| `opt` | `t > R t t` | HTTP OPTIONS | `opt url` |
+| `opt` | `t M > R t t` | HTTP OPTIONS with headers | `opt url headers` |
 | `run` | `t L > R (M t t) t` | Spawn `cmd` with argv list. No shell, no glob. | `run "git" ["status"]` |
 | `$` | `t L > R (M t t) t` | `run` shorthand (sugar for `run`) | `$"git" ["status"]` |
 | `env` | `t > R t t` | Read environment variable | `env "API_KEY"` |
+| `zgunzip` | `t > R t t` | Gzip decompress (RFC 1952); body carries the compressed bytes as text. Err on invalid framing or non-UTF-8 output | `zgunzip! gz-body` |
 
 In 0.12.0 the `$` sigil was rebound from HTTP `get` (parochial — `$` for HTTP is unique to ilo) to the new `run` builtin (argv-list process spawn). `$cmd argv` compiles to `run cmd argv`. HTTP `get` is still called by name.
 
@@ -60,6 +71,21 @@ r=getx! "https://api.github.com/users/octocat";rem=mget!! (mget!! r "headers") "
 ```
 
 Existing `get`/`pst` shapes are untouched. Pick `get` when body is all you need; pick `getx` when you need status or headers. Tree-bridge dispatched, so VM and Cranelift JIT inherit identical semantics.
+
+## Compression
+
+`zgunzip body` decompresses gzip-framed bytes (RFC 1952) into a UTF-8 string. The `body` argument carries the raw compressed bytes as text, so a `Content-Encoding: gzip` response feeds straight in. Tree-bridge eligible (pure, no FnRef, no I/O); the VM and Cranelift backends inherit at zero opcode cost. Backed by `flate2`'s pure-Rust `miniz_oxide` backend so there's no C toolchain dependency.
+
+Err on invalid gzip framing (bad magic, truncated trailer, CRC mismatch) or on decompressed bytes that aren't valid UTF-8. Auto-unwrap with `!`/`!!` matches the rest of the I/O Result family.
+
+```ilo
+-- Inside an R-returning fn — auto-unwrap propagates the Err arm
+plain=zgunzip! gz-body
+
+-- Explicit pattern-match for non-R callers
+r=zgunzip gz-body
+?r{~s:s;^e:""}
+```
 
 ## Process spawn
 
