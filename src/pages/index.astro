@@ -68,28 +68,24 @@ const shipped = [
   { tag: 'ecosystem', name: 'ilo httpd',       body: 'Serve functions as HTTP endpoints. One command, no framework.' },
 ];
 
-type InstallSub = { id: string; label: string; file: string; cmd: string };
-type InstallGroup = { id: string; label: string; verify: string; verifyOut?: string; verifyNote?: string; subs: InstallSub[] };
+type InstallSub = { id: string; label: string; cmd: string };
+type InstallGroup = { id: string; label: string; subs: InstallSub[] };
 const installGroups: InstallGroup[] = [
   {
     id: 'humans',
     label: 'For humans',
-    verify: "ilo 'dbl x:n>n;*x 2' 5",
-    verifyOut: '10',
     subs: [
-      { id: 'mac',     label: 'macOS / Linux', file: 'install.sh',  cmd: 'curl -fsSL ilo-lang.ai/install.sh | sh' },
-      { id: 'windows', label: 'Windows',       file: 'install.ps1', cmd: 'irm https://ilo-lang.ai/install.ps1 | iex' },
+      { id: 'mac',     label: 'macOS / Linux', cmd: 'curl -fsSL ilo-lang.ai/install.sh | sh' },
+      { id: 'windows', label: 'Windows',       cmd: 'irm https://ilo-lang.ai/install.ps1 | iex' },
     ],
   },
   {
     id: 'agents',
     label: 'For agents',
-    verify: 'tool: ilo',
-    verifyNote: 'type-checked at load',
     subs: [
-      { id: 'claude', label: 'Claude Code',  file: 'plugin.json', cmd: '/plugin marketplace add ilo-lang/ilo && /plugin install ilo-lang/ilo' },
-      { id: 'pi',     label: 'Pi',           file: 'pi.json',  cmd: 'pi install ilo-lang/ilo' },
-      { id: 'other',  label: 'Other agents', file: 'skills.json', cmd: 'npx skills add ilo-lang/ilo' },
+      { id: 'claude', label: 'Claude Code',  cmd: '/plugin marketplace add ilo-lang/ilo && /plugin install ilo-lang/ilo' },
+      { id: 'pi',     label: 'Pi',           cmd: 'pi install ilo-lang/ilo' },
+      { id: 'other',  label: 'Other agents', cmd: 'npx skills add ilo-lang/ilo' },
     ],
   },
 ];
@@ -224,7 +220,6 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
                   <div class="install-sub-label">
                     <span class="install-sub-dot" aria-hidden="true"></span>
                     <span class="install-sub-name">{s.label}</span>
-                    <span class="install-sub-file">{s.file}</span>
                   </div>
                   <div class="term-wrap">
                     <div class="term">
@@ -239,24 +234,6 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
             </div>
 
             <div class="footer-row">
-              <span class="verify-inline">
-                {g.verifyOut ? (
-                  <>
-                    verify
-                    <code>{g.verify}</code>
-                    <span class="arrow">→</span>
-                    <span class="out">{g.verifyOut}</span>
-                    <span class="check">✓</span>
-                  </>
-                ) : (
-                  <>
-                    <code>{g.verify}</code>
-                    <span class="arrow">·</span>
-                    <span>{g.verifyNote}</span>
-                    <span class="check">✓</span>
-                  </>
-                )}
-              </span>
               <a class="more" href="/docs/learn/install/">
                 {g.id === 'agents' ? 'All hosts →' : 'All install paths →'}
               </a>
@@ -1675,10 +1652,6 @@ scheduleAutoCycle();
   .install-sub[data-sub-index="1"] .install-sub-dot { background: #60a5fa; }
   .install-sub[data-sub-index="2"] .install-sub-dot { background: var(--ilo-accent); }
   .install-sub-name { font-weight: 600; }
-  .install-sub-file {
-    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
-    font-size: 11.5px; color: var(--ilo-fg-4);
-  }
 
   .term-wrap {
     position: relative;
@@ -1732,19 +1705,6 @@ scheduleAutoCycle();
     margin-top: 14px;
     display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
   }
-  .verify-inline {
-    display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    font-family: var(--ilo-font-sans); font-size: 12.5px; color: var(--ilo-fg-4);
-  }
-  .verify-inline code {
-    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
-    font-size: 12px; color: var(--ilo-fg-2);
-    background: rgba(255,255,255,0.04);
-    padding: 2px 7px; border-radius: 4px;
-  }
-  .verify-inline .arrow { color: var(--ilo-fg-4); }
-  .verify-inline .out { color: var(--ilo-accent); font-family: var(--ilo-font-mono); font-size: 12px; font-weight: 500; }
-  .verify-inline .check { color: var(--ilo-lime); font-family: var(--ilo-font-mono); font-size: 11px; font-weight: 600; }
   .more {
     margin-left: auto;
     font-family: var(--ilo-font-sans); font-size: 13px; font-weight: 500;
