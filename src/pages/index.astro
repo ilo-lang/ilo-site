@@ -132,9 +132,9 @@ print(total)</pre>
           <span class="delta-pill" id="demo-delta">−64%</span>
           <div class="demo-dots" id="demo-dots">
             <button class="demo-dot is-active" data-idx="0" aria-label="fold-sum"></button>
-            <button class="demo-dot" data-idx="1" aria-label="map-double"></button>
-            <button class="demo-dot" data-idx="2" aria-label="filter-even"></button>
-            <button class="demo-dot" data-idx="3" aria-label="pipes"></button>
+            <button class="demo-dot" data-idx="1" aria-label="guards"></button>
+            <button class="demo-dot" data-idx="2" aria-label="http-fetch"></button>
+            <button class="demo-dot" data-idx="3" aria-label="json-parse"></button>
           </div>
         </div>
       </div>
@@ -1766,22 +1766,22 @@ print(total)</pre>
         pyTok: 42, iloTok: 15, delta: 64,
       },
       {
-        name: 'map-double',
-        py: 'nums <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]\ndoubled <span class="op">=</span> [n <span class="op">*</span> <span class="num">2</span> <span class="kw">for</span> n <span class="kw">in</span> nums]\nprint(doubled)',
-        ilo: '<span class="kw">map</span> <span class="op">*</span><span class="num">2</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>]',
-        pyTok: 36, iloTok: 14, delta: 61,
+        name: 'guards',
+        py: '<span class="kw">def</span> grade(score):\n    <span class="kw">if</span> score <span class="op">&gt;=</span> <span class="num">90</span>:\n        <span class="kw">return</span> <span class="str">"A"</span>\n    <span class="kw">elif</span> score <span class="op">&gt;=</span> <span class="num">80</span>:\n        <span class="kw">return</span> <span class="str">"B"</span>\n    <span class="kw">elif</span> score <span class="op">&gt;=</span> <span class="num">70</span>:\n        <span class="kw">return</span> <span class="str">"C"</span>\n    <span class="kw">else</span>:\n        <span class="kw">return</span> <span class="str">"F"</span>',
+        ilo: '<span class="kw">grade</span> s<span class="op">:</span>n<span class="op">&gt;</span>t\n  <span class="op">&gt;=</span>s <span class="num">90</span> <span class="str">"A"</span>\n  <span class="op">&gt;=</span>s <span class="num">80</span> <span class="str">"B"</span>\n  <span class="op">&gt;=</span>s <span class="num">70</span> <span class="str">"C"</span>\n  <span class="str">"F"</span>',
+        pyTok: 48, iloTok: 33, delta: 31,
       },
       {
-        name: 'filter-even',
-        py: 'nums <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>]\nevens <span class="op">=</span> [n <span class="kw">for</span> n <span class="kw">in</span> nums <span class="kw">if</span> n <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>]\nprint(evens)',
-        ilo: '<span class="kw">flt</span> <span class="op">=</span><span class="num">0</span><span class="op">%</span><span class="num">2</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>]',
-        pyTok: 42, iloTok: 18, delta: 57,
+        name: 'http-fetch',
+        py: '<span class="kw">import</span> requests\n\nr <span class="op">=</span> requests.get(<span class="str">"https://api.example.com/users"</span>)\n<span class="kw">if</span> r.status_code <span class="op">==</span> <span class="num">200</span>:\n    print(r.json())\n<span class="kw">else</span>:\n    print(<span class="str">"error"</span>, r.status_code)',
+        ilo: 'r <span class="op">&lt;-</span> <span class="kw">get</span><span class="op">!</span> <span class="str">"https://api.example.com/users"</span>\n<span class="op">?</span>r.ok r.json [<span class="str">"err"</span> r.code]',
+        pyTok: 39, iloTok: 23, delta: 41,
       },
       {
-        name: 'pipes',
-        py: 'nums <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>, <span class="num">7</span>, <span class="num">8</span>, <span class="num">9</span>, <span class="num">10</span>]\ntotal <span class="op">=</span> <span class="kw">sum</span>(n <span class="op">*</span> <span class="num">2</span> <span class="kw">for</span> n <span class="kw">in</span> nums <span class="kw">if</span> n <span class="op">&gt;</span> <span class="num">5</span>)\nprint(total)',
-        ilo: '[<span class="num">1</span>..<span class="num">10</span>] <span class="op">&gt;&gt;</span> <span class="kw">flt</span> <span class="op">&gt;</span><span class="num">5</span> <span class="op">&gt;&gt;</span> <span class="kw">map</span> <span class="op">*</span><span class="num">2</span> <span class="op">&gt;&gt;</span> <span class="kw">sum</span>',
-        pyTok: 52, iloTok: 16, delta: 69,
+        name: 'json-parse',
+        py: '<span class="kw">import</span> json\n\ndata <span class="op">=</span> json.loads(raw)\n<span class="kw">if</span> <span class="str">"users"</span> <span class="kw">in</span> data:\n    <span class="kw">for</span> u <span class="kw">in</span> data[<span class="str">"users"</span>]:\n        print(u[<span class="str">"name"</span>])',
+        ilo: 'd <span class="op">&lt;-</span> <span class="kw">json</span><span class="op">!</span> raw\n<span class="kw">each</span> d.users.<span class="op">*</span>.name <span class="kw">prn</span>',
+        pyTok: 30, iloTok: 14, delta: 53,
       },
     ];
 
