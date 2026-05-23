@@ -123,7 +123,8 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
           </h1>
           <p class="hero-sub">The fewest tokens from intent to working code.</p>
           <p class="hero-lede">
-            Its intended author is an LLM, not a human. Prefix notation. Single-character names. Type-verified before execution. JSON out by default.
+            <strong class="hero-lede-claim">The first programming language designed from the ground up for AI agents.</strong>
+            The intended author is an LLM, not a human. Prefix notation. Single-character names. Type-verified before execution. JSON out by default.
             One metric, evaluated against every design decision: <em>total token cost from intent to working code.</em>
           </p>
 
@@ -1265,6 +1266,7 @@ scheduleAutoCycle();
     margin-top: -4px;
   }
   .hero-lede { font-size: 18px; line-height: 1.55; color: var(--ilo-fg-3); max-width: 520px; }
+  .hero-lede-claim { color: var(--ilo-fg-1); font-weight: 600; display: block; margin-bottom: 6px; }
 
 
   .hero-actions { display: flex; gap: 14px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
