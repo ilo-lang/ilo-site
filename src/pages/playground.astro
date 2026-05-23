@@ -11,7 +11,6 @@ type Example = {
   pyName: string;
   iloName: string;
   py: string;
-  ilo: string;
   iloText: string;
   iloTok: number;
   note: string;
@@ -26,7 +25,6 @@ const examples: Example[] = [
 nums = [1, 2, 3, 4, 5]
 total = reduce(lambda a, b: a + b, nums, 0)
 print(total)`,
-    ilo: '<span class="kw">fld</span> <span class="op">+</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>] <span class="num">0</span>',
     iloText: 'fld + [1,2,3,4,5] 0',
     iloTok: 9,
     note: 'reduce becomes <code>fld</code> with the operator passed directly, no lambda boilerplate.',
@@ -37,7 +35,6 @@ print(total)`,
     py: `nums = [1, 2, 3, 4, 5]
 doubled = [n * 2 for n in nums]
 print(doubled)`,
-    ilo: '<span class="kw">map</span> <span class="op">*</span><span class="num">2</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>]',
     iloText: 'map *2 [1,2,3,4,5]',
     iloTok: 9,
     note: 'List comp becomes <code>map</code> with a curried <code>*2</code>. No <code>for</code>, no temporary binding.',
@@ -48,7 +45,6 @@ print(doubled)`,
     py: `nums = [1, 2, 3, 4, 5, 6]
 evens = [n for n in nums if n % 2 == 0]
 print(evens)`,
-    ilo: '<span class="kw">flt</span> <span class="op">=</span><span class="num">0</span><span class="op">%</span><span class="num">2</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>]',
     iloText: 'flt =0%2 [1,2,3,4,5,6]',
     iloTok: 14,
     note: 'Predicate is a one-shot prefix expression: <code>=0 %x 2</code>.',
@@ -59,7 +55,6 @@ print(evens)`,
     py: `nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 total = sum(n * 2 for n in nums if n > 5)
 print(total)`,
-    ilo: '[<span class="num">1</span>..<span class="num">10</span>] <span class="op">&gt;&gt;</span> <span class="kw">flt</span> <span class="op">&gt;</span><span class="num">5</span> <span class="op">&gt;&gt;</span> <span class="kw">map</span> <span class="op">*</span><span class="num">2</span> <span class="op">&gt;&gt;</span> <span class="kw">sum</span>',
     iloText: '[1..10] >> flt >5 >> map *2 >> sum',
     iloTok: 17,
     note: 'Pipe operator <code>&gt;&gt;</code> threads the list through each stage left to right.',
@@ -76,7 +71,6 @@ print(total)`,
         return "C"
     else:
         return "F"`,
-    ilo: '<span class="kw">grade</span> s<span class="op">:n</span><span class="op">&gt;t</span>\n  <span class="op">&gt;=</span>s <span class="num">90</span> <span class="str">"A"</span>\n  <span class="op">&gt;=</span>s <span class="num">80</span> <span class="str">"B"</span>\n  <span class="op">&gt;=</span>s <span class="num">70</span> <span class="str">"C"</span>\n  <span class="str">"F"</span>',
     iloText: 'grade s:n>t\n  >=s 90 "A"\n  >=s 80 "B"\n  >=s 70 "C"\n  "F"',
     iloTok: 28,
     note: 'Flat guard clauses, no <code>if</code>/<code>elif</code>/<code>else</code> ceremony, no braces.',
@@ -92,7 +86,6 @@ print(total)`,
             return w * h
         case ("tri", b, h):
             return 0.5 * b * h`,
-    ilo: '<span class="kw">area</span> s<span class="op">:</span>shape<span class="op">&gt;n</span>\n  <span class="op">?</span>s\n    [<span class="str">"circle"</span> r]  <span class="op">**</span><span class="num">3.14</span> r r\n    [<span class="str">"rect"</span> w h] <span class="op">*</span>w h\n    [<span class="str">"tri"</span> b h]  <span class="op">**</span><span class="num">0.5</span> b h',
     iloText: 'area s:shape>n\n  ?s\n    ["circle" r]  **3.14 r r\n    ["rect" w h] *w h\n    ["tri" b h]  **0.5 b h',
     iloTok: 38,
     note: 'Pattern match with <code>?</code>; arms are flat, pattern then expression.',
@@ -107,10 +100,9 @@ if r.status_code == 200:
     print(r.json())
 else:
     print("error", r.status_code)`,
-    ilo: '<span class="kw">fetch</span> u<span class="op">:s</span><span class="op">&gt;</span>j <span class="op">!</span>net\n  r <span class="op">&lt;-</span> get<span class="op">!</span> u\n  <span class="op">?</span>r.ok r.json [<span class="str">"err"</span> r.code]',
-    iloText: 'fetch u:s>j !net\n  r <- get! u\n  ?r.ok r.json ["err" r.code]',
-    iloTok: 28,
-    note: 'Effect annotation <code>!net</code> on the signature. Error path is a tuple, not a string.',
+    iloText: 'r <- get! "https://api.example.com/users"\n?r.ok r.json ["err" r.code]',
+    iloTok: 34,
+    note: '<code>&lt;-</code> unwraps the Result inline; the error path is a tuple <code>["err" r.code]</code>, not a string.',
   },
   {
     key: 'parse', group: 'i/o & errors', name: 'json parse',
@@ -121,7 +113,6 @@ data = json.loads(raw)
 if "users" in data:
     for u in data["users"]:
         print(u["name"])`,
-    ilo: 'd <span class="op">&lt;-</span> json<span class="op">!</span> raw\n<span class="kw">each</span> d.users.<span class="op">*</span>.name <span class="kw">prn</span>',
     iloText: 'd <- json! raw\neach d.users.*.name prn',
     iloTok: 15,
     note: 'Path expression <code>d.users.*.name</code> walks the list inline.',
@@ -129,6 +120,7 @@ if "users" in data:
 ];
 
 const groups = Array.from(new Set(examples.map(e => e.group)));
+const firstMultiName = examples[0].iloName.replace(/\.@$/, '.multi.@');
 const exampleJson = JSON.stringify(
   Object.fromEntries(examples.map(e => [e.key, e])),
 );
@@ -583,7 +575,7 @@ const exampleJson = JSON.stringify(
             <div class="pl-pane-head">
               <span class="lang">ilo</span>
               <span class="tag amber">multi-line</span>
-              <span class="name" id="pl-ilo-name">{examples[0].iloName}</span>
+              <span class="name" id="pl-ilo-name">{firstMultiName}</span>
               <button class="pl-pane-copy" data-action="copy-ilo" data-target="pl-ilo-multi">copy</button>
             </div>
             <pre class="pl-out" id="pl-ilo-multi"></pre>
@@ -900,13 +892,27 @@ const exampleJson = JSON.stringify(
     setDeltaPill(els.deltaCompact, cTok, pyTok);
   }
 
+  function multiName(iloName) {
+    return iloName.replace(/\.@$/, '.multi.@');
+  }
+
+  function updateFilenames() {
+    const py = els.pyEdit.value;
+    const ex = currentKey ? EXAMPLES[currentKey] : null;
+    const isExample = ex && ex.py === py;
+    const pyName  = isExample ? ex.pyName  : 'custom.py';
+    const iloName = isExample ? ex.iloName : 'custom.@';
+    els.pyName.textContent = pyName;
+    if (els.iloNameCompact) els.iloNameCompact.textContent = iloName;
+    if (els.iloName) els.iloName.textContent = multiName(iloName);
+  }
+
   function apply(key) {
     const ex = EXAMPLES[key];
     if (!ex) return;
-    els.pyName.textContent = ex.pyName;
-    els.iloName.textContent = ex.iloName;
-    if (els.iloNameCompact) els.iloNameCompact.textContent = ex.iloName;
     els.pyEdit.value = ex.py;
+    currentKey = key;
+    updateFilenames();
     currentIloText = ex.iloText;
     renderIlo();
     replaceHtml(els.note, ex.note);
@@ -917,7 +923,6 @@ const exampleJson = JSON.stringify(
       u.searchParams.delete('py');
       history.replaceState({}, '', u);
     }
-    currentKey = key;
     isExampleResult = true;
     lastConvertedPy = ex.py;
     setFoot('');
@@ -1026,6 +1031,7 @@ const exampleJson = JSON.stringify(
     renderPyHighlight();
     updateConvertBtn();
     syncActiveExample();
+    updateFilenames();
     updateShareUrl();
     if (convertTimer) clearTimeout(convertTimer);
     convertTimer = setTimeout(convertNow, 500);
@@ -1088,6 +1094,7 @@ const exampleJson = JSON.stringify(
       renderPyHighlight();
       renderIlo();
       syncActiveExample();
+      updateFilenames();
       updateConvertBtn();
       convertNow();
     } else if (key && EXAMPLES[key]) {
