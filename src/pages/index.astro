@@ -34,8 +34,7 @@ const posts: Post[] = await fetch('https://danieljohnmorris.com/rss.xml')
         const needle = (title + desc + cat).toLowerCase();
         return needle.includes('ilo') ? { title, url: link, date: pubDate ? new Date(pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : '' } : null;
       })
-      .filter(Boolean)
-      .slice(0, 5) as Post[];
+      .filter(Boolean) as Post[];
   })
   .catch(() => [] as Post[]);
 ---
@@ -432,8 +431,8 @@ print(total)</pre>
     <div class="bench-inner">
       <div class="bench-head">
         <div class="kicker">Benchmarks</div>
-        <h2>Mid-pack on runtime. By design.</h2>
-        <p class="sub">ilo ships three engines — a bytecode VM, a Cranelift JIT, and a Cranelift AOT compiler. Faster than Python and Ruby; slower than V8 and Go. The optimisation budget went into tokens, not nanoseconds.</p>
+        <h2>Three engines, measured.</h2>
+        <p class="sub">Three runtimes: a bytecode VM, a Cranelift JIT, and a Cranelift AOT compiler. Faster than Python and Ruby, slower than V8 and Go. ilo optimises tokens, not nanoseconds.</p>
       </div>
       <div class="bench-card">
         <div class="bench-head-row">
@@ -464,18 +463,21 @@ print(total)</pre>
   {posts.length > 0 && (
     <section class="writing" id="writing">
       <div class="writing-inner">
-        <div class="writing-kicker">Recent</div>
-        <div class="writing-head">
+        <div class="section-h">
+          <div class="kicker">Recent</div>
           <h2>Writing</h2>
-          <a class="btn-text" href="https://danieljohnmorris.com/writing/" target="_blank" rel="noopener">Read more writing →</a>
         </div>
-        <div class="writing-list">
+        <div class="writing-list" id="writing-list">
           {posts.slice(0, 5).map((p) => (
             <a class="writing-item" href={p.url} target="_blank" rel="noopener">
               {p.date && <time class="writing-date">{p.date}</time>}
               <span class="writing-title">{p.title}</span>
             </a>
           ))}
+        </div>
+        <script type="application/json" id="writing-pool" set:html={JSON.stringify(posts)}></script>
+        <div class="writing-foot">
+          <a class="btn-text" href="https://danieljohnmorris.com/writing/" target="_blank" rel="noopener">Read more writing →</a>
         </div>
       </div>
     </section>
@@ -1324,21 +1326,11 @@ print(total)</pre>
   /* Writing */
   .writing { padding: 80px 32px; border-bottom: 1px solid var(--ilo-hairline); }
   .writing-inner { max-width: 1080px; margin: 0 auto; }
-  .writing-kicker {
+  .writing .section-h .kicker {
     font-family: var(--ilo-font-sans);
     font-size: 10.5px; font-weight: 600;
     letter-spacing: 0.10em; text-transform: uppercase;
     color: var(--ilo-amber); margin-bottom: 8px;
-  }
-  .writing-head {
-    display: flex; align-items: baseline; justify-content: space-between;
-    gap: 16px; flex-wrap: wrap;
-  }
-  .writing-head h2 {
-    font-family: var(--ilo-font-sans);
-    font-size: 48px; font-weight: 700;
-    color: var(--ilo-fg-1); margin: 0;
-    letter-spacing: -0.025em; line-height: 1.05;
   }
   .writing-list {
     margin-top: 28px;
@@ -1350,8 +1342,16 @@ print(total)</pre>
     padding: 1rem 0;
     border-bottom: 1px solid var(--ilo-hairline);
     text-decoration: none;
+    transition: opacity 300ms var(--ilo-ease);
   }
   .writing-item:hover .writing-title { color: var(--ilo-fg-1); }
+  .writing-foot {
+    margin-top: 22px;
+    display: flex; align-items: center; justify-content: flex-end;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .writing-item { transition: none; }
+  }
   .writing-date {
     font-family: var(--ilo-font-mono);
     font-size: 0.75rem; font-weight: 500;
@@ -1444,7 +1444,6 @@ print(total)</pre>
     .bench-row { grid-template-columns: 88px 70px 1fr 70px; gap: 8px; }
     .bench-head h2 { font-size: 26px; }
     .writing { padding: 56px 20px; }
-    .writing-head h2 { font-size: 36px; }
     .final-cta { padding: 56px 20px; }
     .cta-statement { font-size: 28px; }
     footer { padding: 40px 20px 28px; }
@@ -1687,5 +1686,145 @@ print(total)</pre>
           : '';
       })
       .catch(() => fallback());
+  })();
+
+  // writing section: live RSS refresh + idle-swap rotation
+  (function () {
+    type WPost = { title: string; url: string; date: string };
+
+    const listEl = document.getElementById('writing-list');
+    if (!listEl) return;
+
+    const VISIBLE = 5;
+    const IDLE_MS = 4000;
+    const FADE_MS = 300;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // build-time pool (already server-rendered, also embedded as JSON fallback)
+    function readBuildPool(): WPost[] {
+      const el = document.getElementById('writing-pool');
+      if (!el || !el.textContent) return [];
+      try {
+        const arr = JSON.parse(el.textContent) as WPost[];
+        return Array.isArray(arr) ? arr : [];
+      } catch (_) { return []; }
+    }
+
+    function formatDate(pubDate: string): string {
+      if (!pubDate) return '';
+      const d = new Date(pubDate);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+    }
+
+    // parse the personal RSS feed for ilo-tagged items
+    function parseFeed(xml: string): WPost[] {
+      const doc = new DOMParser().parseFromString(xml, 'application/xml');
+      if (doc.querySelector('parsererror')) return [];
+      const items = Array.from(doc.querySelectorAll('item'));
+      const out: WPost[] = [];
+      for (const item of items) {
+        const cats = Array.from(item.querySelectorAll('category')).map((c) => (c.textContent || '').toLowerCase());
+        if (!cats.includes('ilo')) continue;
+        const title = (item.querySelector('title')?.textContent || '').trim();
+        const url = (item.querySelector('link')?.textContent || '').trim();
+        const date = formatDate((item.querySelector('pubDate')?.textContent || '').trim());
+        if (title && url) out.push({ title, url, date });
+      }
+      return out;
+    }
+
+    // render the visible rows from a list of posts
+    function renderList(posts: WPost[]) {
+      while (listEl!.firstChild) listEl!.removeChild(listEl!.firstChild);
+      posts.slice(0, VISIBLE).forEach((p) => {
+        const a = document.createElement('a');
+        a.className = 'writing-item';
+        a.href = p.url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        if (p.date) {
+          const t = document.createElement('time');
+          t.className = 'writing-date';
+          t.textContent = p.date;
+          a.appendChild(t);
+        }
+        const span = document.createElement('span');
+        span.className = 'writing-title';
+        span.textContent = p.title;
+        a.appendChild(span);
+        listEl!.appendChild(a);
+      });
+    }
+
+    // ── rotation state ──────────────────────────────────────────────
+    let all: WPost[] = [];
+    let poolCursor = 0;   // index into the "older" pool
+    let rowCursor = 0;    // which visible row to swap next
+    let lastActivity = Date.now();
+
+    // swap one visible row for the next pool item, quietly
+    function swapOne() {
+      const rows = listEl!.querySelectorAll<HTMLAnchorElement>('.writing-item');
+      if (!rows.length || all.length <= VISIBLE) return;
+      const pool = all.slice(VISIBLE);
+      if (!pool.length) return;
+
+      const next = pool[poolCursor % pool.length];
+      poolCursor++;
+      const row = rows[rowCursor % rows.length];
+      rowCursor++;
+
+      const apply = () => {
+        const timeEl = row.querySelector<HTMLTimeElement>('.writing-date');
+        const titleEl = row.querySelector<HTMLSpanElement>('.writing-title');
+        row.href = next.url;
+        if (titleEl) titleEl.textContent = next.title;
+        if (timeEl) timeEl.textContent = next.date;
+      };
+
+      if (reduceMotion) { apply(); return; }
+      row.style.opacity = '0';
+      window.setTimeout(() => {
+        apply();
+        row.style.opacity = '1';
+      }, FADE_MS);
+    }
+
+    // idle detection: one interval ticks, swaps when idle long enough
+    function markActive() {
+      lastActivity = Date.now();
+    }
+    ['mousemove', 'scroll', 'keydown', 'touchstart'].forEach((ev) => {
+      window.addEventListener(ev, markActive, { passive: true });
+    });
+
+    let rotating = false;
+    function startRotation() {
+      if (rotating || all.length <= VISIBLE) return; // nothing to rotate in
+      rotating = true;
+      window.setInterval(() => {
+        if (Date.now() - lastActivity >= IDLE_MS) {
+          swapOne();
+        }
+      }, IDLE_MS);
+    }
+
+    // initialise from the build-time pool, then try a live refresh
+    all = readBuildPool();
+    startRotation();
+
+    fetch('https://danieljohnmorris.com/rss.xml')
+      .then((r) => (r.ok ? r.text() : Promise.reject(new Error('http ' + r.status))))
+      .then((xml) => {
+        const posts = parseFeed(xml);
+        if (!posts.length) return; // keep what's rendered
+        all = posts;
+        poolCursor = 0;
+        rowCursor = 0;
+        renderList(all);
+        startRotation();
+      })
+      .catch(() => { /* fetch blocked (e.g. CORS): keep the server-rendered list */ });
   })();
 </script>
