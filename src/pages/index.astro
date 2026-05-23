@@ -1768,19 +1768,19 @@ print(total)</pre>
       {
         name: 'guards',
         py: '<span class="kw">def</span> grade(score):\n    <span class="kw">if</span> score <span class="op">&gt;=</span> <span class="num">90</span>:\n        <span class="kw">return</span> <span class="str">"A"</span>\n    <span class="kw">elif</span> score <span class="op">&gt;=</span> <span class="num">80</span>:\n        <span class="kw">return</span> <span class="str">"B"</span>\n    <span class="kw">elif</span> score <span class="op">&gt;=</span> <span class="num">70</span>:\n        <span class="kw">return</span> <span class="str">"C"</span>\n    <span class="kw">else</span>:\n        <span class="kw">return</span> <span class="str">"F"</span>',
-        ilo: '<span class="kw">grade</span> s<span class="op">:</span>n<span class="op">&gt;</span>t\n  <span class="op">&gt;=</span>s <span class="num">90</span> <span class="str">"A"</span>\n  <span class="op">&gt;=</span>s <span class="num">80</span> <span class="str">"B"</span>\n  <span class="op">&gt;=</span>s <span class="num">70</span> <span class="str">"C"</span>\n  <span class="str">"F"</span>',
-        pyTok: 48, iloTok: 33, delta: 31,
+        ilo: '<span class="kw">g</span> s<span class="op">:</span>n<span class="op">&gt;</span>t;<span class="op">&gt;=</span>s <span class="num">90</span> <span class="str">"A"</span>;<span class="op">&gt;=</span>s <span class="num">80</span> <span class="str">"B"</span>;<span class="op">&gt;=</span>s <span class="num">70</span> <span class="str">"C"</span>;<span class="str">"F"</span>',
+        pyTok: 48, iloTok: 29, delta: 40,
       },
       {
         name: 'http-fetch',
         py: '<span class="kw">import</span> requests\n\nr <span class="op">=</span> requests.get(<span class="str">"https://api.example.com/users"</span>)\n<span class="kw">if</span> r.status_code <span class="op">==</span> <span class="num">200</span>:\n    print(r.json())\n<span class="kw">else</span>:\n    print(<span class="str">"error"</span>, r.status_code)',
-        ilo: 'r <span class="op">&lt;-</span> <span class="kw">get</span><span class="op">!</span> <span class="str">"https://api.example.com/users"</span>\n<span class="op">?</span>r.ok r.json [<span class="str">"err"</span> r.code]',
+        ilo: 'r <span class="op">&lt;-</span> <span class="kw">get</span><span class="op">!</span> <span class="str">"https://api.example.com/users"</span>;<span class="op">?</span>r.ok r.json [<span class="str">"err"</span> r.code]',
         pyTok: 39, iloTok: 23, delta: 41,
       },
       {
         name: 'json-parse',
         py: '<span class="kw">import</span> json\n\ndata <span class="op">=</span> json.loads(raw)\n<span class="kw">if</span> <span class="str">"users"</span> <span class="kw">in</span> data:\n    <span class="kw">for</span> u <span class="kw">in</span> data[<span class="str">"users"</span>]:\n        print(u[<span class="str">"name"</span>])',
-        ilo: 'd <span class="op">&lt;-</span> <span class="kw">json</span><span class="op">!</span> raw\n<span class="kw">each</span> d.users.<span class="op">*</span>.name <span class="kw">prn</span>',
+        ilo: 'd <span class="op">&lt;-</span> <span class="kw">json</span><span class="op">!</span> raw;<span class="kw">each</span> d.users.<span class="op">*</span>.name <span class="kw">prn</span>',
         pyTok: 30, iloTok: 14, delta: 53,
       },
     ];
