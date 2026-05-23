@@ -199,13 +199,13 @@ const exampleJson = JSON.stringify(
       color: var(--ilo-fg-2); text-decoration: none;
     }
     .pl-nav-link:hover { color: var(--ilo-fg-1); }
-    .pl-nav-btn {
-      font-family: var(--ilo-font-sans); font-size: 12.5px; font-weight: 600;
-      padding: 7px 14px; border-radius: var(--ilo-radius-sm);
-      background: var(--ilo-amber); color: #1a0e02;
-      text-decoration: none;
+    .pl-nav-gh {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--ilo-font-sans); font-size: 13px; font-weight: 500;
+      color: var(--ilo-fg-2); text-decoration: none;
     }
-    .pl-nav-btn:hover { background: var(--ilo-amber-hot); }
+    .pl-nav-gh:hover { color: var(--ilo-fg-1); }
+    .pl-nav-gh svg { width: 14px; height: 14px; }
 
     .pl-main {
       max-width: 1380px; width: 100%;
@@ -273,6 +273,11 @@ const exampleJson = JSON.stringify(
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 14px;
     }
+    .pl-ilo-stack {
+      display: flex; flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
     .pl-pane {
       background: var(--ilo-ink-1);
       border: 1px solid var(--ilo-hairline);
@@ -280,6 +285,26 @@ const exampleJson = JSON.stringify(
       overflow: hidden;
       display: flex; flex-direction: column;
       min-height: 360px;
+    }
+    .pl-pane.is-ilo-multi { min-height: 200px; }
+    .pl-pane.is-ilo-compact { min-height: 80px; }
+    .pl-pane-stats {
+      margin-left: 10px;
+      font-family: var(--ilo-font-mono);
+      font-size: 10.5px;
+      color: var(--ilo-fg-3);
+      letter-spacing: 0.04em;
+    }
+    .pl-pane-stats .unit {
+      font-family: var(--ilo-font-mono); font-size: 10.5px;
+      color: var(--ilo-fg-4);
+      margin-left: 3px;
+      margin-right: 2px;
+    }
+    .pl-pane-stats .pl-r-dot {
+      font-family: var(--ilo-font-mono); font-size: 11px;
+      color: var(--ilo-fg-4);
+      margin: 0 3px;
     }
     .pl-pane-head {
       display: flex; align-items: center; gap: 10px;
@@ -305,23 +330,6 @@ const exampleJson = JSON.stringify(
       color: var(--ilo-amber);
       border-color: rgba(224, 148, 34, 0.28);
       background: rgba(224, 148, 34, 0.05);
-    }
-    .pl-pane-toggle {
-      font-family: var(--ilo-font-mono);
-      font-size: 10.5px;
-      letter-spacing: 0.04em;
-      padding: 2px 8px;
-      border-radius: 4px;
-      border: 1px solid var(--ilo-hairline);
-      background: transparent;
-      color: var(--ilo-fg-3);
-      cursor: pointer;
-      transition: color var(--ilo-duration-2) var(--ilo-ease),
-                  border-color var(--ilo-duration-2) var(--ilo-ease);
-    }
-    .pl-pane-toggle:hover {
-      color: var(--ilo-fg-1);
-      border-color: var(--ilo-hairline-strong);
     }
     .pl-edit, .pl-out {
       flex: 1;
@@ -527,7 +535,10 @@ const exampleJson = JSON.stringify(
       <div class="pl-nav-right">
         <a class="pl-nav-link" href="/#manifesto">Manifesto</a>
         <a class="pl-nav-link" href="/docs/introduction/">Docs</a>
-        <a class="pl-nav-btn" href="/#install">Install ilo</a>
+        <a class="pl-nav-gh" href="https://github.com/ilo-lang/ilo" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
       </div>
     </div>
   </header>
@@ -570,14 +581,26 @@ const exampleJson = JSON.stringify(
           </div>
         </div>
 
-        <div class="pl-pane">
-          <div class="pl-pane-head">
-            <span class="lang">ilo</span>
-            <span class="tag amber">converted</span>
-            <button class="pl-pane-toggle" id="pl-ilo-toggle" type="button" data-action="toggle-mode">multi-line</button>
-            <span class="name" id="pl-ilo-name">{examples[0].iloName}</span>
+        <div class="pl-ilo-stack">
+          <div class="pl-pane is-ilo-multi">
+            <div class="pl-pane-head">
+              <span class="lang">ilo</span>
+              <span class="tag amber">multi-line</span>
+              <span class="pl-pane-stats"><span id="pl-ilo-multi-tok">—</span><span class="unit">tok</span><span class="pl-r-dot">·</span><span id="pl-ilo-multi-ch">—</span><span class="unit">ch</span></span>
+              <span class="name" id="pl-ilo-name">{examples[0].iloName}</span>
+            </div>
+            <pre class="pl-out" id="pl-ilo-multi"></pre>
           </div>
-          <pre class="pl-out" id="pl-ilo-out" set:html={examples[0].ilo} />
+
+          <div class="pl-pane is-ilo-compact">
+            <div class="pl-pane-head">
+              <span class="lang">ilo</span>
+              <span class="tag amber">compact</span>
+              <span class="pl-pane-stats"><span id="pl-ilo-compact-tok">—</span><span class="unit">tok</span><span class="pl-r-dot">·</span><span id="pl-ilo-compact-ch">—</span><span class="unit">ch</span></span>
+              <span class="name" id="pl-ilo-name-compact">{examples[0].iloName}</span>
+            </div>
+            <pre class="pl-out" id="pl-ilo-compact"></pre>
+          </div>
         </div>
       </div>
 
@@ -602,7 +625,7 @@ const exampleJson = JSON.stringify(
 
       <div class="pl-actions">
         <button class="pl-btn" data-action="reset">Reset to example</button>
-        <button class="pl-btn" data-action="copy-ilo" data-target="pl-ilo-out">Copy ilo</button>
+        <button class="pl-btn" data-action="copy-ilo" data-target="pl-ilo-multi">Copy ilo</button>
         <button class="pl-btn pl-btn-convert" data-action="convert" id="pl-convert-btn">Convert</button>
         <div class="pl-actions-right">
           <button class="pl-btn" data-action="copy-share" id="pl-share-btn">Copy share link</button>
@@ -637,7 +660,13 @@ const exampleJson = JSON.stringify(
     pyEdit:  document.getElementById('pl-py-edit'),
     pyHighlight: document.getElementById('pl-py-highlight'),
     iloName: document.getElementById('pl-ilo-name'),
-    iloOut:  document.getElementById('pl-ilo-out'),
+    iloNameCompact: document.getElementById('pl-ilo-name-compact'),
+    iloMulti:   document.getElementById('pl-ilo-multi'),
+    iloCompact: document.getElementById('pl-ilo-compact'),
+    iloMultiTok:   document.getElementById('pl-ilo-multi-tok'),
+    iloMultiCh:    document.getElementById('pl-ilo-multi-ch'),
+    iloCompactTok: document.getElementById('pl-ilo-compact-tok'),
+    iloCompactCh:  document.getElementById('pl-ilo-compact-ch'),
     pyTok:   document.getElementById('pl-py-tok'),
     iloTok:  document.getElementById('pl-ilo-tok'),
     pyCh:    document.getElementById('pl-py-ch'),
@@ -649,14 +678,12 @@ const exampleJson = JSON.stringify(
     footNote: document.getElementById('pl-foot-note'),
     footText: document.getElementById('pl-foot-text'),
     convertBtn: document.getElementById('pl-convert-btn'),
-    toggleBtn: document.getElementById('pl-ilo-toggle'),
   };
 
   let currentKey = ORDER[0];
   let isExampleResult = true;
   let lastConvertedPy = EXAMPLES[ORDER[0]].py;
   let isConverting = false;
-  let isCompact = false;
   let currentIloText = EXAMPLES[ORDER[0]].iloText;
 
   function stripMainWrapper(text) {
@@ -864,10 +891,19 @@ const exampleJson = JSON.stringify(
   function setPyChars(n)  { els.pyCh.textContent = n; }
 
   function renderIlo() {
-    const display = isCompact ? toCompact(currentIloText) : currentIloText;
-    replaceHtml(els.iloOut, highlightIlo(display));
-    setIloTokens(countTokens(display));
-    setIloChars(display.length);
+    const multi = currentIloText;
+    const compact = toCompact(currentIloText);
+    replaceHtml(els.iloMulti, highlightIlo(multi));
+    replaceHtml(els.iloCompact, highlightIlo(compact));
+    const mTok = countTokens(multi);
+    const cTok = countTokens(compact);
+    els.iloMultiTok.textContent = mTok;
+    els.iloMultiCh.textContent = multi.length;
+    els.iloCompactTok.textContent = cTok;
+    els.iloCompactCh.textContent = compact.length;
+    // Receipt reflects the canonical (multi-line) numbers.
+    setIloTokens(mTok);
+    setIloChars(multi.length);
   }
 
   function updateDelta() {
@@ -893,6 +929,7 @@ const exampleJson = JSON.stringify(
     if (!ex) return;
     els.pyName.textContent = ex.pyName;
     els.iloName.textContent = ex.iloName;
+    if (els.iloNameCompact) els.iloNameCompact.textContent = ex.iloName;
     els.pyEdit.value = ex.py;
     currentIloText = ex.iloText;
     renderIlo();
@@ -1007,7 +1044,7 @@ const exampleJson = JSON.stringify(
   });
 
   document.body.addEventListener('click', (e) => {
-    const btn = e.target.closest('button.pl-btn, a.pl-btn, button.pl-pane-toggle');
+    const btn = e.target.closest('button.pl-btn, a.pl-btn');
     if (!btn) return;
     const action = btn.getAttribute('data-action');
     if (action === 'reset') {
@@ -1022,10 +1059,6 @@ const exampleJson = JSON.stringify(
     } else if (action === 'convert') {
       if (convertTimer) { clearTimeout(convertTimer); convertTimer = null; }
       convertNow();
-    } else if (action === 'toggle-mode') {
-      isCompact = !isCompact;
-      if (els.toggleBtn) els.toggleBtn.textContent = isCompact ? 'compact' : 'multi-line';
-      renderIlo();
     }
   });
 
