@@ -1708,17 +1708,17 @@ scheduleAutoCycle();
 
   .sia-error { margin-top: 10px; font-family: var(--font-mono); font-size: 0.78rem; color: #f87171; background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.15); border-radius: 6px; padding: 10px 14px; }
 
-  /* SIA syntax tokens (Python in editor, ilo on the right) */
-  .syn-kw  { color: #c8b3ff; }
-  .syn-num { color: var(--ilo-syn-num); }
-  .syn-s   { color: var(--ilo-syn-str); }
-  .syn-op  { color: var(--ilo-syn-op); }
-  .syn-t   { color: var(--ilo-syn-op); }
-  .syn-p   { color: var(--text); }
-  .syn-fn  { color: var(--ilo-amber-high); }
-  .syn-com,
-  .syn-cm,
-  .syn-cmt { color: var(--ilo-syn-cmt); font-style: italic; }
+  /* SIA syntax tokens (Python in editor, ilo on the right) — :global so JS-injected spans match */
+  :global(.syn-kw)  { color: #c8b3ff; }
+  :global(.syn-num) { color: var(--ilo-syn-num); }
+  :global(.syn-s)   { color: var(--ilo-syn-str); }
+  :global(.syn-op)  { color: var(--ilo-syn-op); }
+  :global(.syn-t)   { color: var(--ilo-syn-op); }
+  :global(.syn-p)   { color: var(--text); }
+  :global(.syn-fn)  { color: var(--ilo-amber-high); }
+  :global(.syn-com),
+  :global(.syn-cm),
+  :global(.syn-cmt) { color: var(--ilo-syn-cmt); font-style: italic; }
 
   @media (max-width: 700px) {
     .sia-panes { grid-template-columns: 1fr; }
