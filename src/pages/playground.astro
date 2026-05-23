@@ -975,10 +975,19 @@ const exampleJson = JSON.stringify(
     }
   }
 
+  function syncActiveExample() {
+    const py = els.pyEdit.value;
+    const matchesCurrent = currentKey && EXAMPLES[currentKey] && EXAMPLES[currentKey].py === py;
+    els.sideButtons().forEach((b) => {
+      b.classList.toggle('is-active', matchesCurrent && b.getAttribute('data-key') === currentKey);
+    });
+  }
+
   function scheduleConvert() {
     updatePyTokens();
     renderPyHighlight();
     updateConvertBtn();
+    syncActiveExample();
     if (convertTimer) clearTimeout(convertTimer);
     convertTimer = setTimeout(convertNow, 500);
   }
