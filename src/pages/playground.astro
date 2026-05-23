@@ -592,7 +592,7 @@ const exampleJson = JSON.stringify(
       <p class="pl-note-row" id="pl-note" set:html={examples[0].note}></p>
 
       <div class="pl-actions">
-        <button class="pl-btn" data-action="reset">Reset to example</button>
+        <button class="pl-btn" data-action="reset" id="pl-reset-btn">Reset to example</button>
         <button class="pl-btn pl-btn-convert" data-action="convert" id="pl-convert-btn">Convert</button>
         <div class="pl-actions-right">
           <button class="pl-btn" data-action="copy-share" id="pl-share-btn">Copy share link</button>
@@ -650,6 +650,7 @@ const exampleJson = JSON.stringify(
     footNote: document.getElementById('pl-foot-note'),
     footText: document.getElementById('pl-foot-text'),
     convertBtn: document.getElementById('pl-convert-btn'),
+    resetBtn: document.getElementById('pl-reset-btn'),
   };
 
   let currentKey = ORDER[0];
@@ -896,15 +897,28 @@ const exampleJson = JSON.stringify(
     return iloName.replace(/\.@$/, '.multi.@');
   }
 
+  function customStem(pyText) {
+    const m = pyText.match(/[A-Za-z_][A-Za-z0-9_]*/);
+    return m ? m[0].toLowerCase() : 'custom';
+  }
+
   function updateFilenames() {
     const py = els.pyEdit.value;
     const ex = currentKey ? EXAMPLES[currentKey] : null;
     const isExample = ex && ex.py === py;
-    const pyName  = isExample ? ex.pyName  : 'custom.py';
-    const iloName = isExample ? ex.iloName : 'custom.@';
+    const stem = isExample ? null : customStem(py);
+    const pyName  = isExample ? ex.pyName  : stem + '.py';
+    const iloName = isExample ? ex.iloName : stem + '.@';
     els.pyName.textContent = pyName;
     if (els.iloNameCompact) els.iloNameCompact.textContent = iloName;
     if (els.iloName) els.iloName.textContent = multiName(iloName);
+  }
+
+  function updateResetBtn() {
+    if (!els.resetBtn) return;
+    const ex = currentKey ? EXAMPLES[currentKey] : null;
+    const isExample = ex && ex.py === els.pyEdit.value;
+    els.resetBtn.hidden = !isExample;
   }
 
   function apply(key) {
@@ -913,6 +927,7 @@ const exampleJson = JSON.stringify(
     els.pyEdit.value = ex.py;
     currentKey = key;
     updateFilenames();
+    updateResetBtn();
     currentIloText = ex.iloText;
     renderIlo();
     replaceHtml(els.note, ex.note);
@@ -1032,6 +1047,7 @@ const exampleJson = JSON.stringify(
     updateConvertBtn();
     syncActiveExample();
     updateFilenames();
+    updateResetBtn();
     updateShareUrl();
     if (convertTimer) clearTimeout(convertTimer);
     convertTimer = setTimeout(convertNow, 500);
@@ -1095,6 +1111,7 @@ const exampleJson = JSON.stringify(
       renderIlo();
       syncActiveExample();
       updateFilenames();
+      updateResetBtn();
       updateConvertBtn();
       convertNow();
     } else if (key && EXAMPLES[key]) {
