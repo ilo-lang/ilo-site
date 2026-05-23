@@ -2,6 +2,7 @@
 import BaseHead from '../components/BaseHead.astro';
 import JsonLd from '../components/JsonLd.astro';
 import { SITE_URL, softwareApplicationSchema, websiteSchema } from '../lib/schema';
+import '../styles/global.css';
 
 type Example = {
   key: string;
@@ -434,9 +435,9 @@ const exampleJson = JSON.stringify(
       <a class="pl-wordmark" href="/">ilo</a>
       <span class="pl-sep">/</span>
       <span class="pl-page-name">playground</span>
-      <span class="pl-status">
+      <span class="pl-status" id="pl-status" hidden>
         <span class="pl-status-dot"></span>
-        static · live conversion soon
+        <span id="pl-status-text">converting…</span>
       </span>
       <div class="pl-nav-right">
         <a class="pl-nav-link" href="/#manifesto">Manifesto</a>
@@ -509,8 +510,8 @@ const exampleJson = JSON.stringify(
         </div>
       </div>
 
-      <div class="pl-foot-note">
-        <b>static demo</b>The ilo side is a hard-coded conversion of each example. Editing the Python is allowed (so you can tweak the input or paste your own to compare visually), but the ilo side doesn't yet auto-convert. Live conversion is in progress. Until then, browse the examples or <a href="/#install">install ilo</a> to run real conversions locally.
+      <div class="pl-foot-note" id="pl-foot-note" hidden>
+        <b>heads-up</b><span id="pl-foot-text"></span>
       </div>
 
     </section>
@@ -541,21 +542,61 @@ const exampleJson = JSON.stringify(
     iloTok:  document.getElementById('pl-ilo-tok'),
     delta:   document.getElementById('pl-delta'),
     note:    document.getElementById('pl-note'),
+    status:  document.getElementById('pl-status'),
+    statusText: document.getElementById('pl-status-text'),
+    footNote: document.getElementById('pl-foot-note'),
+    footText: document.getElementById('pl-foot-text'),
   };
 
   let currentKey = ORDER[0];
+  let isExampleResult = true;
 
-  function updatePyTokens() {
-    const py = els.pyEdit.value;
-    const pyTok = countTokens(py);
+  function escapeHtml(s) {
+    return s
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function setStatus(text) {
+    if (!els.status) return;
+    if (text) {
+      els.statusText.textContent = text;
+      els.status.removeAttribute('hidden');
+    } else {
+      els.status.setAttribute('hidden', '');
+    }
+  }
+
+  function setFoot(text) {
+    if (!els.footNote) return;
+    if (text) {
+      els.footText.textContent = ' ' + text;
+      els.footNote.removeAttribute('hidden');
+    } else {
+      els.footNote.setAttribute('hidden', '');
+    }
+  }
+
+  function setIloTokens(n) {
+    els.iloTok.textContent = n;
+    updateDelta();
+  }
+
+  function updateDelta() {
+    const pyTok = parseInt(els.pyTok.textContent, 10) || 0;
     const iloTok = parseInt(els.iloTok.textContent, 10) || 0;
-    els.pyTok.textContent = pyTok;
-    if (pyTok > 0 && iloTok > 0) {
+    if (pyTok > 0 && iloTok > 0 && iloTok < pyTok) {
       const delta = Math.round((1 - iloTok / pyTok) * 100);
       els.delta.textContent = '−' + delta + '%';
     } else {
       els.delta.textContent = '—';
     }
+  }
+
+  function updatePyTokens() {
+    const py = els.pyEdit.value;
+    els.pyTok.textContent = countTokens(py);
+    updateDelta();
   }
 
   function apply(key) {
@@ -565,7 +606,7 @@ const exampleJson = JSON.stringify(
     els.iloName.textContent = ex.iloName;
     els.pyEdit.value = ex.py;
     replaceHtml(els.iloOut, ex.ilo);
-    els.iloTok.textContent = ex.iloTok;
+    setIloTokens(ex.iloTok);
     replaceHtml(els.note, ex.note);
     els.sideButtons().forEach((b) => b.classList.toggle('is-active', b.getAttribute('data-key') === key));
     if (history.replaceState) {
@@ -574,14 +615,77 @@ const exampleJson = JSON.stringify(
       history.replaceState({}, '', u);
     }
     currentKey = key;
+    isExampleResult = true;
+    setFoot('');
     updatePyTokens();
   }
 
+  // ===== Live conversion via convert.ilo-lang.ai =====
+  const convertCache = new Map();
+  let convertSeq = 0;
+  let convertTimer = null;
+
+  async function sha256hex(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function convertNow() {
+    const python = els.pyEdit.value.trim();
+    if (!python) return;
+    const hash = await sha256hex(python);
+
+    if (convertCache.has(hash)) {
+      const cached = convertCache.get(hash);
+      replaceHtml(els.iloOut, escapeHtml(cached));
+      setIloTokens(countTokens(cached));
+      isExampleResult = false;
+      setStatus('');
+      setFoot('');
+      return;
+    }
+
+    const seq = ++convertSeq;
+    setStatus('converting…');
+
+    try {
+      const resp = await fetch('https://convert.ilo-lang.ai/convert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ python }),
+      });
+      if (seq !== convertSeq) return;
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const data = await resp.json();
+      const ilo = data.ilo || data.result || data.code || '';
+      if (!ilo) throw new Error('Empty response');
+      convertCache.set(hash, ilo);
+      replaceHtml(els.iloOut, escapeHtml(ilo));
+      setIloTokens(countTokens(ilo));
+      isExampleResult = false;
+      setStatus('');
+      setFoot('');
+    } catch (err) {
+      if (seq !== convertSeq) return;
+      setStatus('');
+      setFoot('Live conversion unavailable (' + err.message + '). Showing the last example output; install ilo to convert locally.');
+    }
+  }
+
+  function scheduleConvert() {
+    updatePyTokens();
+    if (convertTimer) clearTimeout(convertTimer);
+    convertTimer = setTimeout(convertNow, 500);
+  }
+
   els.sideButtons().forEach((btn) => {
-    btn.addEventListener('click', () => apply(btn.getAttribute('data-key')));
+    btn.addEventListener('click', () => {
+      apply(btn.getAttribute('data-key'));
+      if (convertTimer) clearTimeout(convertTimer);
+    });
   });
 
-  els.pyEdit.addEventListener('input', updatePyTokens);
+  els.pyEdit.addEventListener('input', scheduleConvert);
 
   document.body.addEventListener('click', (e) => {
     const btn = e.target.closest('button.pl-btn, a.pl-btn');
