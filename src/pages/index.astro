@@ -171,27 +171,29 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
           <div class="frame frame-muted">
             <div class="frame-title">
               <span>python · script.py</span>
-              <span class="mono">30 tokens · 93 chars</span>
+              <span class="mono">48 tokens · 117 chars</span>
             </div>
-            <pre class="frame-body"><span class="kw">def</span> tot(p<span class="op">:</span> <span class="op">float</span>, q<span class="op">:</span> <span class="op">float</span>, r<span class="op">:</span> <span class="op">float</span>) <span class="op">-&gt;</span> <span class="op">float</span>:
+            <pre class="frame-body"><span class="kw">def</span> total(p<span class="op">:</span> <span class="op">float</span>, q<span class="op">:</span> <span class="op">float</span>, r<span class="op">:</span> <span class="op">float</span>) <span class="op">-&gt;</span> <span class="op">float</span>:
     s <span class="op">=</span> p <span class="op">*</span> q
     t <span class="op">=</span> s <span class="op">*</span> r
-    <span class="kw">return</span> s <span class="op">+</span> t</pre>
+    <span class="kw">return</span> s <span class="op">+</span> t
+
+<span class="kw">print</span>(total(<span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>))</pre>
           </div>
           <div class="frame">
             <div class="frame-title">
               <span>ilo · script.@</span>
-              <span class="mono">10 tokens · 30 chars</span>
+              <span class="mono">20 tokens · 36 chars</span>
             </div>
             <pre class="frame-body"><span class="kw">tot</span> p<span class="op">:n</span> q<span class="op">:n</span> r<span class="op">:n</span><span class="op">&gt;n</span>;s<span class="op">=*</span>p q;t<span class="op">=*</span>s r;<span class="op">+</span>s t</pre>
           </div>
           <div class="stat-hero">
             <div class="stat-nums">
-              <span>python <b>30</b> tokens</span>
+              <span>python <b>48</b> tokens</span>
               <span class="arrow">→</span>
-              <span>ilo <b>10</b> tokens</span>
+              <span>ilo <b>20</b> tokens</span>
             </div>
-            <span class="pill pill-lime">−67% tokens</span>
+            <span class="pill pill-lime">−58% tokens</span>
           </div>
           <a class="btn-text try-link" href="#see-it-in-action">
             Try it yourself
@@ -903,7 +905,9 @@ const PRESETS: Preset[] = [
     python: `def tot(p, q, r):
     s = p * q
     t = s * r
-    return s + t`,
+    return s + t
+
+print(tot(2, 3, 4))`,
     iloMulti: `tot p:n q:n r:n>n
   s=*p q
   t=*s r
@@ -916,12 +920,14 @@ const PRESETS: Preset[] = [
     python: `def classify(x):
     if x > 0: return "pos"
     if x < 0: return "neg"
-    return "zero"`,
-    iloMulti: `classify x:n>t
+    return "zero"
+
+print(classify(5))`,
+    iloMulti: `cls x:n>t
   >x 0 "pos"
   <x 0 "neg"
   "zero"`,
-    iloInline: `classify x:n>t;>x 0 "pos";<x 0 "neg";"zero"`,
+    iloInline: `cls x:n>t;>x 0 "pos";<x 0 "neg";"zero"`,
     output: 'pos',
   },
   {
@@ -930,7 +936,9 @@ const PRESETS: Preset[] = [
     match x:
         case 0: return "zero"
         case 1: return "one"
-        case _: return "other"`,
+        case _: return "other"
+
+print(desc(1))`,
     iloMulti: `desc x:n>t
   ?x{0:"zero";1:"one";_:"other"}`,
     iloInline: `desc x:n>t;?x{0:"zero";1:"one";_:"other"}`,
@@ -938,17 +946,21 @@ const PRESETS: Preset[] = [
   },
   {
     name: 'sum',
-    python: `def total(xs):
-    return sum(xs)`,
-    iloMulti: `total xs:L n>n
+    python: `def tot(xs):
+    return sum(xs)
+
+print(tot([1, 2, 3, 4, 5]))`,
+    iloMulti: `tot xs:L n>n
   sum xs`,
-    iloInline: `total xs:L n>n;sum xs`,
+    iloInline: `tot xs:L n>n;sum xs`,
     output: '15',
   },
   {
     name: 'upper',
     python: `def up(s):
-    return s.upper()`,
+    return s.upper()
+
+print(up("hello"))`,
     iloMulti: `up s:t>t
   upr s`,
     iloInline: `up s:t>t;upr s`,
@@ -959,7 +971,9 @@ const PRESETS: Preset[] = [
     python: `import bisect
 
 def find(xs, n):
-    return bisect.bisect(xs, n)`,
+    return bisect.bisect(xs, n)
+
+print(find([1, 3, 5], 4))`,
     iloMulti: `find xs:L n n:n>n
   bisect xs n`,
     iloInline: `find xs:L n n:n>n;bisect xs n`,
