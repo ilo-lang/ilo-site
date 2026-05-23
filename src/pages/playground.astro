@@ -12,6 +12,7 @@ type Example = {
   iloName: string;
   py: string;
   ilo: string;
+  iloText: string;
   iloTok: number;
   note: string;
 };
@@ -26,6 +27,7 @@ nums = [1, 2, 3, 4, 5]
 total = reduce(lambda a, b: a + b, nums, 0)
 print(total)`,
     ilo: '<span class="kw">fld</span> <span class="op">+</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>] <span class="num">0</span>',
+    iloText: 'fld + [1,2,3,4,5] 0',
     iloTok: 9,
     note: 'reduce becomes <code>fld</code> with the operator passed directly, no lambda boilerplate.',
   },
@@ -36,6 +38,7 @@ print(total)`,
 doubled = [n * 2 for n in nums]
 print(doubled)`,
     ilo: '<span class="kw">map</span> <span class="op">*</span><span class="num">2</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>]',
+    iloText: 'map *2 [1,2,3,4,5]',
     iloTok: 9,
     note: 'List comp becomes <code>map</code> with a curried <code>*2</code>. No <code>for</code>, no temporary binding.',
   },
@@ -46,6 +49,7 @@ print(doubled)`,
 evens = [n for n in nums if n % 2 == 0]
 print(evens)`,
     ilo: '<span class="kw">flt</span> <span class="op">=</span><span class="num">0</span><span class="op">%</span><span class="num">2</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>]',
+    iloText: 'flt =0%2 [1,2,3,4,5,6]',
     iloTok: 14,
     note: 'Predicate is a one-shot prefix expression: <code>=0 %x 2</code>.',
   },
@@ -56,6 +60,7 @@ print(evens)`,
 total = sum(n * 2 for n in nums if n > 5)
 print(total)`,
     ilo: '[<span class="num">1</span>..<span class="num">10</span>] <span class="op">&gt;&gt;</span> <span class="kw">flt</span> <span class="op">&gt;</span><span class="num">5</span> <span class="op">&gt;&gt;</span> <span class="kw">map</span> <span class="op">*</span><span class="num">2</span> <span class="op">&gt;&gt;</span> <span class="kw">sum</span>',
+    iloText: '[1..10] >> flt >5 >> map *2 >> sum',
     iloTok: 17,
     note: 'Pipe operator <code>&gt;&gt;</code> threads the list through each stage left to right.',
   },
@@ -72,6 +77,7 @@ print(total)`,
     else:
         return "F"`,
     ilo: '<span class="kw">grade</span> s<span class="op">:n</span><span class="op">&gt;t</span>\n  <span class="op">&gt;=</span>s <span class="num">90</span> <span class="str">"A"</span>\n  <span class="op">&gt;=</span>s <span class="num">80</span> <span class="str">"B"</span>\n  <span class="op">&gt;=</span>s <span class="num">70</span> <span class="str">"C"</span>\n  <span class="str">"F"</span>',
+    iloText: 'grade s:n>t\n  >=s 90 "A"\n  >=s 80 "B"\n  >=s 70 "C"\n  "F"',
     iloTok: 28,
     note: 'Flat guard clauses, no <code>if</code>/<code>elif</code>/<code>else</code> ceremony, no braces.',
   },
@@ -87,6 +93,7 @@ print(total)`,
         case ("tri", b, h):
             return 0.5 * b * h`,
     ilo: '<span class="kw">area</span> s<span class="op">:</span>shape<span class="op">&gt;n</span>\n  <span class="op">?</span>s\n    [<span class="str">"circle"</span> r]  <span class="op">**</span><span class="num">3.14</span> r r\n    [<span class="str">"rect"</span> w h] <span class="op">*</span>w h\n    [<span class="str">"tri"</span> b h]  <span class="op">**</span><span class="num">0.5</span> b h',
+    iloText: 'area s:shape>n\n  ?s\n    ["circle" r]  **3.14 r r\n    ["rect" w h] *w h\n    ["tri" b h]  **0.5 b h',
     iloTok: 38,
     note: 'Pattern match with <code>?</code>; arms are flat, pattern then expression.',
   },
@@ -101,6 +108,7 @@ if r.status_code == 200:
 else:
     print("error", r.status_code)`,
     ilo: '<span class="kw">fetch</span> u<span class="op">:s</span><span class="op">&gt;</span>j <span class="op">!</span>net\n  r <span class="op">&lt;-</span> get<span class="op">!</span> u\n  <span class="op">?</span>r.ok r.json [<span class="str">"err"</span> r.code]',
+    iloText: 'fetch u:s>j !net\n  r <- get! u\n  ?r.ok r.json ["err" r.code]',
     iloTok: 28,
     note: 'Effect annotation <code>!net</code> on the signature. Error path is a tuple, not a string.',
   },
@@ -113,8 +121,9 @@ data = json.loads(raw)
 if "users" in data:
     for u in data["users"]:
         print(u["name"])`,
-    ilo: '<span class="kw">main</span> raw<span class="op">:s</span>\n  d <span class="op">&lt;-</span> json<span class="op">!</span> raw\n  <span class="kw">each</span> d.users.<span class="op">*</span>.name <span class="kw">prn</span>',
-    iloTok: 19,
+    ilo: 'd <span class="op">&lt;-</span> json<span class="op">!</span> raw\n<span class="kw">each</span> d.users.<span class="op">*</span>.name <span class="kw">prn</span>',
+    iloText: 'd <- json! raw\neach d.users.*.name prn',
+    iloTok: 15,
     note: 'Path expression <code>d.users.*.name</code> walks the list inline.',
   },
 ];
@@ -297,6 +306,23 @@ const exampleJson = JSON.stringify(
       border-color: rgba(224, 148, 34, 0.28);
       background: rgba(224, 148, 34, 0.05);
     }
+    .pl-pane-toggle {
+      font-family: var(--ilo-font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.04em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--ilo-hairline);
+      background: transparent;
+      color: var(--ilo-fg-3);
+      cursor: pointer;
+      transition: color var(--ilo-duration-2) var(--ilo-ease),
+                  border-color var(--ilo-duration-2) var(--ilo-ease);
+    }
+    .pl-pane-toggle:hover {
+      color: var(--ilo-fg-1);
+      border-color: var(--ilo-hairline-strong);
+    }
     .pl-edit, .pl-out {
       flex: 1;
       margin: 0;
@@ -354,6 +380,13 @@ const exampleJson = JSON.stringify(
     }
     .pl-r-arrow {
       color: var(--ilo-fg-4); font-family: var(--ilo-font-mono); font-size: 18px;
+    }
+    .pl-r-dot {
+      font-family: var(--ilo-font-mono);
+      font-size: 14px;
+      color: var(--ilo-fg-4);
+      margin: 0 4px 0 6px;
+      font-weight: 400;
     }
     .pl-r-delta {
       font-family: var(--ilo-font-mono); font-size: 13px; font-weight: 600;
@@ -413,6 +446,14 @@ const exampleJson = JSON.stringify(
       pointer-events: none;
     }
     .pl-btn-convert.is-clean:hover { background: transparent; color: var(--ilo-fg-4); }
+    .pl-btn-convert.is-converting {
+      background: transparent;
+      color: var(--ilo-fg-3);
+      border-color: var(--ilo-hairline);
+      cursor: default;
+      pointer-events: none;
+    }
+    .pl-btn-convert.is-converting:hover { background: transparent; color: var(--ilo-fg-3); }
     [hidden] { display: none !important; }
     .pl-actions-right { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; }
 
@@ -533,6 +574,7 @@ const exampleJson = JSON.stringify(
           <div class="pl-pane-head">
             <span class="lang">ilo</span>
             <span class="tag amber">converted</span>
+            <button class="pl-pane-toggle" id="pl-ilo-toggle" type="button" data-action="toggle-mode">multi-line</button>
             <span class="name" id="pl-ilo-name">{examples[0].iloName}</span>
           </div>
           <pre class="pl-out" id="pl-ilo-out" set:html={examples[0].ilo} />
@@ -541,9 +583,19 @@ const exampleJson = JSON.stringify(
 
       <div class="pl-receipt">
         <span class="pl-r-label">tokens</span>
-        <div class="pl-r-num"><span class="lang">py</span><span id="pl-py-tok">—</span><span class="unit">tok</span></div>
+        <div class="pl-r-num">
+          <span class="lang">py</span>
+          <span id="pl-py-tok">—</span><span class="unit">tok</span>
+          <span class="pl-r-dot">·</span>
+          <span id="pl-py-ch">—</span><span class="unit">ch</span>
+        </div>
         <span class="pl-r-arrow">→</span>
-        <div class="pl-r-num"><span class="lang">ilo</span><span id="pl-ilo-tok">{examples[0].iloTok}</span><span class="unit">tok</span></div>
+        <div class="pl-r-num">
+          <span class="lang">ilo</span>
+          <span id="pl-ilo-tok">{examples[0].iloTok}</span><span class="unit">tok</span>
+          <span class="pl-r-dot">·</span>
+          <span id="pl-ilo-ch">—</span><span class="unit">ch</span>
+        </div>
         <span class="pl-r-delta" id="pl-delta">—</span>
         <span class="pl-r-note" id="pl-note" set:html={examples[0].note} />
       </div>
@@ -554,7 +606,6 @@ const exampleJson = JSON.stringify(
         <button class="pl-btn pl-btn-convert" data-action="convert" id="pl-convert-btn">Convert</button>
         <div class="pl-actions-right">
           <button class="pl-btn" data-action="copy-share" id="pl-share-btn">Copy share link</button>
-          <a class="pl-btn pl-btn-primary" href="/#install">Install ilo →</a>
         </div>
       </div>
 
@@ -589,6 +640,8 @@ const exampleJson = JSON.stringify(
     iloOut:  document.getElementById('pl-ilo-out'),
     pyTok:   document.getElementById('pl-py-tok'),
     iloTok:  document.getElementById('pl-ilo-tok'),
+    pyCh:    document.getElementById('pl-py-ch'),
+    iloCh:   document.getElementById('pl-ilo-ch'),
     delta:   document.getElementById('pl-delta'),
     note:    document.getElementById('pl-note'),
     status:  document.getElementById('pl-status'),
@@ -596,12 +649,33 @@ const exampleJson = JSON.stringify(
     footNote: document.getElementById('pl-foot-note'),
     footText: document.getElementById('pl-foot-text'),
     convertBtn: document.getElementById('pl-convert-btn'),
+    toggleBtn: document.getElementById('pl-ilo-toggle'),
   };
 
   let currentKey = ORDER[0];
   let isExampleResult = true;
   let lastConvertedPy = EXAMPLES[ORDER[0]].py;
   let isConverting = false;
+  let isCompact = false;
+  let currentIloText = EXAMPLES[ORDER[0]].iloText;
+
+  function stripMainWrapper(text) {
+    const lines = text.split('\n');
+    if (lines.length < 2) return text;
+    if (!/^main\b/.test(lines[0])) return text;
+    return lines.slice(1)
+      .map(l => l.replace(/^  /, ''))
+      .join('\n')
+      .replace(/^\n+/, '')
+      .replace(/\n+$/, '');
+  }
+
+  function toCompact(text) {
+    // Collapse newline + indentation to '; '. Preserves single tokens between.
+    return text
+      .replace(/\n\s+/g, '; ')
+      .replace(/\n/g, '; ');
+  }
 
   // ===== Syntax highlighting =====
   const PY_KW = new Set(['def','if','elif','else','for','while','in','return','import','from','print','not','and','or','True','False','None','lambda','class','try','except','with','as','pass','break','continue','yield','del','raise','assert','global','nonlocal','is']);
@@ -744,10 +818,13 @@ const exampleJson = JSON.stringify(
   function updateConvertBtn() {
     if (!els.convertBtn) return;
     if (isConverting) {
-      els.convertBtn.setAttribute('hidden', '');
+      els.convertBtn.textContent = 'Converting…';
+      els.convertBtn.classList.add('is-converting');
+      els.convertBtn.classList.remove('is-clean');
       return;
     }
-    els.convertBtn.removeAttribute('hidden');
+    els.convertBtn.classList.remove('is-converting');
+    els.convertBtn.textContent = 'Convert';
     const clean = els.pyEdit.value === lastConvertedPy;
     els.convertBtn.classList.toggle('is-clean', clean);
   }
@@ -783,6 +860,16 @@ const exampleJson = JSON.stringify(
     updateDelta();
   }
 
+  function setIloChars(n) { els.iloCh.textContent = n; }
+  function setPyChars(n)  { els.pyCh.textContent = n; }
+
+  function renderIlo() {
+    const display = isCompact ? toCompact(currentIloText) : currentIloText;
+    replaceHtml(els.iloOut, highlightIlo(display));
+    setIloTokens(countTokens(display));
+    setIloChars(display.length);
+  }
+
   function updateDelta() {
     const pyTok = parseInt(els.pyTok.textContent, 10) || 0;
     const iloTok = parseInt(els.iloTok.textContent, 10) || 0;
@@ -797,6 +884,7 @@ const exampleJson = JSON.stringify(
   function updatePyTokens() {
     const py = els.pyEdit.value;
     els.pyTok.textContent = countTokens(py);
+    setPyChars(py.length);
     updateDelta();
   }
 
@@ -806,8 +894,8 @@ const exampleJson = JSON.stringify(
     els.pyName.textContent = ex.pyName;
     els.iloName.textContent = ex.iloName;
     els.pyEdit.value = ex.py;
-    replaceHtml(els.iloOut, ex.ilo);
-    setIloTokens(ex.iloTok);
+    currentIloText = ex.iloText;
+    renderIlo();
     replaceHtml(els.note, ex.note);
     els.sideButtons().forEach((b) => b.classList.toggle('is-active', b.getAttribute('data-key') === key));
     if (history.replaceState) {
@@ -845,8 +933,8 @@ const exampleJson = JSON.stringify(
 
       if (convertCache.has(hash)) {
         const cached = convertCache.get(hash);
-        replaceHtml(els.iloOut, highlightIlo(cached));
-        setIloTokens(countTokens(cached));
+        currentIloText = cached;
+        renderIlo();
         isExampleResult = false;
         lastConvertedPy = pythonRaw;
         setStatus('');
@@ -866,11 +954,12 @@ const exampleJson = JSON.stringify(
         if (seq !== convertSeq) return;
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const data = await resp.json();
-        const ilo = data.ilo || data.result || data.code || '';
+        let ilo = data.ilo || data.result || data.code || '';
+        ilo = stripMainWrapper(ilo);
         if (!ilo) throw new Error('Empty response');
         convertCache.set(hash, ilo);
-        replaceHtml(els.iloOut, highlightIlo(ilo));
-        setIloTokens(countTokens(ilo));
+        currentIloText = ilo;
+        renderIlo();
         isExampleResult = false;
         lastConvertedPy = pythonRaw;
         setStatus('');
@@ -886,10 +975,19 @@ const exampleJson = JSON.stringify(
     }
   }
 
+  function syncActiveExample() {
+    const py = els.pyEdit.value;
+    const matchesCurrent = currentKey && EXAMPLES[currentKey] && EXAMPLES[currentKey].py === py;
+    els.sideButtons().forEach((b) => {
+      b.classList.toggle('is-active', matchesCurrent && b.getAttribute('data-key') === currentKey);
+    });
+  }
+
   function scheduleConvert() {
     updatePyTokens();
     renderPyHighlight();
     updateConvertBtn();
+    syncActiveExample();
     if (convertTimer) clearTimeout(convertTimer);
     convertTimer = setTimeout(convertNow, 500);
   }
@@ -909,7 +1007,7 @@ const exampleJson = JSON.stringify(
   });
 
   document.body.addEventListener('click', (e) => {
-    const btn = e.target.closest('button.pl-btn, a.pl-btn');
+    const btn = e.target.closest('button.pl-btn, a.pl-btn, button.pl-pane-toggle');
     if (!btn) return;
     const action = btn.getAttribute('data-action');
     if (action === 'reset') {
@@ -924,6 +1022,10 @@ const exampleJson = JSON.stringify(
     } else if (action === 'convert') {
       if (convertTimer) { clearTimeout(convertTimer); convertTimer = null; }
       convertNow();
+    } else if (action === 'toggle-mode') {
+      isCompact = !isCompact;
+      if (els.toggleBtn) els.toggleBtn.textContent = isCompact ? 'compact' : 'multi-line';
+      renderIlo();
     }
   });
 
@@ -945,6 +1047,7 @@ const exampleJson = JSON.stringify(
     } else {
       updatePyTokens();
       renderPyHighlight();
+      renderIlo();
       updateConvertBtn();
     }
   })();
