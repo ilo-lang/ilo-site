@@ -126,10 +126,10 @@ print(total)</pre>
         </div>
 
         <div class="demo-foot">
-          <span class="stat-inline">py <b id="demo-py-tok">38</b> tok</span>
+          <span class="stat-inline">py <b id="demo-py-tok">42</b> tok</span>
           <span class="stat-arrow">→</span>
-          <span class="stat-inline">ilo <b id="demo-ilo-tok">9</b> tok</span>
-          <span class="delta-pill" id="demo-delta">−76%</span>
+          <span class="stat-inline">ilo <b id="demo-ilo-tok">15</b> tok</span>
+          <span class="delta-pill" id="demo-delta">−64%</span>
           <div class="demo-dots" id="demo-dots">
             <button class="demo-dot is-active" data-idx="0" aria-label="fold-sum"></button>
             <button class="demo-dot" data-idx="1" aria-label="map-double"></button>
@@ -145,7 +145,7 @@ print(total)</pre>
   <section class="install-section" id="install">
     <div class="install-wrap-page">
       <div class="install-head">
-        <h2 class="install-h2">get started</h2>
+        <h2 class="install-h2"><a class="hash" href="#install">#</a>get started</h2>
         <a class="install-status" href={releaseUrl} target="_blank" rel="noopener">
           <span class="install-status-dot"></span>
           experimental · {versionLabel}
@@ -237,7 +237,9 @@ print(total)</pre>
         <span class="gs-num">02</span>
         <div class="gs-body">
           <h3 class="gs-title">Try it</h3>
-          <p class="gs-text">Edit Python and watch it convert to ilo, with token counts for both. <a href="/playground/">Open the playground →</a></p>
+          <p class="gs-text gs-try">Run a one-liner: <code id="gs-try-cmd">ilo 'dbl x:n&gt;n;*x 2' 5</code> <button class="gs-copy" data-action="copy" data-target="gs-try-cmd">copy</button></p>
+          <p class="gs-text">It prints <span class="gs-out">10</span>.</p>
+          <p class="gs-text">Or edit Python live in the <a href="/playground/">playground →</a></p>
         </div>
       </div>
 
@@ -252,9 +254,9 @@ print(total)</pre>
   </section>
 
   <!-- FEATURES -->
-  <section class="features">
+  <section class="features" id="features">
     <div class="section-h">
-      <h2>Designed for machines</h2>
+      <h2 class="sec-h2"><a class="hash" href="#features">#</a>designed for machines</h2>
       <p>Every feature exists to reduce total token cost.</p>
     </div>
     <div class="features-grid">
@@ -301,6 +303,20 @@ print(total)</pre>
 <pre><span class="kw">--tools</span> tools.json</pre>
       </a>
 
+      <a class="feat" href="/docs/reference/serv/">
+        <span class="kicker">agent server</span>
+        <h3>JSON Server</h3>
+        <p>A long-lived JSON request/response loop. Agents compile, check, run, and trace without a process per call.</p>
+<pre><span class="kw">ilo</span> serv</pre>
+      </a>
+
+      <a class="feat" href="/docs/reference/cli/">
+        <span class="kicker">http</span>
+        <h3>HTTP Endpoints</h3>
+        <p>Serve an ilo function over HTTP. One command, no framework.</p>
+<pre><span class="kw">ilo</span> httpd app.ilo <span class="kw">--port</span> <span class="num">8080</span></pre>
+      </a>
+
     </div>
   </section>
 
@@ -317,7 +333,7 @@ print(total)</pre>
   <section class="principles" id="manifesto">
     <div class="principles-head">
       <div class="kicker">manifesto · six rules</div>
-      <h2>One budget. Six rules.</h2>
+      <h2 class="sec-h2"><a class="hash" href="#manifesto">#</a>one budget. six rules.</h2>
       <p class="sub">Tokens (generation, retries, errors, context loading) are the only cost we minimise. Each rule below is a constraint we accepted to lower it. <b>If a feature spends tokens, it has to earn them.</b></p>
     </div>
     <div class="principles-list">
@@ -454,7 +470,7 @@ print(total)</pre>
     <div class="bench-inner">
       <div class="bench-head">
         <div class="kicker">Benchmarks</div>
-        <h2>Three engines, measured.</h2>
+        <h2 class="sec-h2"><a class="hash" href="#benchmarks">#</a>three engines, measured.</h2>
         <p class="sub">Three runtimes: a bytecode VM, a Cranelift JIT, and a Cranelift AOT compiler. Faster than Python and Ruby, slower than V8 and Go. ilo optimises tokens, not nanoseconds.</p>
       </div>
       <div class="bench-card">
@@ -487,8 +503,8 @@ print(total)</pre>
     <section class="writing" id="writing">
       <div class="writing-inner">
         <div class="section-h">
-          <div class="kicker">Recent</div>
-          <h2>Writing</h2>
+          <h2 class="sec-h2"><a class="hash" href="#writing">#</a>writing</h2>
+          <p>Notes from building ilo, and the ideas around it.</p>
         </div>
         <div class="writing-list" id="writing-list">
           {posts.slice(0, 5).map((p) => (
@@ -505,6 +521,62 @@ print(total)</pre>
       </div>
     </section>
   )}
+
+  <!-- AGENT CONVERSATION -->
+  <section id="agent-surface" class="agent-conv-section">
+    <div class="agent-conv-inner">
+      <div class="section-h">
+        <h2 class="sec-h2"><a class="hash" href="#agent-surface">#</a>the agent loop</h2>
+        <p>Every subcommand speaks <code>--json</code>. The agent sends a request, ilo replies with structured diagnostics and fix plans, and the loop closes without screen-scraping.</p>
+      </div>
+
+      <div class="conv-frames" id="conv-frames">
+
+        <!-- Frame 1: Agent check (broken program) -->
+        <div class="conv-frame conv-frame--agent" data-frame="0">
+          <div class="conv-frame-header">
+            <span class="conv-label conv-label--agent">Agent</span>
+          </div>
+          <pre class="conv-body"><code><span class="conv-punct">{</span><span class="syn-s">"method"</span><span class="conv-colon">:</span> <span class="syn-s">"check"</span><span class="conv-punct">,</span>
+ <span class="syn-s">"program"</span><span class="conv-colon">:</span> <span class="syn-s">"main&gt;_;prnt +2 a"</span><span class="conv-punct">}</span></code></pre>
+        </div>
+
+        <!-- Frame 2: ilo serv diagnostic -->
+        <div class="conv-frame conv-frame--serv" data-frame="1">
+          <div class="conv-frame-header">
+            <span class="conv-label conv-label--serv">ilo serv</span>
+          </div>
+          <pre class="conv-body"><code><span class="conv-punct">{</span><span class="syn-s">"schemaVersion"</span><span class="conv-colon">:</span> <span class="syn-p">1</span><span class="conv-punct">,</span>
+ <span class="syn-s">"error"</span><span class="conv-colon">:</span> <span class="conv-punct">{</span><span class="syn-s">"phase"</span><span class="conv-colon">:</span> <span class="syn-s">"verify"</span><span class="conv-punct">,</span>
+   <span class="syn-s">"diagnostics"</span><span class="conv-colon">:</span> <span class="conv-punct">[{</span>
+     <span class="syn-s">"code"</span><span class="conv-colon">:</span> <span class="syn-s">"ILO-T004"</span><span class="conv-punct">,</span>
+     <span class="syn-s">"message"</span><span class="conv-colon">:</span> <span class="syn-s">"undefined variable 'a'"</span><span class="conv-punct">,</span>
+     <span class="syn-s">"suggestion"</span><span class="conv-colon">:</span> <span class="syn-s">"did you mean 'main'?"</span>
+   <span class="conv-punct">}]}}</span></code></pre>
+        </div>
+
+        <!-- Frame 3: Agent run (fixed program) -->
+        <div class="conv-frame conv-frame--agent" data-frame="2">
+          <div class="conv-frame-header">
+            <span class="conv-label conv-label--agent">Agent</span>
+          </div>
+          <pre class="conv-body"><code><span class="conv-punct">{</span><span class="syn-s">"method"</span><span class="conv-colon">:</span> <span class="syn-s">"run"</span><span class="conv-punct">,</span>
+ <span class="syn-s">"program"</span><span class="conv-colon">:</span> <span class="syn-s">"main&gt;_;prnt +2 2"</span><span class="conv-punct">}</span></code></pre>
+        </div>
+
+        <!-- Frame 4: ilo serv result -->
+        <div class="conv-frame conv-frame--serv" data-frame="3">
+          <div class="conv-frame-header">
+            <span class="conv-label conv-label--serv">ilo serv</span>
+          </div>
+          <pre class="conv-body"><code><span class="conv-punct">{</span><span class="syn-s">"schemaVersion"</span><span class="conv-colon">:</span> <span class="syn-p">1</span><span class="conv-punct">,</span>
+ <span class="syn-s">"ok"</span><span class="conv-colon">:</span> <span class="syn-p">4</span><span class="conv-punct">,</span>
+ <span class="syn-s">"ms"</span><span class="conv-colon">:</span> <span class="syn-p">0</span><span class="conv-punct">}</span></code></pre>
+        </div>
+
+      </div>
+    </div>
+  </section>
 
   <!-- FINAL CTA -->
   <section class="final-cta">
@@ -731,23 +803,28 @@ print(total)</pre>
   .btn-hero-secondary:hover { border-color: var(--ilo-fg-3); background: rgba(255,255,255,0.03); }
 
   /* Section heading */
-  .section-h { text-align: center; margin: 0 auto 18px; }
-  .section-h h2 {
-    font-family: var(--ilo-font-sans);
-    font-size: 48px; font-weight: 700;
-    color: var(--ilo-fg-1); margin: 0;
-    letter-spacing: -0.025em; line-height: 1.05;
-    text-wrap: balance;
-  }
+  .section-h { max-width: 1080px; margin: 0 auto 18px; text-align: left; }
   .section-h p {
     font-family: var(--ilo-font-sans);
     font-size: 16px; color: var(--ilo-fg-3);
-    margin: 12px auto 0; max-width: 560px; line-height: 1.55;
+    margin: 12px 0 0; max-width: 560px; line-height: 1.55;
   }
+
+  /* Shared section heading: mono, lowercase, left-aligned, amber # prefix */
+  .sec-h2 {
+    font-family: var(--ilo-font-mono);
+    font-size: 28px; font-weight: 500; color: var(--ilo-fg-1);
+    margin: 0; letter-spacing: -0.01em; text-align: left;
+  }
+  .hash {
+    color: var(--ilo-amber); text-decoration: none;
+    margin-right: 10px; font-weight: 400;
+  }
+  .hash:hover { color: var(--ilo-amber-high); }
 
   /* Install */
   .install-section {
-    padding: 110px 32px 96px;
+    padding: 96px 32px;
     border-bottom: 1px solid var(--ilo-hairline);
     background: radial-gradient(ellipse 60% 80% at 50% 0%, rgba(224, 148, 34, 0.035), transparent 60%);
   }
@@ -763,10 +840,6 @@ print(total)</pre>
     font-family: var(--ilo-font-mono);
     font-size: 28px; font-weight: 500; color: var(--ilo-fg-1);
     margin: 0; letter-spacing: -0.01em;
-  }
-  .install-h2::before {
-    content: "#"; color: var(--ilo-amber);
-    margin-right: 10px; font-weight: 400;
   }
   .install-status {
     margin-left: auto;
@@ -845,8 +918,8 @@ print(total)</pre>
     font-variant-ligatures: none;
   }
   .term-body .p { color: var(--ilo-fg-4); }
-  .term-body .url { color: var(--ilo-amber); }
-  .term-body .flag { color: var(--ilo-fg-3); }
+  .term-body .url { color: var(--ilo-fg-1); }
+  .term-body .flag { color: var(--ilo-fg-1); }
   .term-cta {
     background: transparent; color: var(--ilo-amber);
     border: 0; border-left: 1px solid var(--ilo-hairline);
@@ -912,11 +985,17 @@ print(total)</pre>
   .gs-text { font-family: var(--ilo-font-sans); font-size: 15px; color: var(--ilo-fg-3); line-height: 1.6; margin: 0; }
   .gs-text a { color: var(--ilo-amber); text-decoration: none; font-weight: 500; }
   .gs-text a:hover { color: var(--ilo-amber-high); }
+  .gs-try { margin-bottom: 8px; }
+  .gs-try code { font-family: var(--ilo-font-mono); font-variant-ligatures: none; font-size: 13.5px; background: rgba(255,255,255,0.05); color: var(--ilo-fg-1); padding: 2px 8px; border-radius: 4px; }
+  .gs-out { font-family: var(--ilo-font-mono); font-size: 13.5px; color: var(--ilo-amber); font-weight: 500; }
+  .gs-copy { margin-left: 8px; font-family: var(--ilo-font-sans); font-size: 11px; font-weight: 500; color: var(--ilo-amber); background: transparent; border: 1px solid var(--ilo-hairline); border-radius: 4px; padding: 2px 9px; cursor: pointer; transition: color var(--ilo-duration-2) var(--ilo-ease), border-color var(--ilo-duration-2) var(--ilo-ease); }
+  .gs-copy:hover { color: var(--ilo-amber-high); border-color: rgba(224,148,34,0.4); }
+  .gs-copy.is-copied { color: var(--ilo-green); border-color: var(--ilo-green-border); }
 
   /* Features */
-  .features { padding: 100px 32px; border-bottom: 1px solid var(--ilo-hairline); }
+  .features { padding: 96px 32px; border-bottom: 1px solid var(--ilo-hairline); }
   .features-grid {
-    max-width: 1100px; margin: 56px auto 0;
+    max-width: 1080px; margin: 56px auto 0;
     display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
   }
   .feat {
@@ -1036,7 +1115,7 @@ print(total)</pre>
   }
 
   /* Philosophy */
-  .philosophy { padding: 88px 32px; border-bottom: 1px solid var(--ilo-hairline); }
+  .philosophy { padding: 96px 32px; border-bottom: 1px solid var(--ilo-hairline); }
   .philosophy-inner { max-width: 820px; margin: 0 auto; text-align: center; }
   .philosophy-quote {
     font-family: var(--ilo-font-sans);
@@ -1056,32 +1135,21 @@ print(total)</pre>
   .philosophy-link:hover { border-bottom-color: var(--ilo-amber); }
 
   /* Principles */
-  .principles { padding: 120px 32px 80px; border-bottom: 1px solid var(--ilo-hairline); }
-  .principles-head { max-width: 820px; margin: 0 auto 64px; }
+  .principles { padding: 96px 32px; border-bottom: 1px solid var(--ilo-hairline); }
+  .principles-head { max-width: 1080px; margin: 0 auto 64px; text-align: left; }
   .principles-head .kicker {
-    font-family: var(--ilo-font-mono);
-    font-size: 11px; font-weight: 500;
-    letter-spacing: 0.10em; text-transform: uppercase;
-    color: var(--ilo-amber); margin-bottom: 18px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .principles-head .kicker::before,
-  .principles-head .kicker::after {
-    content: ""; height: 1px; background: var(--ilo-hairline); flex: 1;
-  }
-  .principles-head h2 {
     font-family: var(--ilo-font-sans);
-    font-size: 48px; font-weight: 700;
-    color: var(--ilo-fg-1); margin: 0 0 20px;
-    letter-spacing: -0.03em; line-height: 1.05;
-    text-wrap: balance; text-align: center;
+    font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--ilo-amber); margin-bottom: 12px;
   }
+  .principles-head h2 { margin: 0 0 20px; }
   .principles-head .sub {
     font-family: var(--ilo-font-sans);
     font-size: 17px; color: var(--ilo-fg-3);
     line-height: 1.55;
-    max-width: 640px; margin: 0 auto;
-    text-wrap: pretty; text-align: center;
+    max-width: 640px; margin: 0;
+    text-wrap: pretty; text-align: left;
   }
   .principles-head .sub b { color: var(--ilo-fg-1); font-weight: 600; }
   .principles-list { max-width: 1080px; margin: 0 auto; border-top: 1px solid var(--ilo-hairline); }
@@ -1240,7 +1308,7 @@ print(total)</pre>
     border-bottom: 1px solid var(--ilo-hairline);
   }
   .shipped-strip {
-    max-width: 1180px; margin: 0 auto;
+    max-width: 1080px; margin: 0 auto;
     display: flex; align-items: center; gap: 24px;
     padding: 16px 32px;
     flex-wrap: wrap;
@@ -1275,29 +1343,23 @@ print(total)</pre>
   .shipped-link:hover { color: var(--ilo-amber-high); }
 
   /* Benchmarks */
-  .benchmarks { padding: 80px 32px 100px; border-bottom: 1px solid var(--ilo-hairline); }
-  .bench-inner { max-width: 1180px; margin: 0 auto; }
-  .bench-head { max-width: 760px; margin: 0 auto 40px; text-align: center; }
+  .benchmarks { padding: 96px 32px; border-bottom: 1px solid var(--ilo-hairline); }
+  .bench-inner { max-width: 1080px; margin: 0 auto; }
+  .bench-head { max-width: 1080px; margin: 0 auto 40px; text-align: left; }
   .bench-head .kicker {
     font-family: var(--ilo-font-sans);
     font-size: 10.5px; font-weight: 600;
     letter-spacing: 0.10em; text-transform: uppercase;
     color: var(--ilo-amber); margin-bottom: 12px;
   }
-  .bench-head h2 {
-    font-family: var(--ilo-font-sans);
-    font-size: 32px; font-weight: 700;
-    color: var(--ilo-fg-1); margin: 0 0 14px;
-    letter-spacing: -0.025em; line-height: 1.15;
-    text-wrap: balance;
-  }
+  .bench-head h2 { margin: 0 0 14px; }
   .bench-head .sub {
     font-family: var(--ilo-font-sans);
     font-size: 15px; color: var(--ilo-fg-3);
     margin: 0; line-height: 1.6;
   }
   .bench-card {
-    max-width: 920px; margin: 0 auto;
+    max-width: 1080px; margin: 0 auto;
     border: 1px solid var(--ilo-hairline);
     border-radius: var(--ilo-radius-md);
     background: linear-gradient(180deg, rgba(255,255,255,0.012), transparent);
@@ -1357,7 +1419,7 @@ print(total)</pre>
   }
 
   /* Writing */
-  .writing { padding: 80px 32px; border-bottom: 1px solid var(--ilo-hairline); }
+  .writing { padding: 96px 32px; border-bottom: 1px solid var(--ilo-hairline); }
   .writing-inner { max-width: 1080px; margin: 0 auto; }
   .writing .section-h .kicker {
     font-family: var(--ilo-font-sans);
@@ -1397,6 +1459,76 @@ print(total)</pre>
     font-size: 1rem; font-weight: 500;
     color: var(--ilo-fg-2);
     transition: color var(--ilo-duration-2) var(--ilo-ease);
+  }
+
+  /* Agent conversation */
+  .agent-conv-section { padding: 96px 32px; border-bottom: 1px solid var(--ilo-hairline); }
+  .agent-conv-inner { max-width: 1080px; margin: 0 auto; }
+  .conv-frames {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 28px;
+  }
+  .conv-frame {
+    border: 1px solid var(--ilo-hairline);
+    border-radius: var(--ilo-radius-md);
+    background: linear-gradient(180deg, rgba(255,255,255,0.012), transparent);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 450ms var(--ilo-ease),
+                transform 450ms var(--ilo-ease),
+                border-color var(--ilo-duration-2) var(--ilo-ease),
+                background var(--ilo-duration-2) var(--ilo-ease);
+  }
+  .conv-frame.conv-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .conv-frame--serv {
+    grid-column: 2;
+    background: var(--ilo-ink-2);
+  }
+  .conv-frame--agent {
+    grid-column: 1;
+    background: var(--ilo-ink-1);
+  }
+  /* Pair rows explicitly so agent and serv sit on the same row */
+  .conv-frame[data-frame="0"] { grid-row: 1; }
+  .conv-frame[data-frame="1"] { grid-row: 1; }
+  .conv-frame[data-frame="2"] { grid-row: 2; }
+  .conv-frame[data-frame="3"] { grid-row: 2; }
+  .conv-frame-header {
+    display: flex; align-items: center;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--ilo-hairline);
+  }
+  .conv-label {
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .conv-label--agent { color: var(--ilo-fg-3); }
+  .conv-label--serv  { color: var(--ilo-amber); }
+  .conv-body {
+    margin: 0; padding: 14px 16px;
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 12.5px; line-height: 1.7;
+    color: var(--ilo-fg-3); background: transparent;
+    overflow-x: auto; white-space: pre;
+  }
+  .conv-body code { font-family: var(--ilo-font-mono); font-variant-ligatures: none; }
+  .conv-body .syn-s { color: var(--ilo-syn-str); }
+  .conv-body .syn-p { color: var(--ilo-fg-1); }
+  .conv-body .syn-kw { color: var(--ilo-amber); }
+  .conv-body .conv-colon,
+  .conv-body .conv-punct { color: var(--ilo-fg-4); }
+  @media (prefers-reduced-motion: reduce) {
+    .conv-frame {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
   }
 
   /* Final CTA */
@@ -1469,19 +1601,24 @@ print(total)</pre>
     .gs-num { font-size: 24px; }
     .features { padding: 64px 20px; }
     .features-grid { grid-template-columns: 1fr; }
-    .philosophy { padding: 56px 20px; }
+    .philosophy { padding: 64px 20px; }
     .philosophy-quote { font-size: 22px; }
     .principles { padding: 64px 20px; }
-    .principles-head h2 { font-size: 34px; }
-    .section-h h2 { font-size: 34px; }
     .principle { grid-template-columns: 1fr; row-gap: 18px; padding: 28px 0; }
     .principle-meta { flex-direction: row; align-items: baseline; gap: 14px; }
     .principle-meta .num { font-size: 36px; }
     .shipped-strip { padding: 14px 20px; gap: 14px; }
-    .benchmarks { padding: 56px 20px; }
+    .benchmarks { padding: 64px 20px; }
     .bench-row { grid-template-columns: 88px 70px 1fr 70px; gap: 8px; }
-    .bench-head h2 { font-size: 26px; }
-    .writing { padding: 56px 20px; }
+    .writing { padding: 64px 20px; }
+    .agent-conv-section { padding: 64px 20px; }
+    .conv-frames { grid-template-columns: 1fr; }
+    .conv-frame--agent,
+    .conv-frame--serv { grid-column: 1; }
+    .conv-frame[data-frame="0"] { grid-row: 1; }
+    .conv-frame[data-frame="1"] { grid-row: 2; }
+    .conv-frame[data-frame="2"] { grid-row: 3; }
+    .conv-frame[data-frame="3"] { grid-row: 4; }
     .final-cta { padding: 56px 20px; }
     .cta-statement { font-size: 28px; }
     footer { padding: 40px 20px 28px; }
@@ -1491,10 +1628,55 @@ print(total)</pre>
 </style>
 
 <script>
+  // ===== AGENT CONVERSATION - staggered reveal =====
+  (function () {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const frames = Array.from(document.querySelectorAll<HTMLElement>('#conv-frames .conv-frame'));
+    if (!frames.length) return;
+
+    if (reduced) {
+      frames.forEach(f => f.classList.add('conv-visible'));
+      return;
+    }
+
+    let triggered = false;
+    const STAGGER = 600; // ms between frames
+    const DURATION = 350;
+
+    function revealFrames() {
+      if (triggered) return;
+      triggered = true;
+      // The opacity/transform transition lives on .conv-frame in CSS, so just
+      // toggling the class animates it. Stagger via setTimeout.
+      frames.forEach((frame, i) => {
+        setTimeout(() => frame.classList.add('conv-visible'), i * STAGGER);
+      });
+    }
+
+    const section = document.getElementById('agent-surface');
+    if (!section) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          revealFrames();
+          obs.disconnect();
+        }
+      },
+      { threshold: 0, rootMargin: '0px 0px -10% 0px' }
+    );
+    obs.observe(section);
+    // Fallback: if it's already on screen at load, reveal on next frame.
+    requestAnimationFrame(() => {
+      const r = section.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) revealFrames();
+    });
+  })();
+
   // copy buttons
   document.body.addEventListener('click', (e) => {
     const target = e.target as HTMLElement | null;
-    const btn = target ? target.closest('.term-cta') as HTMLButtonElement | null : null;
+    const btn = target ? target.closest('.term-cta, .gs-copy') as HTMLButtonElement | null : null;
     if (!btn) return;
     const targetId = btn.getAttribute('data-target');
     const targetEl = targetId ? document.getElementById(targetId) : null;
@@ -1541,7 +1723,7 @@ print(total)</pre>
     function colorize(s: string) {
       return s
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/(--?[\w-]+)/g, '<span class="flag">$1</span>')
+        .replace(/(^|\s)(--?[A-Za-z][\w-]*)/g, '$1<span class="flag">$2</span>')
         .replace(/(ilo-lang\.ai\/[\w./-]+|ghcr\.io\/[\w./:-]+|nixpkgs#\w+|ilo-lang\/tap\/ilo|https?:\/\/[\w./-]+)/g, '<span class="url">$1</span>');
     }
     chips.forEach((chip) => {
@@ -1562,7 +1744,7 @@ print(total)</pre>
     function colorize(s: string) {
       return s
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/(--?[\w-]+)/g, '<span class="flag">$1</span>');
+        .replace(/(^|\s)(--?[A-Za-z][\w-]*)/g, '$1<span class="flag">$2</span>');
     }
     chips.forEach((chip) => {
       chip.addEventListener('click', () => {
@@ -1581,25 +1763,25 @@ print(total)</pre>
         name: 'fold-sum',
         py: '<span class="kw">from</span> functools <span class="kw">import</span> reduce\n\nnums <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]\ntotal <span class="op">=</span> reduce(<span class="kw">lambda</span> a, b: a <span class="op">+</span> b, nums, <span class="num">0</span>)\nprint(total)',
         ilo: '<span class="kw">fld</span> <span class="op">+</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>] <span class="num">0</span>',
-        pyTok: 38, iloTok: 9, delta: 76,
+        pyTok: 42, iloTok: 15, delta: 64,
       },
       {
         name: 'map-double',
         py: 'nums <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]\ndoubled <span class="op">=</span> [n <span class="op">*</span> <span class="num">2</span> <span class="kw">for</span> n <span class="kw">in</span> nums]\nprint(doubled)',
         ilo: '<span class="kw">map</span> <span class="op">*</span><span class="num">2</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>]',
-        pyTok: 22, iloTok: 9, delta: 59,
+        pyTok: 36, iloTok: 14, delta: 61,
       },
       {
         name: 'filter-even',
         py: 'nums <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>]\nevens <span class="op">=</span> [n <span class="kw">for</span> n <span class="kw">in</span> nums <span class="kw">if</span> n <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>]\nprint(evens)',
         ilo: '<span class="kw">flt</span> <span class="op">=</span><span class="num">0</span><span class="op">%</span><span class="num">2</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>]',
-        pyTok: 28, iloTok: 14, delta: 50,
+        pyTok: 42, iloTok: 18, delta: 57,
       },
       {
         name: 'pipes',
         py: 'nums <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>, <span class="num">7</span>, <span class="num">8</span>, <span class="num">9</span>, <span class="num">10</span>]\ntotal <span class="op">=</span> <span class="kw">sum</span>(n <span class="op">*</span> <span class="num">2</span> <span class="kw">for</span> n <span class="kw">in</span> nums <span class="kw">if</span> n <span class="op">&gt;</span> <span class="num">5</span>)\nprint(total)',
         ilo: '[<span class="num">1</span>..<span class="num">10</span>] <span class="op">&gt;&gt;</span> <span class="kw">flt</span> <span class="op">&gt;</span><span class="num">5</span> <span class="op">&gt;&gt;</span> <span class="kw">map</span> <span class="op">*</span><span class="num">2</span> <span class="op">&gt;&gt;</span> <span class="kw">sum</span>',
-        pyTok: 38, iloTok: 17, delta: 55,
+        pyTok: 52, iloTok: 16, delta: 69,
       },
     ];
 
