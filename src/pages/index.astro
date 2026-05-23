@@ -194,11 +194,9 @@ print(total)</pre>
 
             <div class="install-os-row">
               <button class="os-chip is-active" data-os="unix" data-cmd="curl -fsSL ilo-lang.ai/install.sh | sh">macOS / Linux</button>
-              <button class="os-chip" data-os="brew" data-cmd="brew install ilo-lang/tap/ilo">Homebrew</button>
-              <button class="os-chip" data-os="win" data-cmd="iwr -useb ilo-lang.ai/install.ps1 | iex">Windows</button>
-              <button class="os-chip" data-os="nix" data-cmd="nix profile install nixpkgs#ilo">Nix</button>
-              <button class="os-chip" data-os="docker" data-cmd={`docker run --rm ghcr.io/ilo-lang/ilo:${versionLabel} ilo --help`}>Docker</button>
-              <button class="os-chip" data-os="src" data-cmd="git clone https://github.com/ilo-lang/ilo && cd ilo && make">From source</button>
+              <button class="os-chip" data-os="win" data-cmd="irm https://ilo-lang.ai/install.ps1 | iex">Windows</button>
+              <button class="os-chip" data-os="npm" data-cmd="npm i -g ilo-lang">npm / npx</button>
+              <button class="os-chip" data-os="src" data-cmd="cargo install ilo">From source</button>
             </div>
           </div>
         </div>
@@ -256,47 +254,47 @@ print(total)</pre>
     </div>
     <div class="features-grid">
 
-      <div class="feat">
+      <a class="feat" href="/docs/reference/prefix-notation/">
         <span class="kicker">syntax</span>
         <h3>Prefix Notation</h3>
         <p>Operators before operands. No parentheses. No precedence ambiguity. 22% fewer tokens, 42% fewer characters vs infix.</p>
 <pre><span class="op">+*</span>a b c   <span class="cmt">(a × b) + c</span></pre>
-      </div>
+      </a>
 
-      <div class="feat">
+      <a class="feat" href="/docs/reference/diagnostics/">
         <span class="kicker">safety</span>
         <h3>Verified Before Execution</h3>
         <p>Every program is type-checked before it runs. Agents get compact error codes, not stack traces. One token, not a paragraph.</p>
 <pre><span class="err">ILO-T004:</span> expected <span class="op">n</span>, got <span class="op">t</span></pre>
-      </div>
+      </a>
 
-      <div class="feat featured">
+      <a class="feat" href="/docs/reference/guards/">
         <span class="kicker">control</span>
         <h3>Guards</h3>
         <p>Flat conditionals. No nesting. No braces.</p>
 <pre><span class="op">&gt;=</span><span class="kw">sp</span> <span class="num">1000</span> <span class="str">"gold"</span></pre>
-      </div>
+      </a>
 
-      <div class="feat">
+      <a class="feat" href="/docs/reference/pipes/">
         <span class="kicker">composition</span>
         <h3>Pipes</h3>
         <p>Chain functions left-to-right.</p>
 <pre>x<span class="op">&gt;&gt;</span>dbl<span class="op">&gt;&gt;</span>inc</pre>
-      </div>
+      </a>
 
-      <div class="feat">
+      <a class="feat" href="/docs/reference/error-handling/">
         <span class="kicker">ergonomics</span>
         <h3>Auto-unwrap <span style="color:var(--ilo-syn-op);">!</span></h3>
         <p>12 tokens down to 1. Error propagation without the ceremony.</p>
 <pre><span class="op">inner!</span> x</pre>
-      </div>
+      </a>
 
-      <div class="feat">
+      <a class="feat" href="/docs/builtins/tools/">
         <span class="kicker">integrations</span>
         <h3>MCP &amp; HTTP Tools</h3>
         <p>Wire external APIs as typed functions. Type-checked at load time.</p>
 <pre><span class="kw">--tools</span> tools.json</pre>
-      </div>
+      </a>
 
     </div>
   </section>
@@ -932,10 +930,13 @@ print(total)</pre>
     border-radius: var(--ilo-radius-md);
     background: linear-gradient(180deg, rgba(255,255,255,0.012), transparent);
     display: flex; flex-direction: column; gap: 12px;
+    text-decoration: none; color: inherit;
+    transition: border-color var(--ilo-duration-2) var(--ilo-ease),
+                background var(--ilo-duration-2) var(--ilo-ease);
   }
-  .feat.featured {
+  .feat:hover {
     border-color: rgba(224, 148, 34, 0.30);
-    background: linear-gradient(180deg, rgba(224, 148, 34, 0.035), transparent);
+    background: linear-gradient(180deg, rgba(224, 148, 34, 0.045), transparent);
   }
   .feat .kicker {
     font-family: var(--ilo-font-sans);
