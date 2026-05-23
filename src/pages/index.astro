@@ -763,15 +763,18 @@ print(dbls([1, 2, 3, 4, 5]))`,
     output: '[2, 4, 6, 8, 10]',
   },
   {
-    name: 'filter-even',
-    python: `def evens(xs):
-    return [n for n in xs if n % 2 == 0]
+    name: 'match',
+    python: `def desc(grade):
+    match grade:
+        case "A": return "excellent"
+        case "B": return "good"
+        case _: return "ok"
 
-print(evens([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))`,
-    iloMulti: `evens xs:L n>L n
-  flt (n:n>b;=(mod n 2) 0) xs`,
-    iloInline: `evens xs:L n>L n;flt (n:n>b;=(mod n 2) 0) xs`,
-    output: '[2, 4, 6, 8, 10]',
+print(desc("A"))`,
+    iloMulti: `desc g:t>t
+  ?g{"A":"excellent";"B":"good";_:"ok"}`,
+    iloInline: `desc g:t>t;?g{"A":"excellent";"B":"good";_:"ok"}`,
+    output: 'excellent',
   },
   {
     name: 'len-list',
