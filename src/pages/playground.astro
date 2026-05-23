@@ -373,6 +373,30 @@ const exampleJson = JSON.stringify(
     .pl-out .cmt { color: var(--ilo-syn-cmt); font-style: italic; }
     .pl-out .err { color: var(--ilo-syn-err); }
 
+    /* Line-number gutter for code panes */
+    .lns {
+      display: grid;
+      grid-template-columns: 2.5ch 1fr;
+      column-gap: 12px;
+      align-items: start;
+    }
+    .lne {
+      color: var(--ilo-fg-4);
+      opacity: 0.55;
+      text-align: right;
+      user-select: none;
+      -webkit-user-select: none;
+      font-variant-numeric: tabular-nums;
+    }
+    .lnt {
+      white-space: pre-wrap;
+      min-width: 0;
+    }
+    .pl-edit-highlight .lnt { white-space: pre; }
+    @media (max-width: 600px) {
+      .lns { grid-template-columns: 2ch 1fr; column-gap: 8px; }
+    }
+
     .pl-note-row {
       font-family: var(--ilo-font-mono);
       font-size: 11.5px; line-height: 1.55;
@@ -447,6 +471,11 @@ const exampleJson = JSON.stringify(
       caret-color: var(--ilo-fg-1);
       background: transparent;
       z-index: 2;
+      /* Align cursor with code text inside the line-numbered highlight layer */
+      padding-left: calc(22px + 2.5ch + 12px);
+    }
+    @media (max-width: 600px) {
+      .pl-edit-input { padding-left: calc(22px + 2ch + 8px); }
     }
     .pl-edit-highlight {
       flex: 1;
@@ -809,10 +838,26 @@ const exampleJson = JSON.stringify(
     }).join('\n');
   }
 
+  // Wrap each highlighted line in a gutter/line-number pair. The input is the
+  // per-line-joined HTML produced by highlightPy/highlightIlo (no <span> ever
+  // crosses a newline, so splitting on \n is safe). For a single-line input we
+  // still emit a `1` so the gutter width never changes between compact and
+  // expanded views.
+  function withLineNumbers(html) {
+    const lines = html.split('\n');
+    // Drop a single trailing empty line (common from a terminal newline) so we
+    // don't render an extra blank numbered row.
+    if (lines.length > 1 && lines[lines.length - 1] === '') lines.pop();
+    const rows = lines.map((line, i) =>
+      '<span class="lne">' + (i + 1) + '</span><span class="lnt">' + (line || ' ') + '</span>'
+    ).join('');
+    return '<span class="lns">' + rows + '</span>';
+  }
+
   function renderPyHighlight() {
     if (!els.pyHighlight) return;
     els.pyHighlight.textContent = '';
-    els.pyHighlight.insertAdjacentHTML('afterbegin', highlightPy(els.pyEdit.value) + '\n');
+    els.pyHighlight.insertAdjacentHTML('afterbegin', withLineNumbers(highlightPy(els.pyEdit.value)));
   }
 
   function updateConvertBtn() {
@@ -869,8 +914,8 @@ const exampleJson = JSON.stringify(
   function renderIlo() {
     const multi = currentIloText;
     const compact = toCompact(currentIloText);
-    replaceHtml(els.iloMulti, highlightIlo(multi));
-    replaceHtml(els.iloCompact, highlightIlo(compact));
+    replaceHtml(els.iloMulti, withLineNumbers(highlightIlo(multi)));
+    replaceHtml(els.iloCompact, withLineNumbers(highlightIlo(compact)));
     const mTok = countTokens(multi);
     const cTok = countTokens(compact);
     els.iloMultiTok.textContent = mTok;
@@ -1087,8 +1132,12 @@ const exampleJson = JSON.stringify(
     if (action === 'reset') {
       apply(currentKey || ORDER[0]);
     } else if (action === 'copy-ilo') {
-      const target = document.getElementById(btn.getAttribute('data-target'));
-      const text = target ? target.innerText.trim() : '';
+      // Copy the raw source text, not the rendered DOM — otherwise the line
+      // numbers from the gutter would be included.
+      const targetId = btn.getAttribute('data-target');
+      const text = targetId === 'pl-ilo-compact'
+        ? toCompact(currentIloText).trim()
+        : currentIloText.trim();
       copy(text); flash(btn, btn.classList.contains('pl-pane-copy') ? 'copied ✓' : 'copied ilo ✓');
     } else if (action === 'copy-share') {
       copy(window.location.href);
