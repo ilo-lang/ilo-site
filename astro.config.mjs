@@ -107,6 +107,8 @@ export default defineConfig({
             { label: 'Imports', slug: 'docs/reference/imports' },
             { label: 'Memory Model', slug: 'docs/reference/memory-model' },
             { label: 'REPL', slug: 'docs/reference/repl' },
+            { label: 'Server', slug: 'docs/reference/serv' },
+            { label: 'Transpile', slug: 'docs/reference/transpile' },
             { label: 'CLI', slug: 'docs/reference/cli' },
             { label: 'Engines', slug: 'docs/reference/engines' },
             { label: 'Diagnostics', slug: 'docs/reference/diagnostics' },
