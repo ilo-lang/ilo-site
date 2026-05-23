@@ -296,7 +296,7 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
     <!-- FEATURES — Designed for machines -->
     <section class="features" data-animate>
       <div class="container">
-        <h2 class="section-title">Designed for AI agents</h2>
+        <h2 class="section-title">Language features</h2>
         <p class="section-subtitle">Every feature exists to reduce total token cost.</p>
         <div class="feature-grid">
           <div class="feature-card feature-card--wide">
@@ -351,15 +351,6 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
             <p>Wire external APIs as typed functions. Type-checked at load time.</p>
             <div class="feature-code">
               <code><span class="syn-op">--</span><span class="syn-p">tools</span> tools.json</code>
-            </div>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-label">Surface</div>
-            <h3>Structured by default</h3>
-            <p>Every CLI subcommand emits JSON. Diagnostics carry error codes, source spans, and fix metadata. No screen-scraping.</p>
-            <div class="feature-code">
-              <code><span class="syn-fn">ilo</span> check <span class="syn-op">--json</span></code>
             </div>
           </div>
 
