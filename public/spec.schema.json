@@ -1,0 +1,154 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ilo-lang.ai/spec.schema.json",
+  "title": "ilo language specification",
+  "description": "Machine-readable manifest describing the ilo programming language: types, operators, builtins, error codes, syntax features.",
+  "type": "object",
+  "required": [
+    "language",
+    "version",
+    "description",
+    "syntax",
+    "types",
+    "operators",
+    "builtins",
+    "error_codes"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the JSON Schema this document validates against."
+    },
+    "language": {
+      "type": "string",
+      "description": "Language identifier, e.g. 'ilo'."
+    },
+    "version": {
+      "type": "string",
+      "description": "Spec version, semver or major.minor."
+    },
+    "description": {
+      "type": "string",
+      "description": "Short human-readable summary of the language."
+    },
+    "homepage": { "type": "string", "format": "uri" },
+    "repository": { "type": "string", "format": "uri" },
+    "spec": {
+      "type": "string",
+      "format": "uri",
+      "description": "Link to the canonical long-form specification."
+    },
+    "syntax": {
+      "type": "object",
+      "required": ["notation"],
+      "additionalProperties": false,
+      "properties": {
+        "notation": {
+          "type": "string",
+          "enum": ["prefix", "infix", "postfix", "mixed"]
+        },
+        "function_definition": { "type": "string" },
+        "function_call": { "type": "string" },
+        "statement_separator": { "type": "string" },
+        "comment": { "type": "string" },
+        "auto_unwrap_suffix": { "type": "string" }
+      }
+    },
+    "types": {
+      "type": "object",
+      "description": "Map of type sigil (often a single character) to a type entry.",
+      "patternProperties": {
+        "^.+$": {
+          "type": "object",
+          "required": ["name"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "notes": { "type": "string" }
+          }
+        }
+      }
+    },
+    "operators": {
+      "type": "object",
+      "description": "Operator categories. Each value is an array of operator entries.",
+      "patternProperties": {
+        "^[a-z_]+$": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/operator" }
+        }
+      }
+    },
+    "builtins": {
+      "type": "object",
+      "description": "Builtin function categories. Each value is an array of builtin entries.",
+      "patternProperties": {
+        "^[a-z_]+$": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/builtin" }
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "description": "Optional language features keyed by name.",
+      "patternProperties": {
+        "^[a-z_]+$": {
+          "type": "object",
+          "required": ["desc"],
+          "properties": {
+            "desc": { "type": "string" },
+            "suffix": { "type": "string" },
+            "example": { "type": "string" },
+            "examples": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "error_codes": {
+      "type": "object",
+      "description": "Map of error code (e.g. ILO-T004) to a one-line description.",
+      "patternProperties": {
+        "^[A-Z]+-[A-Z][0-9]+$": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "examples": {
+      "type": "object",
+      "description": "Short example programs or invocations.",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "definitions": {
+    "operator": {
+      "type": "object",
+      "required": ["sym", "sig", "desc"],
+      "additionalProperties": false,
+      "properties": {
+        "sym": { "type": "string", "description": "Operator symbol." },
+        "sig": { "type": "string", "description": "Type signature, e.g. 'n n > n'." },
+        "desc": { "type": "string", "description": "One-line description." }
+      }
+    },
+    "builtin": {
+      "type": "object",
+      "required": ["name", "sig", "desc"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "description": "Canonical short name." },
+        "alias": { "type": "string", "description": "Optional long-form alias." },
+        "sig": { "type": "string", "description": "Type signature, e.g. 't t > t'." },
+        "desc": { "type": "string", "description": "One-line description." },
+        "native_only": {
+          "type": "boolean",
+          "description": "True if the function is only available in the native binary, not the WASM build."
+        }
+      }
+    }
+  }
+}
