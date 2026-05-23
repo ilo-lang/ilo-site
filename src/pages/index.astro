@@ -747,100 +747,73 @@ interface Preset {
 
 const PRESETS: Preset[] = [
   {
-    name: 'upper',
-    python: `def up(s):
-    return s.upper()
-
-print(up("hello"))`,
-    iloMulti: `up s:t>t
-  upr s
-
-main>_
-  prnt up "hello"`,
-    iloInline: `up s:t>t;upr s;main>_;prnt up "hello"`,
-    output: 'HELLO',
+    name: 'arithmetic',
+    python: `def tot(p, q, r):
+    s = p * q
+    t = s * r
+    return s + t`,
+    iloMulti: `tot p:n q:n r:n>n
+  s=*p q
+  t=*s r
+  +s t`,
+    iloInline: `tot p:n q:n r:n>n;s=*p q;t=*s r;+s t`,
+    output: '24',
   },
   {
     name: 'guards',
-    python: `def classify(n):
-    if n < 0:
-        return "neg"
-    if n == 0:
-        return "zero"
-    return "pos"
-
-print(classify(5))`,
-    iloMulti: `classify n:n>t
-  <n 0 "neg"
-  =n 0 "zero"
-  "pos"
-
-main>_
-  prnt classify 5`,
-    iloInline: `classify n:n>t;<n 0 "neg";=n 0 "zero";"pos";main>_;prnt classify 5`,
+    python: `def classify(x):
+    if x > 0: return "pos"
+    if x < 0: return "neg"
+    return "zero"`,
+    iloMulti: `classify x:n>t
+  >x 0 "pos"
+  <x 0 "neg"
+  "zero"`,
+    iloInline: `classify x:n>t;>x 0 "pos";<x 0 "neg";"zero"`,
     output: 'pos',
+  },
+  {
+    name: 'match',
+    python: `def desc(x):
+    match x:
+        case 0: return "zero"
+        case 1: return "one"
+        case _: return "other"`,
+    iloMulti: `desc x:n>t
+  ?x{0:"zero";1:"one";_:"other"}`,
+    iloInline: `desc x:n>t;?x{0:"zero";1:"one";_:"other"}`,
+    output: 'one',
   },
   {
     name: 'sum',
     python: `def total(xs):
-    return sum(xs)
-
-print(total([1, 2, 3, 4, 5]))`,
+    return sum(xs)`,
     iloMulti: `total xs:L n>n
-  sum xs
-
-main>_
-  prnt total [1, 2, 3, 4, 5]`,
-    iloInline: `total xs:L n>n;sum xs;main>_;prnt total [1, 2, 3, 4, 5]`,
+  sum xs`,
+    iloInline: `total xs:L n>n;sum xs`,
     output: '15',
   },
   {
-    name: 'map-double',
-    python: `def dbls(xs):
-    return [n * 2 for n in xs]
-
-print(dbls([1, 2, 3, 4, 5]))`,
-    iloMulti: `dbls xs:L n>L n
-  map (n:n>n;*n 2) xs
-
-main>_
-  prnt dbls [1, 2, 3, 4, 5]`,
-    iloInline: `dbls xs:L n>L n;map (n:n>n;*n 2) xs;main>_;prnt dbls [1, 2, 3, 4, 5]`,
-    output: '[2, 4, 6, 8, 10]',
+    name: 'upper',
+    python: `def up(s):
+    return s.upper()`,
+    iloMulti: `up s:t>t
+  upr s`,
+    iloInline: `up s:t>t;upr s`,
+    output: 'HELLO',
   },
   {
-    name: 'match',
-    python: `def desc(grade):
-    match grade:
-        case "A": return "excellent"
-        case "B": return "good"
-        case _: return "ok"
+    name: 'bisect',
+    python: `import bisect
 
-print(desc("A"))`,
-    iloMulti: `desc g:t>t
-  ?g{"A":"excellent";"B":"good";_:"ok"}
-
-main>_
-  prnt desc "A"`,
-    iloInline: `desc g:t>t;?g{"A":"excellent";"B":"good";_:"ok"};main>_;prnt desc "A"`,
-    output: 'excellent',
-  },
-  {
-    name: 'len-list',
-    python: `def count(xs):
-    return len(xs)
-
-print(count([1, 2, 3, 4, 5]))`,
-    iloMulti: `count xs:L _>n
-  len xs
-
-main>_
-  prnt count [1, 2, 3, 4, 5]`,
-    iloInline: `count xs:L _>n;len xs;main>_;prnt count [1, 2, 3, 4, 5]`,
-    output: '5',
+def find(xs, n):
+    return bisect.bisect(xs, n)`,
+    iloMulti: `find xs:L n n:n>n
+  bisect xs n`,
+    iloInline: `find xs:L n n:n>n;bisect xs n`,
+    output: '2',
   },
 ];
-
 let activePreset = 0;
 let isMultiLine = false;
 let isApiResult = false;
