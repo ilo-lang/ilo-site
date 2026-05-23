@@ -218,28 +218,24 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
 
         {installGroups.map((g, gi) => (
           <div class={`install-group${gi === 0 ? ' active' : ''}`} data-install-group={g.id}>
-            <div class="term-wrap">
-              <div class="term">
-                <div class="term-head">
-                  {g.subs.map((s, j) => (
-                    <span class={`term-file${j === 0 ? ' active' : ''}`} data-term-file={`${g.id}:${s.id}`}>{s.file}</span>
-                  ))}
-                  <label class="picker">
-                    <select class="picker-select" data-install-picker={g.id}>
-                      {g.subs.map((s) => (
-                        <option value={`${g.id}:${s.id}`}>{s.label}</option>
-                      ))}
-                    </select>
-                    <span class="chev" aria-hidden="true">▾</span>
-                  </label>
-                </div>
-                {g.subs.map((s, j) => (
-                  <div class={`term-body-wrap${j === 0 ? ' active' : ''}`} data-install-panel={`${g.id}:${s.id}`}>
-                    <pre class="term-body"><span class="p">$</span> {s.cmd}</pre>
-                    <button class="term-copy" data-copy={s.cmd} aria-label={`Copy ${g.label} ${s.label} install command`}>copy</button>
+            <div class="install-subs">
+              {g.subs.map((s, j) => (
+                <div class="install-sub" data-sub-index={j}>
+                  <div class="install-sub-label">
+                    <span class="install-sub-dot" aria-hidden="true"></span>
+                    <span class="install-sub-name">{s.label}</span>
+                    <span class="install-sub-file">{s.file}</span>
                   </div>
-                ))}
-              </div>
+                  <div class="term-wrap">
+                    <div class="term">
+                      <div class="term-body-wrap active">
+                        <pre class="term-body"><span class="p">$</span> {s.cmd}</pre>
+                        <button class="term-copy" data-copy={s.cmd} aria-label={`Copy ${g.label} ${s.label} install command`}>copy</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
 
             <div class="footer-row">
@@ -837,20 +833,6 @@ const fmt = (ns: number) => ns >= 1000 ? `${(ns / 1000).toFixed(1)}µs` : `${ns}
         x.setAttribute('aria-selected', String(on));
       });
       groups.forEach(g => g.classList.toggle('active', g.getAttribute('data-install-group') === id));
-    });
-  });
-
-  // Install pickers (per-group sub-option dropdown in the terminal head)
-  document.querySelectorAll<HTMLSelectElement>('[data-install-picker]').forEach(sel => {
-    sel.addEventListener('change', () => {
-      const id = sel.value; // e.g. "humans:windows"
-      const groupId = id.split(':')[0];
-      document.querySelectorAll<HTMLElement>(`[data-install-panel^="${groupId}:"]`).forEach(p => {
-        p.classList.toggle('active', p.getAttribute('data-install-panel') === id);
-      });
-      document.querySelectorAll<HTMLElement>(`[data-term-file^="${groupId}:"]`).forEach(f => {
-        f.classList.toggle('active', f.getAttribute('data-term-file') === id);
-      });
     });
   });
 
@@ -1675,10 +1657,33 @@ scheduleAutoCycle();
   .install-group { display: none; flex-direction: column; }
   .install-group.active { display: flex; }
 
+  .install-subs {
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .install-sub { display: flex; flex-direction: column; gap: 8px; }
+  .install-sub-label {
+    display: flex; align-items: baseline; gap: 10px;
+    font-family: var(--ilo-font-sans);
+    font-size: 13.5px;
+    color: var(--ilo-fg-1);
+  }
+  .install-sub-dot {
+    width: 8px; height: 8px; border-radius: 999px;
+    background: var(--ilo-lime);
+    align-self: center;
+    flex: 0 0 auto;
+  }
+  .install-sub[data-sub-index="1"] .install-sub-dot { background: #60a5fa; }
+  .install-sub[data-sub-index="2"] .install-sub-dot { background: var(--ilo-accent); }
+  .install-sub-name { font-weight: 600; }
+  .install-sub-file {
+    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
+    font-size: 11.5px; color: var(--ilo-fg-4);
+  }
+
   .term-wrap {
     position: relative;
     border-radius: 8px;
-    border-top-left-radius: 0;
   }
   .term-wrap::after {
     content: "";
@@ -1698,43 +1703,8 @@ scheduleAutoCycle();
     z-index: 1;
     display: flex; flex-direction: column;
   }
-  .term-head {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 12px 8px 16px;
-    border-bottom: 1px solid var(--ilo-hairline);
-    font-family: var(--ilo-font-mono); font-variant-ligatures: none;
-    font-size: 11px;
-    color: var(--ilo-fg-4);
-    letter-spacing: 0.02em;
-  }
-  .term-file { display: none; color: var(--ilo-fg-3); }
-  .term-file.active { display: inline; }
-  .picker {
-    margin-left: auto;
-    position: relative;
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background var(--ilo-duration-1) var(--ilo-ease), color var(--ilo-duration-1) var(--ilo-ease);
-  }
-  .picker:hover { background: rgba(255,255,255,0.05); }
-  .picker-select {
-    appearance: none; -webkit-appearance: none;
-    background: transparent; border: 0;
-    font-family: var(--ilo-font-sans); font-size: 11.5px;
-    color: var(--ilo-fg-2);
-    padding: 0 18px 0 0;
-    cursor: pointer;
-    line-height: 1.3;
-    outline: none;
-  }
-  .picker-select option { background: var(--ilo-ink-2); color: var(--ilo-fg-1); }
-  .picker .chev { position: absolute; right: 6px; pointer-events: none; color: var(--ilo-fg-4); font-size: 10px; }
-  .picker:hover .picker-select { color: var(--ilo-fg-1); }
 
-  .term-body-wrap { display: none; align-items: stretch; }
-  .term-body-wrap.active { display: flex; }
+  .term-body-wrap { display: flex; align-items: stretch; }
   .term-body {
     margin: 0;
     padding: 14px 18px;
