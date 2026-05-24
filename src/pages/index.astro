@@ -62,7 +62,7 @@ const posts: Post[] = await fetch('https://danieljohnmorris.com/rss.xml')
   <header class="nav">
     <div class="nav-inner container">
       <a class="wordmark" href="/">ilo</a>
-      <a class="v-pill" href={releaseUrl} target="_blank" rel="noopener">{versionLabel}</a>
+      <a class="v-pill" data-version href={releaseUrl} target="_blank" rel="noopener">{versionLabel}</a>
       <nav class="nav-links">
         <a class="nav-link" href="/playground/">Playground</a>
         <a class="nav-link" href="#manifesto">Manifesto</a>
@@ -146,9 +146,9 @@ print(total)</pre>
     <div class="install-wrap-page">
       <div class="install-head">
         <h2 class="install-h2"><a class="hash" href="#install">#</a>get started</h2>
-        <a class="install-status" href={releaseUrl} target="_blank" rel="noopener">
+        <a class="install-status" data-version-href href={releaseUrl} target="_blank" rel="noopener">
           <span class="install-status-dot"></span>
-          experimental · {versionLabel}
+          experimental · <span data-version-text>{versionLabel}</span>
         </a>
       </div>
 
@@ -626,7 +626,7 @@ print(total)</pre>
       </div>
     </div>
     <div class="foot-meta">
-      <a class="badge" href={releaseUrl} target="_blank" rel="noopener">{versionLabel}</a>
+      <a class="badge" data-version href={releaseUrl} target="_blank" rel="noopener">{versionLabel}</a>
       <a class="badge" href="https://github.com/ilo-lang/ilo/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
       <a class="badge" href="https://github.com/ilo-lang/ilo/commit/edfecb12704e6e175613847e52121d3052d298ad" target="_blank" rel="noopener">since Feb 2026</a>
       <span class="foot-built">Compiler built in Rust · Tooling built in ilo</span>
@@ -1628,6 +1628,33 @@ print(total)</pre>
 </style>
 
 <script>
+  // ===== LIVE VERSION - refresh the build-time label from the latest GitHub release =====
+  // The version baked in at build time can go stale between deploys. This upgrades
+  // it client-side so the pill/badge always reflect the current release. The
+  // build-time value remains the instant-paint and no-JS fallback.
+  (function () {
+    fetch('https://api.github.com/repos/ilo-lang/ilo/releases/latest', {
+      headers: { Accept: 'application/vnd.github+json' },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d || !d.tag_name) return;
+        const tag: string = d.tag_name;
+        const url: string = d.html_url;
+        document.querySelectorAll<HTMLAnchorElement>('[data-version]').forEach((el) => {
+          el.textContent = tag;
+          el.href = url;
+        });
+        document.querySelectorAll<HTMLElement>('[data-version-text]').forEach((el) => {
+          el.textContent = tag;
+        });
+        document.querySelectorAll<HTMLAnchorElement>('[data-version-href]').forEach((el) => {
+          el.href = url;
+        });
+      })
+      .catch(() => {});
+  })();
+
   // ===== AGENT CONVERSATION - staggered reveal =====
   (function () {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
