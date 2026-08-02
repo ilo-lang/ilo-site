@@ -129,6 +129,13 @@ export default defineConfig({
             { label: 'Tools', slug: 'docs/builtins/tools' },
           ],
         },
+        {
+          label: 'Ecosystem',
+          items: [
+            { label: 'Languages for AI agents', slug: 'docs/ecosystem/languages-for-agents' },
+            { label: 'Token efficiency', slug: 'docs/ecosystem/token-efficiency' },
+          ],
+        },
       ],
       head: [
         {
