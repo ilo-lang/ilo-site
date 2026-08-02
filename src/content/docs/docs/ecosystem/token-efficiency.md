@@ -52,7 +52,14 @@ The catch is in the word *prefix*: the match runs from the very first character 
 
 This one saves money rather than tokens. The context window is just as full either way.
 
-- [Anthropic prompt caching](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) - how to place cache breakpoints, and what invalidates them
+Every major provider offers it, with different mechanics. The split that matters is whether you place the cache breakpoints yourself or the provider infers them, and whether you are billed per cached token or for storage over time.
+
+- [Anthropic](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) - explicit `cache_control` breakpoints, up to four per request; reads bill at roughly 0.1x
+- [OpenAI](https://platform.openai.com/docs/guides/prompt-caching) - was automatic with no configuration and no write cost; since GPT-5.6 went GA in July 2026 it uses explicit breakpoints and bills writes, which puts it close to Anthropic's model
+- [Google Gemini](https://ai.google.dev/gemini-api/docs/caching) - offers both implicit and explicit context caching, and bills cached content for storage duration rather than per token, so the economics turn on how long you hold the cache rather than how often you read it
+- [DeepSeek](https://api-docs.deepseek.com/guides/kv_cache) - automatic, disk-backed, and the steepest relative discount of the four
+
+Rates move often and vary by model. Treat any number you read as needing a check against the provider's own pricing page before you budget against it.
 
 ## Write less back
 
