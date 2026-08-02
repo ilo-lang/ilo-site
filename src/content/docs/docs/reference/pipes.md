@@ -101,3 +101,51 @@ In a file with multiple functions, wrap pipe chains in parentheses for non-last 
 dbl-inc x:n>n;(x>>dbl>>inc)   -- parens needed (not the last function)
 inc-sq x:n>n;x>>inc>>sq       -- last function, no parens needed
 ```
+
+## Result-aware short-circuit
+
+When the left operand of `>>` returns a `R T E` (Result) or `O T` (Optional), the pipe
+auto-unwraps: `Ok(v)` passes `v` to the next stage; `Err(e)` short-circuits and propagates
+`^e` out of the enclosing function via early-return. Non-Result values pass through unchanged.
+
+This means you can chain Result-returning functions without explicit `!` on each stage:
+
+```ilo
+fetch url>>jpar>>jpth "name"
+```
+
+If `fetch` returns `^e`, both `jpar` and `jpth` are skipped, and `^e` propagates.
+If `fetch` returns `~v`, `v` is unwrapped and passed to `jpar`.
+
+The enclosing function must return `R` (or `O`) for the short-circuit to type-check,
+same as `!`. Non-Result pipes (plain functions returning `n`, `t`, `L`, etc.) are
+unaffected — no unwrap, no error propagation.
+
+### How it works
+
+The parser injects `UnwrapMode::PipePropagate` on intermediate pipe-desugared calls.
+The verifier treats this leniently — non-Result returns pass through without `ILO-T025`.
+The runtime checks the value's tag at each stage (`ISOK`/`ISERR`) so plain numbers,
+text, and lists skip the unwrap entirely.
+
+### Before and after
+
+Before (manual unwrap per stage):
+
+```ilo
+fn process url:t>R t t
+;r=get! url
+;j=jpar! r
+;n=jpth! j "name"
+;n
+```
+
+After (Result-aware pipe, single line):
+
+```ilo
+fn process url:t>R t t
+;url>>get>>jpar>>jpth "name"
+```
+
+Both are equivalent. The pipe form is ~60% fewer tokens and eliminates the class of
+errors where an agent forgets a `!` on one of the intermediate stages.
