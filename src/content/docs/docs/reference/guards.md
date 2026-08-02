@@ -119,7 +119,7 @@ ilo has three syntactically distinct conditional shapes. They look similar at a 
 
 Worked side-by-side. The condition is `> x 0`; the arms are `"pos"` and `"nonpos"`:
 
-```ilo
+```text
 -- braceless guard: early return, fallthrough is the else
 f x:n>t;>x 0 "pos";"nonpos"
 
@@ -129,8 +129,8 @@ f x:n>t;>x 0{ret "pos"};"nonpos"
 -- brace ternary: value, no early return, tail expr returns
 f x:n>t;>x 0{"pos"}{"nonpos"}
 
--- prefix ternary keyword: cheapest when the bool is already named
-f x:n>t;c=>x 0;?h c "pos" "nonpos"
+-- bare-bool prefix ternary: cheapest when the bool is already named
+f x:n>t;c=>x 0;?c "pos" "nonpos"
 ```
 
 **Common mistake.** `?h cond{...}` is **not** a legal shape - `?h` is the keyword prefix-ternary, so braces after the condition trigger ILO-P009. The parser hint enumerates the three canonical forms; the fix is to drop `?h` (for `cond{...}` or `cond{a}{b}`) or to drop the braces (for `?h cond a b`).
@@ -165,9 +165,9 @@ f x:n>n;v=?=x 0 10 20;+v 1   -- v is 10 or 20, then add 1
 
 **Bare-bool prefix ternary.** When the condition is already a boolean - a bound `b` variable or a call returning `b` - drop the comparison and use `?` directly:
 
-```ilo
+```text
 f x:n h:b>n;?h 10 20             -- if h then 10 else 20
-g x:n>n;?pos x 1 -1              -- pos x : b, returns 1 or -1
+g x:n>n;?pos x 1 (-1)            -- pos x : b, returns 1 or (-1)
 ```
 
 The braced form `?h{a}{b}` is also accepted and equivalent.
@@ -248,10 +248,9 @@ show a:n b:n > t             -- two numbers in, text out
 
 `div` returns `R n t`: either an Ok number or an Err string. `show` captures the Result in `r` (without auto-unwrapping) and matches on it.
 
-You can also skip the rebind and put the call directly in the scrutinee slot — either bare or parenthesised, both parse the same:
+You can also skip the rebind and put the call directly in the scrutinee slot — parenthesised:
 
 ```ilo
-show a:n b:n>t;?div a b{~v:str v;^e:e}
 show a:n b:n>t;?(div a b){~v:str v;^e:e}
 ```
 

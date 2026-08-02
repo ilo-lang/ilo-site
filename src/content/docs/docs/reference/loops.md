@@ -215,24 +215,18 @@ For simple list transforms, prefer [`map`](/docs/builtins/collections#higher-ord
 
 ## Parallel map: `par-map`
 
-`par-map` is a parallel version of `map` that distributes work across threads:
+`par-map` is a parallel version of `map` that distributes work across threads. It is order-preserving, and **per-item errors surface as `Err` inside the result list** - so the return type is `L (R T t)` where `T` is the mapped function's return type, not a bare `L T`:
 
 ```ilo
 double x:n>n;*x 2
-main>L n;par-map double (range 0 1000)
+main>L (R n t);par-map double (range 0 1000)
 ```
 
-```bash
-ilo 'double x:n>n;*x 2 main>L n;par-map double (range 0 1000)' main
-```
-
-`par-map` accepts an optional chunk size to control granularity:
+Default concurrency is the CPU count; override globally with the `ILO_PAR_MAP_CONCURRENCY` environment variable, or per-call with a third argument (`n=0` falls back to the CPU count):
 
 ```ilo
-par-map double xs 64     -- chunk every 64 elements
+par-map double xs 4      -- at most 4 concurrent workers
 ```
-
-The chunk size tunes the work-stealing scheduler: smaller chunks improve load balancing at the cost of higher overhead; larger chunks reduce overhead but may leave threads idle. As of 0.13.0, `par-map` has a native VM opcode (`PAR_MAP`) and the Cranelift JIT can JIT the inner function before dispatching to threads.
 
 `par-map` is safe only for pure functions with no shared mutable state. The verifier does not enforce this automatically; use effect sets (see `World` capability) to annotate and restrict side-effectful code.
 

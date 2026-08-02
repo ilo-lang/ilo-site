@@ -63,7 +63,7 @@ Both accept the same optional trailing `M t t` request-headers map as `get`/`pst
 
 ```ilo
 -- Conditional request: branch on 304 vs 200
-fetch>R t t;h=mset mmap "if-none-match" "\"abc123\"";r=getx! "https://api.example.com/data" h;st=mget!! r "status";?(=st 304){~"not modified"};~mget!! r "body"
+fetch>R t t;h=mset mmap "if-none-match" "\"abc123\"";r=getx! "https://api.example.com/data" h;st=mget!! r "status";=st 304 ~"not modified";~mget!! r "body"
 
 -- Read a rate-limit header
 r=getx! "https://api.github.com/users/octocat";rem=mget!! (mget!! r "headers") "x-ratelimit-remaining"

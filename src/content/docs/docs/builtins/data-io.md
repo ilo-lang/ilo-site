@@ -88,7 +88,7 @@ All four follow symlinks (POSIX `stat`, not `lstat`). Metadata calls are leaf qu
 
 ```ilo
 sz p:t>R n t;fsize p
-isnew p:t>b;t=mtime! p;d=-(now)t;<d 3600.0   -- modified in the last hour
+isnew p:t>R b t;m=mtime! p;d=- now m;~<d 3600.0   -- modified in the last hour
 kind p:t>t;f=isfile p;d=isdir p;?f{true:"file";false:?d{true:"dir";false:"other"}}
 ```
 
