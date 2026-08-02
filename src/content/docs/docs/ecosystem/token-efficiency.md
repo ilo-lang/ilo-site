@@ -74,25 +74,10 @@ One generated program replaces a chain of round trips, each of which carries ful
 Change what generated code costs in the first place. The moves in use across the [agent-language field](/docs/ecosystem/languages-for-agents/):
 
 - **Dense syntax** - short fixed aliases, minimal punctuation: [ilo](https://github.com/ilo-lang/ilo) (`mapr`, `fld`, `rdjl`), [Mog](https://github.com/voltropy/mog) flat operators
-- **Small loadable spec** - bound the artifact an agent reads before writing (measured below)
+- **Small loadable spec** - bound the artifact an agent must read before it can write the language: [Zero](https://github.com/vercel-labs/zerolang) and [Mog](https://github.com/voltropy/mog) both ship one under 3k tokens
 - **Structured diagnostics** - stable error codes + fix hints kill retry loops: [Zero](https://github.com/vercel-labs/zerolang) repair plans, ilo `ILO-P/T/R` codes, [Codong](https://github.com/brettinhere/Codong) fix/retry JSON
 - **One canonical form** - one way to write each operation, no plausible-but-wrong variants: Codong, [Lume](https://github.com/mavboas/lume)
 - **Budgeted doc retrieval** - Lume's `lume kb pack "<q>" --max-tokens N` packs docs under a cap
 - **Constrained decoding** - grammar masks the token distribution so invalid syntax cannot be sampled: [Axis](https://github.com/vmelnic/axis) LL(1) masks, MoonBit (ICSE 2024)
 
-## Measured: spec size per language
-
-The smallest artifact each language positions as agent context for *writing* it. Measured 2026-08-01 from clones at HEAD; tokens = bytes / 4. Full reference specs excluded for every project, including ilo's ~44k-token [SPEC.md](https://github.com/ilo-lang/ilo/blob/main/SPEC.md).
-
-| Language | Artifact | ~Tokens |
-|---|---|---:|
-| [Zero](https://github.com/vercel-labs/zerolang) | `skills/zero/SKILL.md` | 969 |
-| [Mog](https://github.com/voltropy/mog) | `docs/context.md` | 2,671 |
-| **[ilo](https://github.com/ilo-lang/ilo)** | `skills/ilo/SKILL.md` | **3,440** |
-| [Thermite](https://github.com/dollspace-gay/Thermite) | `THERMITE.skill.md` | 5,084 |
-| [Codong](https://github.com/brettinhere/Codong) | `SPEC_FOR_AI.md` | 11,881 |
-| [Magpie](https://github.com/magpie-lang/magpie) | `SKILL.md` | 13,273 |
-| [Vera](https://github.com/aallan/vera) | `SKILL.md` | 30,089 |
-| [AILANG](https://github.com/sunholo-data/ailang) | `llms.txt` | 31,369 |
-
-Vendor percentage claims reported as claimed, not independently verified. Full field: [agentlanguages.dev](https://agentlanguages.dev).
+Full field: [agentlanguages.dev](https://agentlanguages.dev) and [languages for AI agents](/docs/ecosystem/languages-for-agents/). Vendor percentage claims are reported as claimed, not independently verified.
