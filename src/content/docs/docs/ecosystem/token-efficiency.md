@@ -11,7 +11,7 @@ An agent with no index explores by reading, and reading is what costs - a single
 
 **Search the repo directly.** No index; the agent runs `grep` and `rg` and reasons over the results. Nothing to precompute or go stale, and it [reaches over 90% of RAG-level accuracy](https://www.mindstudio.ai/blog/is-rag-dead-what-ai-agents-use-instead) on code retrieval benchmarks.
 
-- [Claude Code](https://www.claude.com/product/claude-code) and [Cline](https://github.com/cline/cline) ship with no index
+- [Claude Code](https://www.claude.com/product/claude-code), [Codex CLI](https://github.com/openai/codex) and [Cline](https://github.com/cline/cline) ship with no index. Semantic search is an open request on Codex ([#5181](https://github.com/openai/codex/issues/5181), [#609](https://github.com/openai/codex/issues/609)), and third-party indexers exist for all three
 
 **Embed and retrieve.** Chunk, embed, retrieve by similarity. Catches intent that keyword search misses; the index needs rebuilding as code changes.
 
@@ -59,7 +59,7 @@ This one saves money rather than tokens. The context window is just as full eith
 Output tokens are the half you control by asking. An instruction in context cuts what the model writes, with no toolchain change.
 
 - [caveman](https://github.com/JuliusBrussee/caveman) - strips articles, filler and pleasantries from responses while keeping the technical content intact; roughly 75% fewer tokens on prose-heavy turns
-- [Ponytail](https://extraheadroom.com/ponytail-claude-code) - aims at generated code rather than prose, pushing the model down a ladder (no code? one line? a config change?) before it writes anything; lite, full and ultra intensity levels
+- [Ponytail](https://extraheadroom.com/ponytail-claude-code) - aims at generated code rather than prose, pushing the model down a ladder (no code? one line? a config change?) before it writes anything; lite, full and ultra intensity levels. Ships as an add-on to [Headroom](#compress-what-reaches-the-model), which handles the input side
 
 ## Code instead of tool calls
 
