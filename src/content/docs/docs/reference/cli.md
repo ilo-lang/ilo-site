@@ -459,3 +459,81 @@ ilo help lang      # full language specification
 ilo help ai        # compact spec for LLM consumption
 ilo -ai            # same as help ai
 ```
+
+## Constrained decoding (`ilo constrain`)
+
+`ilo constrain` exports the parser grammar as JSON so an external LLM harness can apply **constrained decoding** at generation time. By mapping the grammar's per-state token masks onto the model's tokeniser logits, a host harness makes **syntactically invalid ilo unreachable at generation** — the model literally cannot produce tokens that would fail `ilo check` with an `ILO-L###` or `ILO-P###` code.
+
+Three modes:
+
+### `ilo constrain` (default — `--mode states`)
+
+Emits the grammar as a JSON state machine:
+
+```json
+{
+  "schemaVersion": 1,
+  "states": {
+    "TopLevel": {
+      "transitions": {
+        "type": "AfterType",
+        "tool": "AfterTool",
+        "ident": "FnHeader",
+        "eof": "End"
+      }
+    },
+    "FnHeader": {
+      "transitions": { "<": "TypeParams", ">": "ReturnType", "ident": "ParamName" }
+    }
+  },
+  "initial": "TopLevel",
+  "accept": ["End"]
+}
+```
+
+29 parse states covering declaration, type, parameter, expression, statement, match-arm, and list-literal positions. A host harness walks this token-by-token to determine the valid token set at each generation step.
+
+### `ilo constrain --mode masks`
+
+Emits per-state binary masks over a 59-entry token-category vocabulary:
+
+```json
+{
+  "schemaVersion": 1,
+  "vocabulary": ["type", "tool", "use", "with", "by", "L", "R", "F", "O", "M", "S",
+    "W", "U32", "U64", "I64", "true", "false", "nil", "num", "text", "ident", "_",
+    ">=", "<=", "!=", "+=", ">>", "??", "!!", "..", ".?", "+", "-", "*", "/", ">",
+    "<", "=", "&", "|", "?", "@", "!", "^", "~", "$", ":", ";", ".", ",", "{", "}",
+    "(", ")", "[", "]", "\\n", "eof"],
+  "masks": {
+    "TopLevel": [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    "AfterOp": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
+  }
+}
+```
+
+Each mask array has length 59. A `1` at index `i` means `vocabulary[i]` is valid in that state. Map onto the target model's BPE tokeniser to mask logits at each generation step. The masks are over **categories** (`ident`, `num`, `text`) rather than individual token values, so the vocabulary is small and stable.
+
+### `ilo constrain --mode completions --file FILE --line LINE --col COL`
+
+Tokenises the source file up to a 1-based line/column cursor, runs the token stream through the state machine, and returns the current parse state plus the set of valid next tokens:
+
+```json
+{
+  "schemaVersion": 1,
+  "state": "FnHeader",
+  "validTokens": ["<", "ident", ">"]
+}
+```
+
+Useful for editor integration (autocomplete, inline hints) and for agents that need to ask "what can I write here?"
+
+### Limitations
+
+The state machine is **static**: it encodes the grammar's shape, not the parser's internal bookkeeping (arity tables, lambda context, declaration boundaries). It prevents lex/parse errors at generation time; type errors (`ILO-T004`, `ILO-T006`) and runtime errors are still caught by `ilo check` and `ilo run`.
+
+ilo's prefix notation and small keyword set make the state space small (29 states, 59 categories) and the masks strong — far fewer valid tokens per position than a conventional language with operator precedence and infix expressions.
