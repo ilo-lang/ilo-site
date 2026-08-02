@@ -37,23 +37,20 @@ rev(srt nums)   -- → [5 4 3 2 1] (sort descending)
 `srt` also accepts a key function for sort-by (`srt fn list`):
 
 ```ilo
-neg x:n>n;-x                              -- negate a number
-srt neg nums                              -- sort by negative → [5 4 3 1 1]
-
-slen s:t>n;len s                          -- string length as key
-srt slen ["banana" "fig" "apple" "kiwi"]  -- → [fig kiwi apple banana]
+neg x:n>n;-x                                    -- negate a number
+main>L n;srt neg [1 5 3 4 1]                    -- → [5 4 3 1 1]
 ```
 
 `rsrt` mirrors `srt` and also takes a key function for descending sort-by (`rsrt fn list`):
 
 ```ilo
-slen s:t>n;len s                            -- string length as key
-rsrt slen ["banana" "fig" "apple" "kiwi"]   -- → [banana apple kiwi fig]
+slen s:t>n;len s                                -- string length as key
+main>L t;rsrt slen ["banana" "fig" "apple" "kiwi"]  -- → [banana apple kiwi fig]
 ```
 
 Both `srt` and `rsrt` also accept a 3-arg `fn ctx list` form where `fn` takes `(elem, ctx)`. This is the cross-engine alternative when you want explicit state without forming a closure.
 
-`srt` is **stable**: elements (or items with equal keys, for the key-function form) keep their relative input order. This matters when merging parallel streams sorted by a shared key — e.g. timeline events that share a timestamp keep their per-source ordering inside each tie group. The guarantee holds on every engine (tree, VM, Cranelift JIT, Cranelift AOT). `argsort` is also stable; `rsrt` mirrors `srt`'s stability.
+`srt` is **stable**: elements (or items with equal keys, for the key-function form) keep their relative input order. This matters when merging parallel streams sorted by a shared key - e.g. timeline events that share a timestamp keep their per-source ordering inside each tie group. The guarantee holds on every engine (tree, VM, Cranelift JIT, Cranelift AOT). `argsort` is also stable; `rsrt` mirrors `srt`'s stability.
 
 Number functions that pair well with lists:
 
@@ -105,10 +102,11 @@ main nums:L n > L n      -- keep only positives
 
 #### `fld` / `fold`
 
-`fld fn init list` reduces a list to a single value. Applies `fn` to an accumulator and each element left-to-right. Like `reduce` in JavaScript or `foldl` in Haskell:
+`fld fn list init` reduces a list to a single value. Applies `fn` to an accumulator and each element left-to-right. Like `reduce` in JavaScript or `foldl` in Haskell:
 
 ```ilo
-add a:n b:n>n;+a b main xs:L n>n;fld add 0 xs  -- → 15
+add a:n b:n>n;+a b
+main xs:L n>n;fld add xs 0  -- → 15
 ```
 
 Or as a file:
@@ -118,7 +116,7 @@ add a:n b:n > n          -- add two numbers
   +a b                   -- return a + b
 
 main nums:L n > n        -- sum via fold
-  fold add 0 nums       -- → 15
+  fold add nums 0       -- → 15
 ```
 
 #### `sum`
@@ -149,7 +147,7 @@ above xs:L n thr:n>L n;flt (x:n>b;>x thr) xs         -- captures `thr`
 
 Access elements by index (zero-based) using `.`. Works on lists and maps:
 
-```ilo
+```text
 xs.0            -- first element
 xs.2            -- third element
 data.users.0    -- chained access
@@ -157,7 +155,7 @@ data.users.0    -- chained access
 
 Safe navigation with `.?` returns nil instead of erroring:
 
-```ilo
+```text
 user.?email     -- nil if "email" doesn't exist
 ```
 

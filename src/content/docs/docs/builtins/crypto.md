@@ -91,15 +91,15 @@ Both are tree-bridge eligible (no I/O, no FnRef). The encoder is total; the deco
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `hex-enc` | `L n > t` | Encode list of integers 0-255 as lowercase hex string |
-| `hex-dec` | `t > R (L n) t` | Decode hex string to list of byte values 0-255; Err on invalid input |
+| `hex` | `t > t` | Lowercase hex encode of the UTF-8 bytes of a string (every byte becomes two hex chars) |
+| `hex-rev` | `t > t` | Reverse the byte order of a hex string, byte-pair-wise; odd length errors ILO-T013 |
 
 ```ilo
-hex-enc [104 101 108 108 111]   -- "68656c6c6f"
-hex-dec! "68656c6c6f"           -- [104, 101, 108, 108, 111]
+hex "hello"      -- "68656c6c6f"
+hex-rev "abCD"   -- "CDab"
 ```
 
-`hex-enc` takes a list of integers in the range 0-255. Values outside this range produce ILO-R009. `hex-dec` accepts upper- or lowercase hex; odd-length or non-hex input returns `Err`.
+`len (hex s)` is `2 * len s` for ASCII input. `hex-rev` preserves case and is the little-endian/big-endian conversion tool (e.g. Bitcoin txid byte order).
 
 ## Common patterns
 

@@ -60,7 +60,7 @@ Capability flags (`--allow-net`, `--allow-read`, `--allow-write`, `--allow-run`)
 | Agent driving the compiler/runtime | `ilo serv` |
 | One-shot CLI invocations | `ilo check` / `ilo run` / `ilo build` |
 
-The per-process startup overhead matters at scale — a tool that compiles thousands of snippets per minute should run `ilo serv` once and stream requests, not fork `ilo check` per snippet.
+The per-process startup overhead matters at scale - a tool that compiles thousands of snippets per minute should run `ilo serv` once and stream requests, not fork `ilo check` per snippet.
 
 ## Protocol stability
 
@@ -68,6 +68,6 @@ The per-process startup overhead matters at scale — a tool that compiles thous
 
 ## Related
 
-- `ilo httpd` — user-facing HTTP server backed by a handler function
-- `ilo apply` — apply a typed fix plan to source (often consumed from `ilo check` output)
-- `ilo trace` — line-of-execution trace mode, useful when debugging an agent's program
+- `ilo httpd` - user-facing HTTP server backed by a handler function
+- `ilo apply` - apply a typed fix plan to source (often consumed from `ilo check` output)
+- `ilo trace` - line-of-execution trace mode, useful when debugging an agent's program

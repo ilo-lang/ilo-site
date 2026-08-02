@@ -215,30 +215,24 @@ For simple list transforms, prefer [`map`](/docs/builtins/collections#higher-ord
 
 ## Parallel map: `par-map`
 
-`par-map` is a parallel version of `map` that distributes work across threads:
+`par-map` is a parallel version of `map` that distributes work across threads. It is order-preserving, and **per-item errors surface as `Err` inside the result list** - so the return type is `L (R T t)` where `T` is the mapped function's return type, not a bare `L T`:
 
 ```ilo
 double x:n>n;*x 2
-main>L n;par-map double (range 0 1000)
+main>L (R n t);par-map double (range 0 1000)
 ```
 
-```bash
-ilo 'double x:n>n;*x 2 main>L n;par-map double (range 0 1000)' main
-```
-
-`par-map` accepts an optional chunk size to control granularity:
+Default concurrency is the CPU count; override globally with the `ILO_PAR_MAP_CONCURRENCY` environment variable, or per-call with a third argument (`n=0` falls back to the CPU count):
 
 ```ilo
-par-map double xs 64     -- chunk every 64 elements
+par-map double xs 4      -- at most 4 concurrent workers
 ```
-
-The chunk size tunes the work-stealing scheduler: smaller chunks improve load balancing at the cost of higher overhead; larger chunks reduce overhead but may leave threads idle. As of 0.13.0, `par-map` has a native VM opcode (`PAR_MAP`) and the Cranelift JIT can JIT the inner function before dispatching to threads.
 
 `par-map` is safe only for pure functions with no shared mutable state. The verifier does not enforce this automatically; use effect sets (see `World` capability) to annotate and restrict side-effectful code.
 
 ## Tail-call optimisation
 
-ilo deliberately has no `loop` keyword — every iteration shape that can't be written with `@` foreach should be expressed as a tail-recursive function. To make that safe, the runtime guarantees that **tail calls do not consume host-stack frames**: a function that recurses only in tail position can run to arbitrary depth, because the runtime rebinds parameters in place rather than pushing a frame.
+ilo deliberately has no `loop` keyword - every iteration shape that can't be written with `@` foreach should be expressed as a tail-recursive function. To make that safe, the runtime guarantees that **tail calls do not consume host-stack frames**: a function that recurses only in tail position can run to arbitrary depth, because the runtime rebinds parameters in place rather than pushing a frame.
 
 ```ilo
 -- Count down from n to 0. Runs at any depth.
@@ -255,7 +249,7 @@ A call is in **tail position** when its return value is the function's return va
 - an arm of a `?` match that is itself in tail position,
 - the body of a braceless guard.
 
-Calls inside `@` foreach, `@..` range, or `wh` loops are **not** in tail position — the loop header runs after each iteration, so the call's return doesn't become the function's return. Operands of further computation (e.g. `*n fac -n 1`) are also not in tail position.
+Calls inside `@` foreach, `@..` range, or `wh` loops are **not** in tail position - the loop header runs after each iteration, so the call's return doesn't become the function's return. Operands of further computation (e.g. `*n fac -n 1`) are also not in tail position.
 
 The peephole only fires when the callee is a direct user-defined function name (not a `FnRef` in scope, not a closure, not a builtin, not a tool) and the call has no auto-unwrap (`!` / `!!`). These constraints cover the common recursive-accumulator and state-machine shapes.
 

@@ -35,7 +35,7 @@ HTTP and process-spawn builtins require the native binary. They are not availabl
 | `$` | `t L > R (M t t) t` | `run` shorthand (sugar for `run`) | `$"git" ["status"]` |
 | `env` | `t > R t t` | Read environment variable | `env "API_KEY"` |
 
-In 0.12.0 the `$` sigil was rebound from HTTP `get` (parochial — `$` for HTTP is unique to ilo) to the new `run` builtin (argv-list process spawn). `$cmd argv` compiles to `run cmd argv`. HTTP `get` is still called by name.
+In 0.12.0 the `$` sigil was rebound from HTTP `get` (parochial - `$` for HTTP is unique to ilo) to the new `run` builtin (argv-list process spawn). `$cmd argv` compiles to `run cmd argv`. HTTP `get` is still called by name.
 
 `post` was renamed to `pst` to bring it into line with the I/O compression family (`rd`, `wr`, `srt`, `flt`, `fld`, `fmt`). The old name no longer resolves; the verifier surfaces a did-you-mean hint pointing at `pst`.
 
@@ -51,19 +51,19 @@ r=pst-to url body 3000
 
 ## Rich-response variants: getx / pstx
 
-`get` / `pst` / `get-to` / `pst-to` return `R t t` — body only. That is the right shape for fire-and-forget GETs and POSTs but blocks every workflow that needs response metadata: conditional requests (304 Not Modified branching on `If-None-Match`), redirect following, rate-limit headers (`X-RateLimit-Remaining`), pagination Link headers, cookie capture, status-code branching beyond Ok/Err.
+`get` / `pst` / `get-to` / `pst-to` return `R t t` - body only. That is the right shape for fire-and-forget GETs and POSTs but blocks every workflow that needs response metadata: conditional requests (304 Not Modified branching on `If-None-Match`), redirect following, rate-limit headers (`X-RateLimit-Remaining`), pagination Link headers, cookie capture, status-code branching beyond Ok/Err.
 
 `getx` and `pstx` are the rich variants. The success arm is a `Map[Text, _]` with three keys:
 
-- `status` (`n`) — HTTP status code (200, 304, 404, 500, ...). Non-2xx responses are still Ok with the status surfaced; only transport failure (DNS, connection refused, timeout) returns Err.
-- `headers` (`M t t`) — response headers. Header names are lowercased.
-- `body` (`t`) — response body decoded as UTF-8.
+- `status` (`n`) - HTTP status code (200, 304, 404, 500, ...). Non-2xx responses are still Ok with the status surfaced; only transport failure (DNS, connection refused, timeout) returns Err.
+- `headers` (`M t t`) - response headers. Header names are lowercased.
+- `body` (`t`) - response body decoded as UTF-8.
 
 Both accept the same optional trailing `M t t` request-headers map as `get`/`pst`.
 
 ```ilo
 -- Conditional request: branch on 304 vs 200
-fetch>R t t;h=mset mmap "if-none-match" "\"abc123\"";r=getx! "https://api.example.com/data" h;st=mget!! r "status";?(=st 304){~"not modified"};~mget!! r "body"
+fetch>R t t;h=mset mmap "if-none-match" "\"abc123\"";r=getx! "https://api.example.com/data" h;st=mget!! r "status";=st 304 ~"not modified";~mget!! r "body"
 
 -- Read a rate-limit header
 r=getx! "https://api.github.com/users/octocat";rem=mget!! (mget!! r "headers") "x-ratelimit-remaining"

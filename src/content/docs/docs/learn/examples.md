@@ -10,7 +10,7 @@ Practical patterns you can copy and adapt. Each example is a complete, runnable 
 Fetch JSON from an API, filter positive values, sum them:
 
 ```ilo
-fetch url:t>R _ t;r=($!url);rdb! r "json"
+fetch url:t>R _ t;r=get! url;rdb! r "json"
 pos x:_>b;>x 0
 proc rows:L _>n;clean=flt pos rows;sum clean
 ```
@@ -23,16 +23,16 @@ Hit a URL and report whether it responded:
 
 ```ilo
 check url:t>t
-  r=$url
+  r=get url
   ?r{~v:fmt "{}: ok" url;^e:fmt "{}: {}" url e}
 ```
 
 ```bash
-ilo 'check url:t>t;r=$url;?r{~v:fmt "{}: ok" url;^e:fmt "{}: {}" url e}' "http://httpbin.org/get"
+ilo 'check url:t>t;r=get url;?r{~v:fmt "{}: ok" url;^e:fmt "{}: {}" url e}' "http://httpbin.org/get"
 # -> http://httpbin.org/get: ok
 ```
 
-`$url` makes an HTTP GET. The result is matched: `~v` (Ok) or `^e` (Err).
+`get url` makes an HTTP GET (since 0.12.0 the `$` sigil is process exec, not HTTP). The result is matched: `~v` (Ok) or `^e` (Err).
 
 ## CSV processing
 
@@ -97,7 +97,7 @@ notify uid:t msg:t>R _ t
   u=get-user! uid
   !u.verified{^"user not verified"}
   send-email! u.email "Notification" msg
-  ~_
+  ~nil
 ```
 
 Tools are type-checked at compile time. `get-user!` unwraps the result, propagating errors automatically.
@@ -128,14 +128,9 @@ Same semantics. 0.33x the tokens, 0.22x the characters. For an AI agent paying p
 Classify HTTP status codes using a discriminated union:
 
 ```ilo
-type status S{ok:n; redirect:n t; err:n t}
+type status = ok(n) | redirect(n) | err(t)
 
-describe s:status>t
-  ?s{
-    ok code: fmt "OK {}" code
-    redirect code loc: fmt "→ {} {}" code loc
-    err code msg: fmt "error {}: {}" code msg
-  }
+describe s:status>t;?s{ok(code):fmt "OK {}" code; redirect(code):fmt "redirect {}" code; err(msg):fmt "error: {}" msg}
 ```
 
 ## Parallel processing
@@ -157,15 +152,17 @@ read-lines path:t>R L t t
   ~rdl! f
 ```
 
-## use<- chain
+## Error chaining with `!`
 
-Chain operations without nesting:
+The `!` unwrap operator keeps fallible pipelines flat - each step propagates its error automatically, no nesting:
 
 ```ilo
+row-total r:L t>R n t;~num! r.0
+
 process path:t>R n t
-  use<- f=open! path
-  use<- rows=parse-csv! f
-  ~sum (map (r:L _>n;num! r.0) rows)
+  rows=rd! path
+  totals=mapr row-total rows
+  ~sum totals
 ```
 
 ## Pagination (tail-recursive accumulator)
@@ -175,7 +172,7 @@ Canonical pattern for iterating paged APIs: tail-recursive accumulator + empty-t
 ```ilo
 -- fetch-page: one HTTP call; returns ~[items next-token] or Err.
 fetch-page url:t token:t>R (L _) t
-  b=get! fmt "{}&cursor={}" url token
+  b=get! (fmt "{}&cursor={}" url token)
   items=jpar-list! b
   nxt=default-on-err (jpth b "next_cursor") ""
   ~[items nxt]

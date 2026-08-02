@@ -88,7 +88,7 @@ transform x:n>n;(x>>dbl>>inc>>sq)
 Pipes combine with `!` for functions that return `R` (Result) types:
 
 ```ilo
-f x:n>>g!>>h
+f x:n>R n t;r=x>>g!>>h;~r
 ```
 
 This desugars to `h(g!(f(x)))` - if `g` returns an error, it propagates immediately.

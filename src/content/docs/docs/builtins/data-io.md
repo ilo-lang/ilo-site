@@ -82,13 +82,13 @@ Four atomic primitives sit alongside the directory enumerators. The shape is del
 - `isfile path > b` returns `true` iff `path` resolves to a regular file. Missing, permission-denied, and non-file all collapse to `false`.
 - `isdir path > b` returns `true` iff `path` resolves to a directory. Same `false`-on-failure collapse as `isfile`.
 
-The asymmetry between size/mtime (`R n t`) and the predicates (`b`) is deliberate. Predicates almost always feed into a single-token branch (`?isfile p{...}`), so collapsing the error tier into `false` is the right ergonomic — Python uses the same convention for `os.path.isfile`. Size and mtime callers usually want to distinguish "missing" from "permission-denied" from "this is a directory, not a file", so the error tier stays exposed.
+The asymmetry between size/mtime (`R n t`) and the predicates (`b`) is deliberate. Predicates almost always feed into a single-token branch (`?isfile p{...}`), so collapsing the error tier into `false` is the right ergonomic - Python uses the same convention for `os.path.isfile`. Size and mtime callers usually want to distinguish "missing" from "permission-denied" from "this is a directory, not a file", so the error tier stays exposed.
 
 All four follow symlinks (POSIX `stat`, not `lstat`). Metadata calls are leaf queries where "what does this path resolve to?" is almost always the question; `walk` and `glob` are the place where symlink-following needs to be off (for cycle safety).
 
 ```ilo
 sz p:t>R n t;fsize p
-isnew p:t>b;t=mtime! p;d=-(now)t;<d 3600.0   -- modified in the last hour
+isnew p:t>R b t;m=mtime! p;d=- now m;~<d 3600.0   -- modified in the last hour
 kind p:t>t;f=isfile p;d=isdir p;?f{true:"file";false:?d{true:"dir";false:"other"}}
 ```
 
@@ -185,7 +185,7 @@ home>t;env! "HOME"
 | `dtfmt` | `n t > R t t` | Format Unix epoch as text (strftime, UTC) | `dtfmt 1700000000 "%Y-%m-%d"` |
 | `dtparse` | `t t > R n t` | Parse text to Unix epoch (strftime, UTC) | `dtparse "2024-01-15" "%Y-%m-%d"` |
 | `dtparse-rel` | `t n > R n t` | Resolve relative-date phrase to epoch anchored at `now` (today/yesterday/tomorrow, `N days/weeks/months ago`, `in N days/weeks/months`, `last/next/this <weekday>`, ISO-8601 passthrough) | `dtparse-rel "last friday" (now)` |
-| `dur-parse` | `t > R n t` | Parse human duration string into seconds. Accepts `s`/`m`/`h`/`d`/`w` abbreviations and full names (singular + plural), decimal quantities, mixed sequences. Months are **not** supported (variable length); use explicit day counts. A leading `-` is sticky — it applies to every following token until an explicit `+` resets it, so `"-1m 30s"` = `-90`. | `dur-parse "1.5 hours"` |
+| `dur-parse` | `t > R n t` | Parse human duration string into seconds. Accepts `s`/`m`/`h`/`d`/`w` abbreviations and full names (singular + plural), decimal quantities, mixed sequences. Months are **not** supported (variable length); use explicit day counts. A leading `-` is sticky - it applies to every following token until an explicit `+` resets it, so `"-1m 30s"` = `-90`. | `dur-parse "1.5 hours"` |
 | `dur-fmt` | `n > t` | Format seconds as human-readable duration. Drops zero parts, uses largest units, preserves fractional seconds (up to 3 dp, trailing zeros stripped). Negative values get a single leading `-` which round-trips through `dur-parse`. | `dur-fmt 9720` → `"2h 42m"` |
 | `add-mo` | `n n > n` | Add N calendar months to epoch, snapping to last valid day (Jan 31 + 1 = Feb 28/29). N may be negative. Returns epoch at 00:00 UTC. | `add-mo 1706659200 1` → `1709164800` |
 | `last-dom` | `n > n` | Epoch of the last day of the month containing `dt`, at 00:00 UTC. | `last-dom 1707955200` → `1709164800` (Feb 29 2024) |

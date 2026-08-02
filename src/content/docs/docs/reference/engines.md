@@ -15,7 +15,7 @@ ilo programs verify once and then run on either the bytecode VM or Cranelift (JI
 | **JIT** (Cranelift) | Medium | High | Hot loops, benchmarks, long-running services |
 | **AOT** | Highest (build) | Highest | Shipping a single native binary with no runtime |
 
-As of 0.13.0 ilo ships with two engines: the VM and Cranelift. The tree-walking interpreter was removed as a user-selectable engine; the shared runtime module (`src/runtime/`) stays in-tree as the internal dispatch target for ~30 builtins routed through the VM/Cranelift tree-bridge — HOF / regex / fmt / IO / sleep / ct / rsrt / closure-bind-ctx / crypto / calendar shapes the VM and Cranelift haven't lifted natively. The VM bails to it transparently; per ILO-234 the round-trip cost is negligible.
+As of 0.13.0 ilo ships with two engines: the VM and Cranelift. The tree-walking interpreter was removed as a user-selectable engine; the shared runtime module (`src/runtime/`) stays in-tree as the internal dispatch target for ~30 builtins routed through the VM/Cranelift tree-bridge - HOF / regex / fmt / IO / sleep / ct / rsrt / closure-bind-ctx / crypto / calendar shapes the VM and Cranelift haven't lifted natively. The VM bails to it transparently; per ILO-234 the round-trip cost is negligible.
 
 The CLI picks a sensible default per command. To force an engine, see `--vm` / `--jit` in the [CLI Reference](/docs/reference/cli/).
 
@@ -36,7 +36,7 @@ The CLI picks a sensible default per command. To force an engine, see `--vm` / `
 ### JIT (Cranelift)
 - Enabled with `--features cranelift` in a source build.
 - Best for hot loops and numeric kernels.
-- As of 0.13.0, supports tail-call optimisation via `return_call` — recursive tail calls compile to a loop without stack growth.
+- As of 0.13.0, supports tail-call optimisation via `return_call` - recursive tail calls compile to a loop without stack growth.
 - Dispatches `par-map` to the parallel scheduler and JIT-compiles the inner function before distributing work to threads.
 
 ### AOT

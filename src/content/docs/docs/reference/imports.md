@@ -73,13 +73,6 @@ The `if` condition is evaluated before type-checking; only the matching branch i
 
 ## Lazy loading
 
-Prefix `lazy` to defer resolution until first call, reducing startup cost for large optional modules:
-
-```ilo
-lazy use "heavy-lib.ilo"
-```
-
-The module is loaded and type-checked on the first call to any of its functions, not at program start.
 
 ## Import rules
 

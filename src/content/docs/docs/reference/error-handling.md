@@ -9,25 +9,25 @@ Use this when handling Results, optionals, auto-unwrap with `!`, or nil-coalesce
 
 Try/catch is verbose. An AI agent generating `try { ... } catch (e) { ... }` pays tokens for boilerplate, and if it forgets the catch block, the error is silently swallowed. ilo makes errors part of the type system - you can't forget to handle them.
 
-## Quick errors with `^`
+## Errors with `^`
 
-Any function can bail out early with `^`:
+`^` exits the function immediately with an error - and the verifier requires the function's return type to admit it. A `^` in a function declared `> n` is rejected at check time (`ILO-T008`): the signature promises a plain number, so there would be no channel for the error to travel back on. Declare the return as `R` instead:
 
 ```ilo
-div a:n b:n > n            -- says it returns a number...
-  = b 0 ^"divide by zero"  -- ...but ^ can throw an error
-  / a b                     -- otherwise divide
+div a:n b:n > R n t        -- number on success, text on error
+  = b 0 ^"divide by zero"  -- ^ returns the Err arm
+  ~/ a b                   -- ~ returns the Ok arm
 ```
 
 ```bash
-ilo 'div a:n b:n>n;=b 0 ^"divide by zero";/a b' div 10 2
+ilo 'div a:n b:n>R n t;=b 0 ^"divide by zero";~/a b' div 10 2
 # → 5
 
-ilo 'div a:n b:n>n;=b 0 ^"divide by zero";/a b' div 10 0
+ilo 'div a:n b:n>R n t;=b 0 ^"divide by zero";~/a b' div 10 0
 # → ^divide by zero
 ```
 
-`^` exits the function immediately with an error. But there's a problem: the return type says `> n` (a number), so any code **calling** this function expects a number back - it has no way to catch or handle the error. The error just crashes through.
+Making the error part of the type means every caller is forced to handle it - there is no crash-through path.
 
 ## Recoverable errors with `R`
 

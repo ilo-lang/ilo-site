@@ -24,7 +24,7 @@ Prefix eliminates:
 - Operator precedence ambiguity
 - Nesting depth
 
-```ilo
+```text
 (a + b) * c  -- Infix: 5 tokens, 13 chars
 
 *+a b c      -- Prefix: 4 tokens, 7 chars
@@ -43,7 +43,7 @@ Read inside-out, left-to-right:
 
 ilo supports infix too:
 
-```ilo
+```text
 a + b        -- works
 x * y + 1    -- works
 ```
@@ -105,7 +105,7 @@ When using infix, standard mathematical precedence applies (higher binds tighter
 
 Function application binds tighter than all infix operators:
 
-```ilo
+```text
 f a + b     -- means (f a) + b, NOT f(a + b)
 ```
 
@@ -129,7 +129,7 @@ Overall: **22% fewer tokens, 42% fewer characters** vs infix.
 
 Prefix operators nest by each operator greedily consuming the next two operands. Those operands can themselves be operator expressions:
 
-```ilo
+```text
 -- Two levels: (a * b) + c
 +*a b c
 
@@ -168,7 +168,7 @@ This is equivalent to `(((a + b) * c) - d) / e` in infix - note how 4 pairs of p
 
 The outer prefix op binds the inner prefix subexpression as its **left** operand, regardless of operator precedence. With two same-precedence ops side by side this disagrees with the natural left-to-right reading:
 
-```ilo
+```text
 */a b c     -- (a/b) * c   ← NOT (a*b)/c
 /*a b c     -- (a*b) / c   ← NOT (a/b)*c
 +-a b c     -- (a-b) + c   ← NOT (a+b)-c

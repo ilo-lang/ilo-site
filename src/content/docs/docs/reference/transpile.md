@@ -1,9 +1,9 @@
 ---
 title: Transpile
-description: Compile an ilo program to JavaScript or Python source. Use this when you need to run ilo logic in a JS or Python runtime — browser, Node, embedded Python, or any non-ilo host.
+description: Compile an ilo program to JavaScript or Python source. Use this when you need to run ilo logic in a JS or Python runtime - browser, Node, embedded Python, or any non-ilo host.
 ---
 
-Compile an ilo program to JavaScript or Python source. Use this when you need to run ilo logic in a JS or Python runtime — browser, Node, embedded Python, or any non-ilo host.
+Compile an ilo program to JavaScript or Python source. Use this when you need to run ilo logic in a JS or Python runtime - browser, Node, embedded Python, or any non-ilo host.
 
 ## Targets
 
@@ -21,7 +21,7 @@ Same `ilo build` subcommand as the native AOT path; the `--emit` flag chooses th
 
 ## Limitations
 
-The transpiled output is **not a full ilo runtime** — it covers the canonical surface (functions, prefix expressions, guards, match, Result, records, lists, maps, common builtins). Features that don't have a clean host equivalent are deferred:
+The transpiled output is **not a full ilo runtime** - it covers the canonical surface (functions, prefix expressions, guards, match, Result, records, lists, maps, common builtins). Features that don't have a clean host equivalent are deferred:
 
 - **JS**: file I/O, `defer`/`errdefer`, `World`/capabilities, tagged sum-type match patterns, generic monomorphisation (best-effort), full builtin coverage
 - **Python**: pattern-match arms that depend on ilo-specific match semantics, World/capabilities
@@ -40,5 +40,5 @@ For production code that needs full ilo semantics, ship the native binary (`ilo 
 
 ## Related
 
-- `ilo build` — native AOT compile (default target)
-- Engines reference — VM, JIT, AOT comparison
+- `ilo build` - native AOT compile (default target)
+- Engines reference - VM, JIT, AOT comparison
