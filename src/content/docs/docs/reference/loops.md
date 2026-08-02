@@ -232,7 +232,7 @@ par-map double xs 4      -- at most 4 concurrent workers
 
 ## Tail-call optimisation
 
-ilo deliberately has no `loop` keyword — every iteration shape that can't be written with `@` foreach should be expressed as a tail-recursive function. To make that safe, the runtime guarantees that **tail calls do not consume host-stack frames**: a function that recurses only in tail position can run to arbitrary depth, because the runtime rebinds parameters in place rather than pushing a frame.
+ilo deliberately has no `loop` keyword - every iteration shape that can't be written with `@` foreach should be expressed as a tail-recursive function. To make that safe, the runtime guarantees that **tail calls do not consume host-stack frames**: a function that recurses only in tail position can run to arbitrary depth, because the runtime rebinds parameters in place rather than pushing a frame.
 
 ```ilo
 -- Count down from n to 0. Runs at any depth.
@@ -249,7 +249,7 @@ A call is in **tail position** when its return value is the function's return va
 - an arm of a `?` match that is itself in tail position,
 - the body of a braceless guard.
 
-Calls inside `@` foreach, `@..` range, or `wh` loops are **not** in tail position — the loop header runs after each iteration, so the call's return doesn't become the function's return. Operands of further computation (e.g. `*n fac -n 1`) are also not in tail position.
+Calls inside `@` foreach, `@..` range, or `wh` loops are **not** in tail position - the loop header runs after each iteration, so the call's return doesn't become the function's return. Operands of further computation (e.g. `*n fac -n 1`) are also not in tail position.
 
 The peephole only fires when the callee is a direct user-defined function name (not a `FnRef` in scope, not a closure, not a builtin, not a tool) and the call has no auto-unwrap (`!` / `!!`). These constraints cover the common recursive-accumulator and state-machine shapes.
 

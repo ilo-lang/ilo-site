@@ -248,7 +248,7 @@ show a:n b:n > t             -- two numbers in, text out
 
 `div` returns `R n t`: either an Ok number or an Err string. `show` captures the Result in `r` (without auto-unwrapping) and matches on it.
 
-You can also skip the rebind and put the call directly in the scrutinee slot — parenthesised:
+You can also skip the rebind and put the call directly in the scrutinee slot - parenthesised:
 
 ```ilo
 show a:n b:n>t;?(div a b){~v:str v;^e:e}

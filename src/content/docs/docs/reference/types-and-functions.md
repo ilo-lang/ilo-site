@@ -63,7 +63,7 @@ _=mset m "visited" true   -- discard the new map; side-effect only
 _=prnt debug-value        -- discard return, keep the print
 ```
 
-The `_` sigil tells the verifier the discard is intentional. Without it, `mset m k v` as a bare statement silently drops the returned map and fires ILO-T033. For most cases you *do* want the assignment form (`m=mset m k v`) — `_=` is reserved for genuine fire-and-forget calls.
+The `_` sigil tells the verifier the discard is intentional. Without it, `mset m k v` as a bare statement silently drops the returned map and fires ILO-T033. For most cases you *do* want the assignment form (`m=mset m k v`) - `_=` is reserved for genuine fire-and-forget calls.
 
 Newlines inside `[...]` or `(...)` are treated as whitespace, not statement separators, so list literals and parenthesised expressions can span multiple lines without problems. Windows CRLF (`\r\n`) is normalised to LF before parsing, so files edited on Windows work identically.
 
@@ -77,7 +77,7 @@ type shape = circle(n) | square(n) | point
 area s:shape>n;?s{circle(r):*3.14 *r r; square(d):*d d; point:0}
 ```
 
-Construct with `circle 5` (payload variant) or bare `point`; match with `tag(binding):` or `tag:` arms. Sum types are exhaustively matched — the verifier emits `ILO-T024` if a branch is missing.
+Construct with `circle 5` (payload variant) or bare `point`; match with `tag(binding):` or `tag:` arms. Sum types are exhaustively matched - the verifier emits `ILO-T024` if a branch is missing.
 
 ## Generics
 

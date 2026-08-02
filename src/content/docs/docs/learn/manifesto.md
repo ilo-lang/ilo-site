@@ -134,11 +134,11 @@ The agent loads the target function's source, its dependencies' signatures, and 
 
 Every path from the compiler to an agent is machine-readable by default.
 
-Diagnostics, AST output, call graphs, fix plans, skill content, size reports — all of it ships as structured JSON. Not as an optional flag you might forget to pass, but as the default contract. Prose output exists for human TTYs; JSON is the agent path.
+Diagnostics, AST output, call graphs, fix plans, skill content, size reports - all of it ships as structured JSON. Not as an optional flag you might forget to pass, but as the default contract. Prose output exists for human TTYs; JSON is the agent path.
 
 - **Every CLI subcommand has a `--json` mode.** An agent driving `ilo check`, `ilo graph`, `ilo bench`, or any other subcommand gets a typed, parseable response with no screen-scraping.
 - **Every emitted artifact carries a stable `schemaVersion` field.** Schemas evolve; the version field lets agents detect and adapt to changes rather than silently misparse them.
-- **Every diagnostic carries machine-readable fields:** error code, source span, candidate fixes, and related locations. An agent reading a diagnostic knows exactly what went wrong, where it went wrong, and what to try next — without parsing human prose.
+- **Every diagnostic carries machine-readable fields:** error code, source span, candidate fixes, and related locations. An agent reading a diagnostic knows exactly what went wrong, where it went wrong, and what to try next - without parsing human prose.
 - **Fix plans are typed:** each suggested repair carries a `FixSafety` classification so the agent can decide autonomously whether to apply it.
 
 :::note[What the agent cares about]

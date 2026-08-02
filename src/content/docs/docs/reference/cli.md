@@ -382,9 +382,9 @@ For a program whose entry function returns a Result, ilo splits the `~`/`^` wrap
 
 | Top-level return | stdout | stderr | Exit |
 |------------------|--------|--------|------|
-| `~v` (Ok)        | `v` (bare) | — | 0 |
-| `^e` (Err)       | — | `^e` | 1 |
-| any non-Result   | `v` | — | 0 |
+| `~v` (Ok)        | `v` (bare) | - | 0 |
+| `^e` (Err)       | - | `^e` | 1 |
+| any non-Result   | `v` | - | 0 |
 
 In `--json` mode the value is always wrapped (`{"schemaVersion": 1, "ok": v}` / `{"schemaVersion": 1, "error": ...}`) on stdout; exit codes match the table above. The contract applies uniformly to in-process runners and AOT-compiled binaries: output is byte-for-byte identical across every backend.
 
@@ -392,7 +392,7 @@ In `--json` mode the value is always wrapped (`{"schemaVersion": 1, "ok": v}` / 
 
 Every subcommand that produces machine-readable output supports `--json` (or `-j`), and every envelope starts with `"schemaVersion": 1` so agents can route on the contract and the shape can evolve without breaking older consumers. Five long-standing outputs (`run`, `graph`, `--ast`, `serv`, `tools --json`) and the newly-added `ilo spec --json` mode were brought into the convention in 0.12.1.
 
-For five of those six the change is strictly additive — the existing object envelopes gained one extra top-level field next to their existing keys. The one observable break is `ilo tools --json`: its legacy shape was a bare array, so wrapping it as `{"schemaVersion": 1, "tools": [...]}` changes the top-level type. Indexing consumers should read `.tools[0]` instead of `[0]`.
+For five of those six the change is strictly additive - the existing object envelopes gained one extra top-level field next to their existing keys. The one observable break is `ilo tools --json`: its legacy shape was a bare array, so wrapping it as `{"schemaVersion": 1, "tools": [...]}` changes the top-level type. Indexing consumers should read `.tools[0]` instead of `[0]`.
 
 | Command                     | `--json` support                | Versioned?                    |
 | --------------------------- | ------------------------------- | ----------------------------- |
@@ -408,7 +408,7 @@ For five of those six the change is strictly additive — the existing object en
 | `ilo serv`                  | yes (JSONL stdio)                | yes (0.12.1+, every line)    |
 | `ilo spec [lang\|ai]`       | yes (wraps prose, 0.12.1+)       | yes (0.12.1+)                |
 
-`spec` emits markdown / `ai.txt` for humans by default; with `--json` it wraps the prose as `{"schemaVersion": 1, "format": "markdown"|"ai-txt", "content": "..."}` so the contract matches every other emitter. `repl` is interactive and stays out of the JSON contract — the JSONL-over-stdio equivalent for agents is `ilo serv`.
+`spec` emits markdown / `ai.txt` for humans by default; with `--json` it wraps the prose as `{"schemaVersion": 1, "format": "markdown"|"ai-txt", "content": "..."}` so the contract matches every other emitter. `repl` is interactive and stays out of the JSON contract - the JSONL-over-stdio equivalent for agents is `ilo serv`.
 
 The full per-command schema reference lives in [`JSON_OUTPUT.md`](https://github.com/ilo-lang/ilo/blob/main/JSON_OUTPUT.md) in the ilo repo; it's locked by `tests/json_output_contracts.rs` so future changes that break a schema fail CI.
 

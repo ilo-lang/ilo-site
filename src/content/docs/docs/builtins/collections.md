@@ -50,7 +50,7 @@ main>L t;rsrt slen ["banana" "fig" "apple" "kiwi"]  -- → [banana apple kiwi fi
 
 Both `srt` and `rsrt` also accept a 3-arg `fn ctx list` form where `fn` takes `(elem, ctx)`. This is the cross-engine alternative when you want explicit state without forming a closure.
 
-`srt` is **stable**: elements (or items with equal keys, for the key-function form) keep their relative input order. This matters when merging parallel streams sorted by a shared key — e.g. timeline events that share a timestamp keep their per-source ordering inside each tie group. The guarantee holds on every engine (tree, VM, Cranelift JIT, Cranelift AOT). `argsort` is also stable; `rsrt` mirrors `srt`'s stability.
+`srt` is **stable**: elements (or items with equal keys, for the key-function form) keep their relative input order. This matters when merging parallel streams sorted by a shared key - e.g. timeline events that share a timestamp keep their per-source ordering inside each tie group. The guarantee holds on every engine (tree, VM, Cranelift JIT, Cranelift AOT). `argsort` is also stable; `rsrt` mirrors `srt`'s stability.
 
 Number functions that pair well with lists:
 
