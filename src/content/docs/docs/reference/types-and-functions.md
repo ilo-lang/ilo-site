@@ -7,7 +7,7 @@ Use this when declaring functions, return types, or working with ilo's type sigi
 
 Every ilo function declares its parameter types and return type inline:
 
-```ilo
+```text
 funcname param1:type param2:type>returntype;body
 ```
 
@@ -31,7 +31,7 @@ funcname param1:type param2:type>returntype;body
 ```ilo
 dbl x:n>n;*x 2                            -- number → number
 greet first:t last:t>t;fmt "{} {}" first last -- text params, text return
-truthy x:_>b;!!x                          -- any type, boolean return
+notzero x:n>b;!=x 0                       -- ! is logical NOT; returns a bool
 pi>n;3.14159                              -- zero-arg function
 ```
 
@@ -58,7 +58,7 @@ Each statement binds a variable or returns a value. The last expression is the r
 
 Use `_=expr` to explicitly discard a value and suppress the `ILO-T033` warning for mutation-shaped builtins (`mset`, `mdel`, `+=`) used for their side effects:
 
-```ilo
+```text
 _=mset m "visited" true   -- discard the new map; side-effect only
 _=prnt debug-value        -- discard return, keep the print
 ```
@@ -69,74 +69,46 @@ Newlines inside `[...]` or `(...)` are treated as whitespace, not statement sepa
 
 ## Sum types (discriminated unions)
 
-`S` declares an enum-like sum type. Each variant can carry a payload:
+`type Name = V1 | V2(payloadType) | ...` declares a sum type at top level. Each variant may carry one payload:
 
 ```ilo
-type shape S{circle:n; rect:n n; point}
+type shape = circle(n) | square(n) | point
 
-area s:shape>n
-  ?s{
-    circle r: *3.14 *r r
-    rect w h: *w h
-    point: 0
-  }
+area s:shape>n;?s{circle(r):*3.14 *r r; square(d):*d d; point:0}
 ```
 
-Sum types are exhaustively matched — the verifier emits `ILO-T024` if a branch is missing. Recursive sum types (e.g. linked lists, trees) are supported. Generics (`S{ok:T; err:E}`) let you parameterise variants over type variables.
+Construct with `circle 5` (payload variant) or bare `point`; match with `tag(binding):` or `tag:` arms. Sum types are exhaustively matched — the verifier emits `ILO-T024` if a branch is missing.
 
 ## Generics
 
-Functions accept type variables, written with a leading `'`:
+Sum type declarations accept type parameters, enabling reusable polymorphic variants:
 
 ```ilo
-identity x:'a>'a;x
-
-wrap x:'a>L 'a;[x]
+type result<a,b> = ok(a) | err(b)
+type opt<a> = some(a) | none
 ```
 
-Bounded generics constrain the type variable to a set of concrete types:
+Construct and match them exactly like non-generic sum types; the concrete type is inferred from context. For functions, the `_` (any) type accepts any value:
 
 ```ilo
-to-str x:('a n|t)>t;str x
+identity x:_>_;x
 ```
 
-Multi-bound (comma-separated) and the full `where` clause form are supported for more complex constraints. The VM and JIT dispatch generics via monomorphisation at the call site.
+There are no `'a`-style type variables on functions, no bounds, and no `where` clauses.
 
 ## Brace-lambda multi-statement body
 
-Lambdas (anonymous functions) can now have multi-statement bodies using `{|...|}`:
+A brace-lambda (`{params> stmts}`) gives a lambda a compact multi-statement body, anywhere a single-expression lambda is accepted:
 
 ```ilo
-transform xs:L n>L n
-  map {|x:n>n; s=*x x; +s 1|} xs
+transform xs:L n>L n;map {x> s=*x x; +s 1} xs
 ```
 
-The `{|...|} ` delimiters let a lambda span multiple statements in inline position, anywhere a single-expression lambda was previously required.
+Param names are bare (types inferred as `_`) and there is no explicit return type.
 
-## Gleam-style additions
+### `panic`
 
-### `use<-` chain
-
-`use<-` threads a value through a callback chain without nesting:
-
-```ilo
-main>R _ t
-  use<- f=open! "data.txt"
-  use<- rows=parse-csv! f
-  ~len rows
-```
-
-Each `use<-` desugars to a callback; errors propagate via the `!` unwrap. The style eliminates the pyramid of doom from deeply-nested `?` matches.
-
-### `todo` and `panic`
-
-`todo` is a compile-safe placeholder that passes type-checking but aborts at runtime with a `todo: not implemented` message:
-
-```ilo
-complex-fn x:n>n;todo
-```
-
-`panic msg` aborts immediately with a message (equivalent to `^msg` at the top level, but valid in any return-type context):
+`panic msg` aborts immediately with a message (valid in any return-type context):
 
 ```ilo
 assert-positive x:n>n;>x 0 x;panic "expected positive"
@@ -144,16 +116,11 @@ assert-positive x:n>n;>x 0 x;panic "expected positive"
 
 ### Match alternatives
 
-A single match arm can cover multiple patterns with `|`:
+A match arm can cover multiple patterns with `|`:
 
 ```ilo
-classify x:n>t;?x{0|1:"tiny"; 2|3|4:"small"; _:"large"}
+classify x:n>t;?x{0|1|2:"small"; _:"large"}
 ```
 
-### Multi-subject match
+As of 26.5 an or-pattern only parses in the **first** arm; a later arm containing `|` fails with `ILO-P003` ([ILO-509](https://linear.app/ilo-lang/issue/ILO-509)). Put the or-pattern first, or expand the later arms into single patterns.
 
-`?` can take a tuple of subjects:
-
-```ilo
-pair-kind a:b b:b>t;?{a b}{true true:"both"; false false:"neither"; _:"mixed"}
-```

@@ -24,7 +24,7 @@ The complete language specification is maintained in [SPEC.md](https://github.co
 - [Types & Functions — Sum types](/docs/reference/types-and-functions/#sum-types-discriminated-unions) - `S{ok:T; err:E}`, generics, recursive, exhaustive match
 - [Types & Functions — Generics](/docs/reference/types-and-functions/#generics) - bounded and multi-bound type variables
 - [Types & Functions — Brace-lambda](/docs/reference/types-and-functions/#brace-lambda-multi-statement-body) - multi-statement lambda bodies
-- [Types & Functions — Gleam-style](/docs/reference/types-and-functions/#gleam-style-additions) - `use<-`, `todo`/`panic`, match alternatives, multi-subject match
+- [Types & Functions](/docs/reference/types-and-functions/#generics) - generics, brace-lambdas, `panic`, match alternatives
 - [Imports — Modules](/docs/reference/imports/#re-exports) - re-exports, conditional imports, lazy loading
 - [Error Handling — defer](/docs/reference/error-handling/#defer-and-errdefer) - `defer` / `errdefer`
 - [Loops — par-map](/docs/reference/loops/#parallel-map-par-map) - parallel map with chunking and native VM opcode
