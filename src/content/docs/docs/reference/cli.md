@@ -491,11 +491,11 @@ Emits the grammar as a JSON state machine:
 }
 ```
 
-29 parse states covering declaration, type, parameter, expression, statement, match-arm, and list-literal positions. A host harness walks this token-by-token to determine the valid token set at each generation step.
+30 parse states covering declaration, type, parameter, expression, statement, match-arm, and list-literal positions. A host harness walks this token-by-token to determine the valid token set at each generation step.
 
 ### `ilo constrain --mode masks`
 
-Emits per-state binary masks over a 59-entry token-category vocabulary:
+Emits per-state binary masks over a 58-entry token-category vocabulary:
 
 ```json
 {
@@ -516,7 +516,7 @@ Emits per-state binary masks over a 59-entry token-category vocabulary:
 }
 ```
 
-Each mask array has length 59. A `1` at index `i` means `vocabulary[i]` is valid in that state. Map onto the target model's BPE tokeniser to mask logits at each generation step. The masks are over **categories** (`ident`, `num`, `text`) rather than individual token values, so the vocabulary is small and stable.
+Each mask array has length 58. A `1` at index `i` means `vocabulary[i]` is valid in that state. Map onto the target model's BPE tokeniser to mask logits at each generation step. The masks are over **categories** (`ident`, `num`, `text`) rather than individual token values, so the vocabulary is small and stable.
 
 ### `ilo constrain --mode completions --file FILE --line LINE --col COL`
 
