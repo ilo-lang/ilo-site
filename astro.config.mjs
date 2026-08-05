@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
+import sitemap from '@astrojs/sitemap';
 import { readFileSync } from 'fs';
 
 const iloGrammar = JSON.parse(readFileSync(new URL('./ilo.tmLanguage.json', import.meta.url), 'utf-8'));
@@ -36,6 +37,7 @@ export default defineConfig({
     '/docs/integrations/http-tools': '/docs/builtins/http',
   },
   integrations: [
+    sitemap(),
     starlight({
       expressiveCode: {
         frames: {
