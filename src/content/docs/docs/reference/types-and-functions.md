@@ -54,6 +54,23 @@ ilo 'calc a:n b:n>n;s=+a b;p=*a b;+s p' 3 4
 
 Each statement binds a variable or returns a value. The last expression is the return value.
 
+## Script mode (implicit `main`)
+
+Bare statements at the top level of a file are collected, in source order, into a synthetic `main>_;` — no wrapper needed:
+
+```ilo
+prnt +2 2            -- whole file; prints 4
+```
+
+Declarations and top-level statements mix freely, as long as each statement starts its own top-level line:
+
+```ilo
+tri n:n>n;/(*n +n 1) 2
+prnt tri 10          -- own line → becomes main's body; prints 55
+```
+
+A call glued to the declaration's line (`tri n:n>n;...;prnt tri 10`) joins `tri`'s body, making `tri` call itself — rejected at verify time as unconditional recursion (`ILO-V500`). A file with both an explicit `main` and bare statements is rejected (`ILO-P104`).
+
 ## Discarding a value (`_=expr`)
 
 Use `_=expr` to explicitly discard a value and suppress the `ILO-T033` warning for mutation-shaped builtins (`mset`, `mdel`, `+=`) used for their side effects:
