@@ -152,8 +152,8 @@ export default defineConfig({
           tag: 'script',
           attrs: {
             defer: true,
-            src: 'https://cloud.umami.is/script.js',
-            'data-website-id': '39ac022b-8282-43ec-8e1a-7fd9dc222f39',
+            src: 'https://analytics.danieljohnmorris.com/script.js',
+            'data-website-id': '1ee34896-4fb2-40b3-be9b-238c6c1980b6',
           },
         },
       ],
