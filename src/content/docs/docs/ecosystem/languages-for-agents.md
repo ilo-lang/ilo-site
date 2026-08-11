@@ -29,7 +29,7 @@ Spend tokens to buy certainty: machine-checked contracts, effect types, solvers 
 | Language | Design move | Active |
 |---|---|---|
 | [Zero](https://github.com/vercel-labs/zerolang) | Agent-first systems language, tiny binaries, JSON diagnostics with repair plans | active |
-| [BAML](https://github.com/BoundaryML/baml) | Close the escape hatches: runtime types with no `any` or unchecked casts, typed errors with exhaustive matching, schema-aligned parsing that repairs near-miss model output. The language track (0.15) is separate from the v0 prompt DSL | active |
+| [BAML](https://github.com/BoundaryML/baml) | Close the escape hatches: runtime types with no `any` or unchecked casts, typed errors with exhaustive matching, schema-aligned parsing that repairs malformed model output instead of rejecting it. Compiler work began Nov 2025; the older prompt DSL was rebranded BAML v0 in Jul 2026, so the two release tracks share a repo | active |
 | [Vera](https://github.com/aallan/vera) | Mandatory contracts verified by Z3; LLM inference as a typed effect | active |
 | [Thermite](https://github.com/dollspace-gay/Thermite) | req/ens/fx contracts discharged by Verus, Lean and Z3; five-level assurance ladder | active |
 | [AILANG](https://github.com/sunholo-data/ailang) | Row-polymorphic effect types, no loops; effects carve IO/FS/Net/Clock/AI | active |
