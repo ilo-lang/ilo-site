@@ -83,6 +83,7 @@ Change what generated code costs in the first place. The moves in use across the
 - **Dense syntax** - short fixed aliases, minimal punctuation: [ilo](https://github.com/ilo-lang/ilo) (`mapr`, `fld`, `rdjl`), [Mog](https://github.com/voltropy/mog) flat operators
 - **Small loadable spec** - bound the artifact an agent must read before it can write the language: [Zero](https://github.com/vercel-labs/zerolang) and [Mog](https://github.com/voltropy/mog) both ship one under 3k tokens
 - **Structured diagnostics** - stable error codes + fix hints kill retry loops: [Zero](https://github.com/vercel-labs/zerolang) repair plans, ilo `ILO-P/T/R` codes, [Codong](https://github.com/brettinhere/Codong) fix/retry JSON
+- **Repair instead of reject** - accept output that near-misses the schema rather than erroring and asking again: [BAML](https://github.com/BoundaryML/baml) schema-aligned parsing coerces markdown fences, trailing commas, unquoted keys and wrong quote characters. Spends tokens on a verbose surface to save a retry, so it nets out only where the baseline failure rate is high enough. Nobody has measured where that line sits
 - **One canonical form** - one way to write each operation, no plausible-but-wrong variants: Codong, [Lume](https://github.com/mavboas/lume)
 - **Budgeted doc retrieval** - Lume's `lume kb pack "<q>" --max-tokens N` packs docs under a cap
 - **Constrained decoding** - grammar masks the token distribution so invalid syntax cannot be sampled: [Axis](https://github.com/vmelnic/axis) LL(1) masks, MoonBit (ICSE 2024)
