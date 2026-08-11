@@ -41,6 +41,7 @@ Full comparison, including which to reach for when: [how AI agents find code in 
 A proxy rewrites bulky tool output into a summary before it lands in context, keeping the full text retrievable if it turns out to matter.
 
 - [Headroom](https://extraheadroom.com) - compresses tool results and file dumps on the way in, storing the original against a hash the agent can retrieve later. It is also how [Ponytail](#write-less-back) is distributed, so the two cover both directions
+- [Caveman Engine](https://caveman.so/products/caveman-engine) - the same shape from the makers of the caveman skill, covering the input side the skill explicitly does not touch. Targets logs, JSON, tables, code and diffs, keeps the original bytes locally so a lossy replacement can be recovered, and fails closed by passing content through unchanged when it cannot parse it or cannot make it smaller. Go, closed source, in private development at the time of writing, and its own page labels reductions "inferred, never verified savings"
 
 ## Cache the repeated part of the prompt
 
@@ -65,7 +66,7 @@ Rates move often and vary by model. Treat any number you read as needing a check
 
 Output tokens are the half you control by asking. An instruction in context cuts what the model writes, with no toolchain change.
 
-- [caveman](https://github.com/JuliusBrussee/caveman) - strips articles, filler and pleasantries from responses while keeping the technical content intact; roughly 75% fewer tokens on prose-heavy turns
+- [caveman](https://github.com/JuliusBrussee/caveman) - strips articles, filler and pleasantries from responses while keeping the technical content intact. Worth reading its [honest-numbers page](https://github.com/JuliusBrussee/caveman/blob/main/docs/HONEST-NUMBERS.md), which is the most careful accounting anyone in this field publishes: 65% fewer output tokens on prose (10 prompts, range 22-87%), 0% on input, and the skill itself adds roughly 1-1.5k input tokens per turn. JetBrains independently measured 8.5% across 86 SkillsBench agentic coding tasks. On terse replies or per-request billing it goes net negative, and the docs tell you to turn it off
 - [Ponytail](https://extraheadroom.com/ponytail-claude-code) - aims at generated code rather than prose, pushing the model down a ladder (no code? one line? a config change?) before it writes anything; lite, full and ultra intensity levels. Ships as an add-on to [Headroom](#compress-what-reaches-the-model), which handles the input side
 
 ## Code instead of tool calls
